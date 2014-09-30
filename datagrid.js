@@ -1,17 +1,15 @@
 define([
-    'require',
     'jquery',
     "underscore",
     'moment',
     'date_filter'
-], function (require, $, _, moment, date_filter) {
+], function ($, _, moment, date_filter) {
   "use strict";
 
   var dependencies_loaded = false;
   var grids_to_initialize = []
 
-  var DataGrid = function (parent_elem, grid_elem_selector, data_frame, column_types) {
-    this.parent_elem = parent_elem;
+  var DataGrid = function (grid_elem_selector, data_frame, column_types) {
     this.grid_elem_selector = grid_elem_selector;
     this.data_frame = data_frame;
 
@@ -80,14 +78,6 @@ define([
     }, this);
   }
 
-  DataGrid.prototype.initialize = function () {
-    if (this.parent_elem.find(this.grid_elem_selector).length == 0){
-      this.initialize_slick_grid_after_append();
-    }else {
-      this.initialize_slick_grid();
-    }
-  }
-
   DataGrid.prototype.initialize_slick_grid = function () {
     this.data_view = new Slick.Data.DataView({
       inlineFilters: false,
@@ -140,7 +130,7 @@ define([
     var show_clear_filter_button = false;
     for (var i=0; i < this.filter_list.length; i++){
       var cur_filter = this.filter_list[i];
-      var filter_button = this.parent_elem.find(".slick-header-column." + cur_filter.field + "-header .filter-button");
+      var filter_button = this.grid_elem_selector.find(".slick-header-column." + cur_filter.field + "-header .filter-button");
       if (cur_filter.is_active()){
         show_clear_filter_button = true;
         filter_button.addClass("filter-active");
@@ -264,29 +254,6 @@ define([
 //      return "<span class='number'><span class='total'>total:</span>#{quanto.safe_to_money(val)}</span>";
 //    return "<span class='number no-value'>- -</span>";
 //  }
-
-  // If the target div for slick grid has not yet been added to parent_elem, we have
-  // to hook up a MutationObserver to be notified when that happens.  This is because
-  // slick grid cannot be initialized until its target div been added to the DOM.
-  DataGrid.prototype.initialize_slick_grid_after_append = function () {
-    var self = this;
-    MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-    var observer = new MutationObserver(function(mutations, observer) {
-      // Once the target div for slick grid was added to the parent_elem
-      // then we're safe to initialize slick grid (and disconnect this observer).
-      if (mutations.length == 1 && mutations[0].addedNodes.length == 1 &&
-          $(mutations[0].addedNodes[0]).find(self.grid_elem_selector).length == 1){
-        self.initialize_slick_grid();
-        observer.disconnect()
-      }
-    });
-
-    // define what element should be observed by the observer
-    // and what types of mutations trigger the callback
-    observer.observe(this.parent_elem.get(0), {
-      childList: true
-    });
-  }
 
   return { "DataGrid": DataGrid };
 
