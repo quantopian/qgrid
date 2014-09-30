@@ -1,7 +1,7 @@
 define([
     'jquery',
-    'nbextensions/handlebars-v2.0.0',
-    'nbextensions/datagrid.filterbase'
+    'handlebars',
+    'filter_base'
 ], function ($, handlebars, filter_base) {
   "use strict";
 
