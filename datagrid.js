@@ -1,8 +1,8 @@
 define([
     'require',
     'jquery',
-    "underscore_cdn",
-    'moment_cdn',
+    "underscore",
+    'moment',
     'date_filter'
 ], function (require, $, _, moment, date_filter) {
   "use strict";
