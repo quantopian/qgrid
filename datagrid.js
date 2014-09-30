@@ -4,7 +4,7 @@ define([
     'base/js/namespace',
     "underscore",
     'moment',
-    'nbextensions/datagrid.datefilter'
+    'date_filter'
 ], function (require, $, IPython, _, moment, date_filter) {
   "use strict";
 
@@ -292,37 +292,35 @@ define([
   // *************************************
   // Public API and dependency loading
   // *************************************
-  IPython.render_slick_grid = function (parent_elem, grid_elem_selector, data_frame, column_types) {
-    var data_grid = new DataGrid(parent_elem, grid_elem_selector, data_frame, column_types);
-    if (dependencies_loaded){
-      data_grid.initialize();
-    }else {
-      grids_to_initialize.push(data_grid);
-    }
-  };
+//  IPython.render_slick_grid = function (parent_elem, grid_elem_selector, data_frame, column_types) {
+//    var data_grid = new DataGrid(parent_elem, grid_elem_selector, data_frame, column_types);
+//    if (dependencies_loaded){
+//      data_grid.initialize();
+//    }else {
+//      grids_to_initialize.push(data_grid);
+//    }
+//  };
 
-  var load_ipython_extension = function () {
-    require([
-        require.toUrl("./jquery.event.drag-2.2.js"),
-        require.toUrl("./slick.core.2.2.js"),
-        require.toUrl("./slick.dataview.2.2.js")
-      ],
-      function(){
-        require([require.toUrl("./slick.grid.2.2.js")], function(){
-          dependencies_loaded = true;
-          if (grids_to_initialize.length > 0){
-            var array_length = grids_to_initialize.length;
-            for (var i = 0; i < array_length; i++) {
-              grids_to_initialize[i].initialize();
-            }
-          }
-        });
-      }
-    );
-  };
+//  var load_ipython_extension = function () {
+//    require([
+//        require.toUrl("./jquery.event.drag-2.2.js"),
+//        require.toUrl("./slick.core.2.2.js"),
+//        require.toUrl("./slick.dataview.2.2.js")
+//      ],
+//      function(){
+//        require([require.toUrl("./slick.grid.2.2.js")], function(){
+//          dependencies_loaded = true;
+//          if (grids_to_initialize.length > 0){
+//            var array_length = grids_to_initialize.length;
+//            for (var i = 0; i < array_length; i++) {
+//              grids_to_initialize[i].initialize();
+//            }
+//          }
+//        });
+//      }
+//    );
+//  };
 
-  return {
-    load_ipython_extension : load_ipython_extension,
-  };
+  return { "DataGrid": DataGrid };
 
 });
