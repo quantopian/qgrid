@@ -1,7 +1,6 @@
 define([
-    'jquery',
-    'base/js/namespace'
-], function ($, IPython) {
+    'jquery'
+], function ($) {
   "use strict";
 
   var FilterBase = function(field){
