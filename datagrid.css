@@ -1,0 +1,342 @@
+
+.data-grid * {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.data-grid {
+  width: auto;
+  min-width: 600px;
+  height: 571px;
+  border: 1px solid #d3d3d3;
+  margin: 30px 10px 0 10px;
+}
+
+.data-grid .slick-header {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+
+.data-grid .slick-header-columns {
+  background: none;
+  background-color: rgb(245, 245, 245);
+  border-bottom: none;
+}
+
+.data-grid .slick-header-column {
+  background: rgb(245, 245, 245);
+  color: #565656;
+  border-right-style: none;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 6px 2px !important;
+}
+
+.data-grid .slick-header-column.active {
+  background-color: #deeaf7;
+}
+
+.data-grid .slick-header-column-sorted {
+  font-style: inherit !important;
+}
+
+.data-grid .slick-header-column:first-child .slick-column-name {
+  margin-left: 6px !important;
+}
+
+.data-grid .slick-sort-indicator {
+  height: 8px !important;
+}
+
+.data-grid .slick-sort-indicator-desc {
+  background: url(sort_desc.png) no-repeat -6px -10px !important;
+}
+
+.data-grid .slick-sort-indicator-asc {
+  background: url(sort_asc.png) no-repeat -6px -3px !important;
+}
+
+.data-grid .slick-column-name {
+  margin-bottom: 0px;
+}
+
+.data-grid .slick-resizable-handle {
+  width: 1px;
+  background-color: #c5c5c5;
+  border-left: 3px solid rgb(245, 245, 245);
+  border-right: 3px solid rgb(245, 245, 245);
+}
+
+.data-grid .slick-resizable-handle.active {
+  border-right-color: #deeaf7;
+}
+
+.data-grid .slick-cell {
+  border-bottom: 1px solid #e1e8ed !important;
+  border-right: none !important;
+  font-size: 13px;
+  padding-top: 3px;
+  padding-left: 0px;
+  &.l0.r0
+   border-left: none;
+}
+
+.data-grid .slick-cell.l0.r0 {
+  border-left: none;
+  padding-left: 6px;
+}
+
+/* Filter button */
+
+.data-grid .slick-header-column.active .filter-button, .filter-button:hover {
+  background-color: #deeaf7;
+  border-left: 1px solid #cccccc;
+}
+
+.data-grid .slick-header-column.filter-button-disabled .filter-button {
+  color: #bababa;
+}
+
+.data-grid .filter-button {
+  position: absolute;
+  right: 4px;
+  top: 0px;
+  line-height: 29px;
+  height: 28px;
+  width: 21px;
+  text-align: center;
+  z-index: 900;
+}
+
+.data-grid .filter-button:hover {
+  background-color: #efefef;
+  border-left: 1px solid #cccccc;
+}
+
+/* Filter dropdowns */
+
+.data-grid .grid-filter {
+  z-index: 1000;
+  position: relative;
+  padding: 0px;
+  margin: 0px;
+  max-height: 400px;
+  display: block;
+}
+
+.data-grid .grid-filter.hidden {
+  display: none;
+}
+
+.data-grid .grid-filter .dropdown-menu {
+  padding: 0px;
+  overflow: hidden;
+}
+
+.data-grid .grid-filter h3.popover-title {
+  padding: 5px 11px;
+  border-bottom: 1px solid #d3d3d3;
+}
+
+.data-grid .grid-filter .dropdown-title {
+  font-size: 13px;
+}
+
+.data-grid .grid-filter i.fa-times {
+  position: absolute;
+  right: 11px;
+  top: 7px;
+  padding: 0;
+  color: #ababab;
+  cursor: pointer;
+}
+
+.data-grid .grid-filter i.fa-times:hover {
+  color: #777777;
+}
+
+.data-grid .grid-filter .dropdown-footer {
+  background-color: #f7f7f7;
+  border-top: 1px solid #d3d3d3;
+  padding: 5px 12px;
+  height: 17px;
+}
+
+.data-grid .grid-filter .dropdown-footer a.reset-link {
+  padding: 0px;
+  float: right;
+}
+
+.data-grid .grid-filter .dropdown-footer a.select-all-link {
+  padding: 0px;
+}
+
+.data-grid .date-range-filter .dropdown-body {
+  margin: 15px 11px;
+  width: 210px;
+}
+
+.data-grid .date-range-filter .start-date {
+  margin-right: 4px;
+  width: 80px
+}
+
+.data-grid .date-range-filter .end-date {
+  margin-left: 4px;
+  width: 80px
+}
+
+#ui-datepicker-div {
+  z-index: 9999 !important;
+}
+
+/* from custom-bootstrap *****************/
+
+.data-grid input.datepicker {
+  padding: 4px 4px 2px 4px;
+  border: 1px solid lightgrey;
+  font-size: 13px;
+  line-height: 18px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* jquery-ui datepicker style overrides */
+
+#ui-datepicker-div .ui-datepicker {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /*@include box-shadow(0 5px 10px rgba(0, 0, 0, 0.2))*/
+  z-index: 99 !important;
+  padding: 0 !important;
+  background-color: white;
+  border: 1px solid gray;
+}
+
+/*.ui-datepicker .ui-corner-all, &.ui-corner-all
+    @include border-radius(0)
+*/
+
+#ui-datepicker-div .ui-datepicker-header {
+  border: none
+  background: none
+}
+
+#ui-datepicker span.ui-icon-circle-triangle-w {
+  background-image: url("/assets/glyphicons-halflings.png") !important;
+  background-position: -432px -72px !important;
+}
+
+#ui-datepicker  span.ui-icon-circle-triangle-e {
+  background-image: url("/assets/glyphicons-halflings.png") !important;
+  background-position: -456px -72px !important;
+}
+
+#ui-datepicker-div .ui-state-hover
+  background: none
+
+#ui-datepicker-div .ui-state-default
+  text-align: center
+  background: none
+  border: 1px solid transparent
+  &:hover
+    background: $gray-5
+  &.ui-state-active
+    border: 1px solid gray
+
+
+table.ui-datepicker-calendar
+    th
+      font-size: 11px
+      font-weight: normal
+      padding-bottom: 0
+  .ui-datepicker-title
+    font-weight: bold
+  .ui-datepicker-prev, .ui-datepicker-next
+    i
+      position: relative
+      top: 4px
+      left: 7px
+      color: gray
+      text-decoration: none
+    &:hover
+      i
+        text-decoration: none
+        color: black
+*/
+
+
+
+
+
+/*
+  .numerical-filter
+    .dropdown-body
+      margin: 20px 23px 10px 20px
+      width: 207px
+      text-align: center
+      .slider-range
+        margin-bottom: 4px
+        .ui-slider-handle
+          width: 18px
+          padding: 0
+      .slider-label
+        .range-separator
+          font-size: 28px
+          font-weight: 300
+          padding: 0 7px
+          color: #646a76
+          position: relative
+          top: 4px
+  .text-filter
+    .input-area
+      padding: 12px
+      .search-input
+        height: 30px
+        width: 100%
+        margin-bottom: 0px
+    .text-filter-grid
+      width: 300px
+      height: 250px
+      @include box-sizing-border-box
+      .slick-header-columns
+        height: 0px
+      .slick-row.active
+        .slick-cell
+          background-color: #deeaf7
+      .slick-cell
+        line-height: 30px
+        background-color: white
+        border-bottom: 1px solid #f1f1f1 !important
+        padding: 0
+        text-align: left
+        cursor: pointer
+        &.check-box-cell
+          text-align: center
+          line-height: 28px
+          input
+            margin: 0
+      .slick-row:hover
+        .slick-cell
+          background-color: #f8fbfd
+  .ticker-filter
+    .security-ticker
+      text-transform: uppercase
+      color: #999 !important
+    .label-cash
+      margin-left: 0
+    .slick-viewport
+      overflow: auto !important
+  .transaction-filter
+    .input-area
+      display: none
+    .select-all-link
+      display: none
+    .slick-header
+      border-bottom: none
+    .text-filter-grid
+      width: 170px
+      height: 63px
+      .slick-cell
+        line-height: 32px
+*/

@@ -1,0 +1,50 @@
+body.notebook_app .ui-datepicker {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /*@include box-shadow(0 5px 10px rgba(0, 0, 0, 0.2))*/
+  z-index: 99 !important;
+  padding: 0 !important;
+  background-color: white;
+  border: 1px solid gray;
+}
+
+/*.ui-datepicker .ui-corner-all, &.ui-corner-all
+    @include border-radius(0)
+
+.ui-datepicker .ui-datepicker-header
+    border: none
+    background: none
+    span.ui-icon-circle-triangle-w
+      background-image: url("/assets/glyphicons-halflings.png") !important
+      background-position: -432px -72px !important
+    span.ui-icon-circle-triangle-e
+      background-image: url("/assets/glyphicons-halflings.png") !important
+      background-position: -456px -72px !important
+  .ui-state-hover
+    background: none
+  .ui-state-default
+    text-align: center
+    background: none
+    border: 1px solid transparent
+    &:hover
+      background: $gray-5
+    &.ui-state-active
+      border: 1px solid gray
+  table.ui-datepicker-calendar
+    th
+      font-size: 11px
+      font-weight: normal
+      padding-bottom: 0
+  .ui-datepicker-title
+    font-weight: bold
+  .ui-datepicker-prev, .ui-datepicker-next
+    i
+      position: relative
+      top: 4px
+      left: 7px
+      color: gray
+      text-decoration: none
+    &:hover
+      i
+        text-decoration: none
+        color: black
+*/
