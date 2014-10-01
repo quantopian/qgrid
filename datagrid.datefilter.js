@@ -1,8 +1,8 @@
 define([
     'jquery',
-    'jqueryui',
     'handlebars',
-    'filter_base'
+    'filter_base',
+    'jqueryui'
 ], function ($, handlebars, filter_base) {
   "use strict";
 
