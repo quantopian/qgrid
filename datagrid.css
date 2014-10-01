@@ -205,6 +205,13 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* jquery-ui overrides */
+
+.ui-widget {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
+
 /* jquery-ui datepicker style overrides */
 
 #ui-datepicker-div .ui-datepicker {
@@ -218,7 +225,7 @@
 
 /*.ui-datepicker .ui-corner-all, &.ui-corner-all
     @include border-radius(0)
-*/
+
 
 #ui-datepicker-div .ui-datepicker-header {
   border: none
@@ -266,13 +273,7 @@ table.ui-datepicker-calendar
       i
         text-decoration: none
         color: black
-
-/* jquery-ui overrides */
-
-.ui-widget {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 14px;
-}
+*/
 
 /*
   .numerical-filter
