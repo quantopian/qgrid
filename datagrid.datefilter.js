@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'jqueryui',
     'handlebars',
     'filter_base'
 ], function ($, handlebars, filter_base) {

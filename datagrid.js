@@ -2,8 +2,7 @@ define([
     'jquery',
     "underscore",
     'moment',
-    'date_filter',
-    'slick_grid'
+    'date_filter'
 ], function ($, _, moment, date_filter) {
   "use strict";
 
