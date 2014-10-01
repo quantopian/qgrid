@@ -2,7 +2,8 @@ define([
     'jquery',
     "underscore",
     'moment',
-    'date_filter'
+    'date_filter',
+    'slick_grid'
 ], function ($, _, moment, date_filter) {
   "use strict";
 
@@ -11,6 +12,7 @@ define([
 
   var DataGrid = function (grid_elem_selector, data_frame, column_types) {
     this.grid_elem_selector = grid_elem_selector;
+    this.grid_elem = $(this.grid_elem_selector)
     this.data_frame = data_frame;
 
     this.row_data = [];
@@ -130,7 +132,7 @@ define([
     var show_clear_filter_button = false;
     for (var i=0; i < this.filter_list.length; i++){
       var cur_filter = this.filter_list[i];
-      var filter_button = this.grid_elem_selector.find(".slick-header-column." + cur_filter.field + "-header .filter-button");
+      var filter_button = this.grid_elem.find(".slick-header-column." + cur_filter.field + "-header .filter-button");
       if (cur_filter.is_active()){
         show_clear_filter_button = true;
         filter_button.addClass("filter-active");
