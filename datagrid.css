@@ -76,7 +76,8 @@
 .data-grid .slick-cell {
   border-bottom: 1px solid #e1e8ed !important;
   border-right: none !important;
-  font-size: 13px;
+  font-size: 14px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding-top: 3px;
   padding-left: 0px;
   &.l0.r0
@@ -124,6 +125,7 @@
   margin: 0px;
   max-height: 400px;
   display: block;
+  border-radius: 0px;
 }
 
 .data-grid .grid-filter.hidden {
@@ -138,6 +140,7 @@
 .data-grid .grid-filter h3.popover-title {
   padding: 5px 11px;
   border-bottom: 1px solid #d3d3d3;
+  border-radius: 0px;
 }
 
 .data-grid .grid-filter .dropdown-title {
@@ -263,11 +266,13 @@ table.ui-datepicker-calendar
       i
         text-decoration: none
         color: black
-*/
 
+/* jquery-ui overrides */
 
-
-
+.ui-widget {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+}
 
 /*
   .numerical-filter
