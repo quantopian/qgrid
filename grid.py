@@ -126,3 +126,14 @@ class SlickDataFrame(object):
             display_javascript(raw_js, raw=True)
         except Exception, err:
             display_html('ERROR: %s\n' % str(err))
+
+def load_ipython_extension(ipython):
+    """
+    Entrypoint for ipython.  Add objects to the user's namespace by adding them
+    to the dictionary passed to ipython.push.
+    """
+    ipython.push(
+        {
+            'SlickDataFrame': SlickDataFrame,
+            }
+    )
