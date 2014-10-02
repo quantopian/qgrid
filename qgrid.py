@@ -24,6 +24,7 @@ SLICK_GRID_CSS = dedent(
     """
 )
 
+
 SLICK_GRID_JS = dedent(
     """
     var self = this;
@@ -37,10 +38,10 @@ SLICK_GRID_JS = dedent(
             date_filter: "{cdn_base_url}/datagrid.datefilter",
             slider_filter: "{cdn_base_url}/datagrid.sliderfilter",
             filter_base:  "{cdn_base_url}/datagrid.filterbase",
-            handlebars: "{cdn_base_url}/lib/handlebars-v2.0.0",
+            handlebars: "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min",
             jquery: [
                 "components/jquery/jquery.min",
-                "/static/js/jquery.min"
+                "https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min"
             ],
             underscore: [
                 "components/underscore/underscore-min",
@@ -52,7 +53,7 @@ SLICK_GRID_JS = dedent(
             ],
             jqueryui: [
                 "components/jquery-ui/ui/minified/jquery-ui.min",
-                "http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min"
+                "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min"
             ]
         }}
     }});
@@ -114,7 +115,7 @@ class QuantopianGrid(object):
             if debug:
                 cdn_base_url = "/nbextensions"
             else:
-                cdn_base_url = "https://rawgit.com/quantopian/SlickDataFrame/master"
+                cdn_base_url = "https://rawgit.com/quantopian/SlickDataFrame/master/qgrid"
 
             raw_html = SLICK_GRID_CSS.format(div_id=self.div_id, cdn_base_url=cdn_base_url)
             raw_js = SLICK_GRID_JS.format(cdn_base_url=cdn_base_url,
