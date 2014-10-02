@@ -56,11 +56,11 @@
 }
 
 .q-grid .slick-sort-indicator-desc {
-  background: url(sort_desc.png) no-repeat -6px -10px !important;
+  background: url(lib/sort_desc.png) no-repeat -6px -10px !important;
 }
 
 .q-grid .slick-sort-indicator-asc {
-  background: url(sort_asc.png) no-repeat -6px -3px !important;
+  background: url(lib/sort_asc.png) no-repeat -6px -3px !important;
 }
 
 .q-grid .slick-column-name {
@@ -169,7 +169,7 @@
   background-color: #f7f7f7;
   border-top: 1px solid #d3d3d3;
   padding: 4px 12px;
-  height: 26px;
+  height: 19px;
 }
 
 .q-grid-container .grid-filter .dropdown-footer a.reset-link {

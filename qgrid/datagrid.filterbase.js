@@ -66,7 +66,7 @@ define([
         this.filter_elem = this.create_filter_elem();
       }
 
-      this.filter_elem.appendTo(this.column_header_elem.closest(".filter-container")).show();
+      this.filter_elem.appendTo(this.column_header_elem.closest(".q-grid-container")).show();
 
       // position the dropdown
       var top = this.filter_btn.offset().top + this.filter_btn.height();

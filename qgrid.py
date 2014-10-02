@@ -11,8 +11,8 @@ SLICK_GRID_CSS = dedent(
     <script type="text/javascript">
     if ($("#dg-css").length == 0){{
         $("head").append([
-            "<link href='{cdn_base_url}/slick.grid.css' rel='stylesheet'>",
-            "<link href='{cdn_base_url}/slick-default-theme.css' rel='stylesheet'>",
+            "<link href='{cdn_base_url}/lib/slick.grid.css' rel='stylesheet'>",
+            "<link href='{cdn_base_url}/lib/slick-default-theme.css' rel='stylesheet'>",
             "<link href='http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css' rel='stylesheet'>",
             "<link id='dg-css' href='{cdn_base_url}/datagrid.css' rel='stylesheet'>"
         ]);
@@ -29,15 +29,15 @@ SLICK_GRID_JS = dedent(
     var self = this;
     require.config({{
         paths: {{
-            jquery_drag: "{cdn_base_url}/jquery.event.drag-2.2",
-            slick_core: "{cdn_base_url}/slick.core.2.2",
-            slick_data_view: "{cdn_base_url}/slick.dataview.2.2",
-            slick_grid: "{cdn_base_url}/slick.grid.2.2",
+            jquery_drag: "{cdn_base_url}/lib/jquery.event.drag-2.2",
+            slick_core: "{cdn_base_url}/lib/slick.core.2.2",
+            slick_data_view: "{cdn_base_url}/lib/slick.dataview.2.2",
+            slick_grid: "{cdn_base_url}/lib/slick.grid.2.2",
             data_grid: "{cdn_base_url}/datagrid",
             date_filter: "{cdn_base_url}/datagrid.datefilter",
             slider_filter: "{cdn_base_url}/datagrid.sliderfilter",
             filter_base:  "{cdn_base_url}/datagrid.filterbase",
-            handlebars: "{cdn_base_url}/handlebars-v2.0.0",
+            handlebars: "{cdn_base_url}/lib/handlebars-v2.0.0",
             jquery: [
                 "components/jquery/jquery.min",
                 "/static/js/jquery.min"
