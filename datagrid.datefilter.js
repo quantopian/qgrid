@@ -9,7 +9,11 @@ define([
   var DateFilter = function(field){
     this.base = filter_base.FilterBase;
     this.base(field);
-    this.filter_elem_template = handlebars.compile(
+  }
+  DateFilter.prototype = new filter_base.FilterBase;
+
+  DateFilter.prototype.get_filter_template = function(){
+    return handlebars.compile(
       "<div class='date-range-filter grid-filter dropdown-menu {{type}}-filter'>" +
         "<h3 class='popover-title'>" +
           "<div class='dropdown-title'>Filter by {{name}}</div>" +
@@ -25,13 +29,6 @@ define([
         "</div>" +
       "</div>"
     );
-  }
-  DateFilter.prototype = new filter_base.FilterBase;
-
-  DateFilter.prototype.create_filter_elem = function(){
-    this.filter_elem = $(this.filter_elem_template(this.column));
-    this.initialize_controls();
-    return this.filter_elem;
   }
 
   DateFilter.prototype.reset_filter = function(){

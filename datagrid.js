@@ -2,8 +2,9 @@ define([
     'jquery',
     "underscore",
     'moment',
-    'date_filter'
-], function ($, _, moment, date_filter) {
+    'date_filter',
+    'slider_filter'
+], function ($, _, moment, date_filter, slider_filter) {
   "use strict";
 
   var dependencies_loaded = false;
@@ -173,10 +174,11 @@ define([
       }
     }
 
-//    for (var i=0; i < this.filters; i++){
-//      if cur_filter instanceof quanto.SliderFilter
-//        cur_filter.update_min_max(item)
-//    }
+    for (var i=0; i < this.filters; i++){
+      if (Object.prototype.toString.call(cur_filter) === "SliderFilter"){
+        cur_filter.update_min_max(item);
+      }
+    }
 
     return item.include;
   }
@@ -225,10 +227,11 @@ define([
   DataGrid.prototype.create_date_filter = function(field){
     return new date_filter.DateFilter(field);
   }
-//
-//  DataGrid.prototype.create_number_filter = function(field){
-//    return new quanto.SliderFilter(@$tab_elem, field);
-//  }
+
+  DataGrid.prototype.create_number_filter = function(field){
+    return new slider_filter.SliderFilter(field);
+  }
+
 //
 //  DataGrid.prototype.create_money_filter = function(field){
 //    return new quanto.SliderFilter(@$tab_elem, field, quanto.safe_to_money);

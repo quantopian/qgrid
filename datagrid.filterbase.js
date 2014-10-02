@@ -23,6 +23,17 @@ define([
     this.update_filter_button_disabled();
   }
 
+  FilterBase.prototype.create_filter_elem = function(){
+    this.filter_template = this.get_filter_template();
+    this.filter_elem = $(this.filter_template(this.column));
+    this.initialize_controls();
+    return this.filter_elem;
+  }
+
+  FilterBase.prototype.get_filter_template = function(item){
+    throw new Error("not implemented!");
+  }
+
   // If all the values in this column are the same, the filters would accomplish nothing,
   // so we gray out the filter button.  If the button is clicked we show a tooltip explaining
   // why the filter is disabled.
@@ -40,10 +51,6 @@ define([
     return false;
   }
 
-  FilterBase.prototype.create_filter_elem = function(){
-    console.log("Create filter elem not implemented.");
-  }
-
   FilterBase.prototype.handle_filter_button_clicked = function(e){
     this.column = this.column_header_elem.data("column");
 
@@ -58,16 +65,19 @@ define([
       if (!this.filter_elem){
         this.filter_elem = this.create_filter_elem();
       }
-      this.filter_elem.appendTo(this.slick_grid.getContainerNode()).show();
+
+      this.filter_elem.appendTo(this.column_header_elem.closest(".filter-container")).show();
 
       // position the dropdown
       var top = this.filter_btn.offset().top + this.filter_btn.height();
       var left = 0;
+
       if (this.column.rightAlignFilter){
         left = (this.filter_btn.offset().left + this.filter_btn.width()) - this.filter_elem.width();
       }else {
         left = this.filter_btn.offset().left;
       }
+      this.filter_elem.offset({ top: 0, left: 0 });
       this.filter_elem.offset({ top: top, left: left });
     }
     else{
@@ -140,9 +150,10 @@ define([
 //  filter_done: () =>
 //    throw new Error("not implemented!")
 //
-//  include_item: (item) =>
-//    throw new Error("not implemented!")
-//
+  FilterBase.prototype.include_item = function(item){
+    throw new Error("not implemented!");
+  }
+
   FilterBase.prototype.update_has_multiple_values = function(item){
     // Record the first value, and then set the this.has_multiple_values flag to true as soon as we receive a row that has
     // a different value from that first value.  We need this info because if this column has all the same

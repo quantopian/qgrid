@@ -5,12 +5,17 @@
   box-sizing: content-box;
 }
 
+.filter-container {
+  position: relative;
+  margin: 4px -5px;
+}
+
 .data-grid {
   width: auto;
   min-width: 600px;
   height: 571px;
   border: 1px solid #d3d3d3;
-  margin: 30px 10px 0 10px;
+  border-radius: 4px;
 }
 
 .data-grid .slick-header {
@@ -118,7 +123,7 @@
 
 /* Filter dropdowns */
 
-.data-grid .grid-filter {
+.filter-container .grid-filter {
   z-index: 1000;
   position: relative;
   padding: 0px;
@@ -128,26 +133,26 @@
   border-radius: 0px;
 }
 
-.data-grid .grid-filter.hidden {
+.filter-container .grid-filter.hidden {
   display: none;
 }
 
-.data-grid .grid-filter .dropdown-menu {
+.filter-container .grid-filter .dropdown-menu {
   padding: 0px;
   overflow: hidden;
 }
 
-.data-grid .grid-filter h3.popover-title {
+.filter-container .grid-filter h3.popover-title {
   padding: 5px 11px;
   border-bottom: 1px solid #d3d3d3;
   border-radius: 0px;
 }
 
-.data-grid .grid-filter .dropdown-title {
+.filter-container .grid-filter .dropdown-title {
   font-size: 13px;
 }
 
-.data-grid .grid-filter i.fa-times {
+.filter-container .grid-filter i.fa-times {
   position: absolute;
   right: 11px;
   top: 7px;
@@ -156,48 +161,69 @@
   cursor: pointer;
 }
 
-.data-grid .grid-filter i.fa-times:hover {
+.filter-container .grid-filter i.fa-times:hover {
   color: #777777;
 }
 
-.data-grid .grid-filter .dropdown-footer {
+.filter-container .grid-filter .dropdown-footer {
   background-color: #f7f7f7;
   border-top: 1px solid #d3d3d3;
-  padding: 5px 12px;
-  height: 17px;
+  padding: 4px 12px;
+  height: 26px;
 }
 
-.data-grid .grid-filter .dropdown-footer a.reset-link {
+.filter-container .grid-filter .dropdown-footer a.reset-link {
   padding: 0px;
   float: right;
 }
 
-.data-grid .grid-filter .dropdown-footer a.select-all-link {
+.filter-container .grid-filter .dropdown-footer a.select-all-link {
   padding: 0px;
 }
 
-.data-grid .date-range-filter .dropdown-body {
+.filter-container .date-range-filter .dropdown-body {
   margin: 15px 11px;
   width: 210px;
 }
 
-.data-grid .date-range-filter .start-date {
+.filter-container .date-range-filter .start-date {
   margin-right: 4px;
-  width: 80px
+  width: 80px;
 }
 
-.data-grid .date-range-filter .end-date {
+.filter-container .date-range-filter .end-date {
   margin-left: 4px;
-  width: 80px
+  width: 80px;
 }
 
-#ui-datepicker-div {
-  z-index: 9999 !important;
+.filter-container .numerical-filter .dropdown-body {
+  margin: 20px 23px 10px 20px;
+  width: 207px;
+  text-align: center;
+}
+
+.filter-container .numerical-filter .slider-range {
+  margin-bottom: 4px;
+}
+
+
+.filter-container .numerical-filter .ui-slider-handle {
+  width: 18px;
+  padding: 0;
+}
+
+.filter-container .numerical-filter .range-separator {
+  font-size: 28px;
+  font-weight: 300;
+  padding: 0 7px;
+  color: #646a76;
+  position: relative;
+  top: 4px;
 }
 
 /* from custom-bootstrap *****************/
 
-.data-grid input.datepicker {
+.filter-container input.datepicker {
   padding: 4px 4px 2px 4px;
   border: 1px solid lightgrey;
   font-size: 13px;
@@ -213,6 +239,10 @@
 }
 
 /* jquery-ui datepicker style overrides */
+
+#ui-datepicker-div {
+  z-index: 9999 !important;
+}
 
 #ui-datepicker-div .ui-datepicker {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
