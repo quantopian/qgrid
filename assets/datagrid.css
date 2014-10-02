@@ -1,16 +1,16 @@
 
-.data-grid * {
+.q-grid-container * {
   -webkit-box-sizing: content-box;
   -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
 
-.filter-container {
+.q-grid-container {
   position: relative;
   margin: 4px -5px;
 }
 
-.data-grid {
+.q-grid {
   width: auto;
   min-width: 600px;
   height: 571px;
@@ -18,19 +18,19 @@
   border-radius: 4px;
 }
 
-.data-grid .slick-header {
+.q-grid .slick-header {
   border-top: none;
   border-left: none;
   border-right: none;
 }
 
-.data-grid .slick-header-columns {
+.q-grid .slick-header-columns {
   background: none;
   background-color: rgb(245, 245, 245);
   border-bottom: none;
 }
 
-.data-grid .slick-header-column {
+.q-grid .slick-header-column {
   background: rgb(245, 245, 245);
   color: #565656;
   border-right-style: none;
@@ -39,46 +39,46 @@
   padding: 6px 2px !important;
 }
 
-.data-grid .slick-header-column.active {
+.q-grid .slick-header-column.active {
   background-color: #deeaf7;
 }
 
-.data-grid .slick-header-column-sorted {
+.q-grid .slick-header-column-sorted {
   font-style: inherit !important;
 }
 
-.data-grid .slick-header-column:first-child .slick-column-name {
+.q-grid .slick-header-column:first-child .slick-column-name {
   margin-left: 6px !important;
 }
 
-.data-grid .slick-sort-indicator {
+.q-grid .slick-sort-indicator {
   height: 8px !important;
 }
 
-.data-grid .slick-sort-indicator-desc {
+.q-grid .slick-sort-indicator-desc {
   background: url(sort_desc.png) no-repeat -6px -10px !important;
 }
 
-.data-grid .slick-sort-indicator-asc {
+.q-grid .slick-sort-indicator-asc {
   background: url(sort_asc.png) no-repeat -6px -3px !important;
 }
 
-.data-grid .slick-column-name {
+.q-grid .slick-column-name {
   margin-bottom: 0px;
 }
 
-.data-grid .slick-resizable-handle {
+.q-grid .slick-resizable-handle {
   width: 1px;
   background-color: #c5c5c5;
   border-left: 3px solid rgb(245, 245, 245);
   border-right: 3px solid rgb(245, 245, 245);
 }
 
-.data-grid .slick-resizable-handle.active {
+.q-grid .slick-resizable-handle.active {
   border-right-color: #deeaf7;
 }
 
-.data-grid .slick-cell {
+.q-grid .slick-cell {
   border-bottom: 1px solid #e1e8ed !important;
   border-right: none !important;
   font-size: 14px;
@@ -89,23 +89,23 @@
    border-left: none;
 }
 
-.data-grid .slick-cell.l0.r0 {
+.q-grid .slick-cell.l0.r0 {
   border-left: none;
   padding-left: 6px;
 }
 
 /* Filter button */
 
-.data-grid .slick-header-column.active .filter-button, .filter-button:hover {
+.q-grid .slick-header-column.active .filter-button, .filter-button:hover {
   background-color: #deeaf7;
   border-left: 1px solid #cccccc;
 }
 
-.data-grid .slick-header-column.filter-button-disabled .filter-button {
+.q-grid .slick-header-column.filter-button-disabled .filter-button {
   color: #bababa;
 }
 
-.data-grid .filter-button {
+.q-grid .filter-button {
   position: absolute;
   right: 4px;
   top: 0px;
@@ -116,14 +116,14 @@
   z-index: 900;
 }
 
-.data-grid .filter-button:hover {
+.q-grid .filter-button:hover {
   background-color: #efefef;
   border-left: 1px solid #cccccc;
 }
 
 /* Filter dropdowns */
 
-.filter-container .grid-filter {
+.q-grid-container .grid-filter {
   z-index: 1000;
   position: relative;
   padding: 0px;
@@ -133,26 +133,26 @@
   border-radius: 0px;
 }
 
-.filter-container .grid-filter.hidden {
+.q-grid-container .grid-filter.hidden {
   display: none;
 }
 
-.filter-container .grid-filter .dropdown-menu {
+.q-grid-container .grid-filter .dropdown-menu {
   padding: 0px;
   overflow: hidden;
 }
 
-.filter-container .grid-filter h3.popover-title {
+.q-grid-container .grid-filter h3.popover-title {
   padding: 5px 11px;
   border-bottom: 1px solid #d3d3d3;
   border-radius: 0px;
 }
 
-.filter-container .grid-filter .dropdown-title {
+.q-grid-container .grid-filter .dropdown-title {
   font-size: 13px;
 }
 
-.filter-container .grid-filter i.fa-times {
+.q-grid-container .grid-filter i.fa-times {
   position: absolute;
   right: 11px;
   top: 7px;
@@ -161,58 +161,58 @@
   cursor: pointer;
 }
 
-.filter-container .grid-filter i.fa-times:hover {
+.q-grid-container .grid-filter i.fa-times:hover {
   color: #777777;
 }
 
-.filter-container .grid-filter .dropdown-footer {
+.q-grid-container .grid-filter .dropdown-footer {
   background-color: #f7f7f7;
   border-top: 1px solid #d3d3d3;
   padding: 4px 12px;
   height: 26px;
 }
 
-.filter-container .grid-filter .dropdown-footer a.reset-link {
+.q-grid-container .grid-filter .dropdown-footer a.reset-link {
   padding: 0px;
   float: right;
 }
 
-.filter-container .grid-filter .dropdown-footer a.select-all-link {
+.q-grid-container .grid-filter .dropdown-footer a.select-all-link {
   padding: 0px;
 }
 
-.filter-container .date-range-filter .dropdown-body {
+.q-grid-container .date-range-filter .dropdown-body {
   margin: 15px 11px;
   width: 210px;
 }
 
-.filter-container .date-range-filter .start-date {
+.q-grid-container .date-range-filter .start-date {
   margin-right: 4px;
   width: 80px;
 }
 
-.filter-container .date-range-filter .end-date {
+.q-grid-container .date-range-filter .end-date {
   margin-left: 4px;
   width: 80px;
 }
 
-.filter-container .numerical-filter .dropdown-body {
+.q-grid-container .numerical-filter .dropdown-body {
   margin: 20px 23px 10px 20px;
   width: 207px;
   text-align: center;
 }
 
-.filter-container .numerical-filter .slider-range {
+.q-grid-container .numerical-filter .slider-range {
   margin-bottom: 4px;
 }
 
 
-.filter-container .numerical-filter .ui-slider-handle {
+.q-grid-container .numerical-filter .ui-slider-handle {
   width: 18px;
   padding: 0;
 }
 
-.filter-container .numerical-filter .range-separator {
+.q-grid-container .numerical-filter .range-separator {
   font-size: 28px;
   font-weight: 300;
   padding: 0 7px;
@@ -223,7 +223,7 @@
 
 /* from custom-bootstrap *****************/
 
-.filter-container input.datepicker {
+.q-grid-container input.datepicker {
   padding: 4px 4px 2px 4px;
   border: 1px solid lightgrey;
   font-size: 13px;

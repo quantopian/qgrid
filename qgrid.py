@@ -18,8 +18,8 @@ SLICK_GRID_CSS = dedent(
         ]);
     }}
     </script>
-    <div class='filter-container'>
-    <div id='{div_id}' class='data-grid'></div>
+    <div class='q-grid-container'>
+    <div id='{div_id}' class='q-grid'></div>
     </div>
     """
 )
@@ -75,7 +75,7 @@ SLICK_GRID_JS = dedent(
     """
 )
 
-class SlickDataFrame(object):
+class QuantopianGrid(object):
     def __init__(self, data_frame):
         self.data_frame = data_frame
         self.div_id = str(uuid.uuid4())
@@ -110,7 +110,7 @@ class SlickDataFrame(object):
             column_types_json = json.dumps(self.column_types)
             data_frame_json = self.df_copy.to_json(orient="records", double_precision=self.precision)
 
-            debug = False
+            debug = True
             if debug:
                 cdn_base_url = "/nbextensions"
             else:
@@ -127,6 +127,9 @@ class SlickDataFrame(object):
         except Exception, err:
             display_html('ERROR: %s\n' % str(err))
 
+def qgrid(dataframe):
+    return QuantopianGrid(dataframe)
+
 def load_ipython_extension(ipython):
     """
     Entrypoint for ipython.  Add objects to the user's namespace by adding them
@@ -134,6 +137,6 @@ def load_ipython_extension(ipython):
     """
     ipython.push(
         {
-            'SlickDataFrame': SlickDataFrame,
-            }
+            'qgrid': qgrid
+        }
     )
