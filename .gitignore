@@ -1,3 +1,4 @@
 # IntelliJ IDEA (IDE-related files)
 *.iml
 .idea/*
+.ipynb_checkpoints/*
