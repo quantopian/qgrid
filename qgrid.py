@@ -24,39 +24,40 @@ SLICK_GRID_CSS = dedent(
     """
 )
 
-
 SLICK_GRID_JS = dedent(
     """
-    var self = this;
+    var path_dictionary = {{
+        jquery_drag: "{cdn_base_url}/lib/jquery.event.drag-2.2",
+        slick_core: "{cdn_base_url}/lib/slick.core.2.2",
+        slick_data_view: "{cdn_base_url}/lib/slick.dataview.2.2",
+        slick_grid: "{cdn_base_url}/lib/slick.grid.2.2",
+        data_grid: "{cdn_base_url}/datagrid",
+        date_filter: "{cdn_base_url}/datagrid.datefilter",
+        slider_filter: "{cdn_base_url}/datagrid.sliderfilter",
+        filter_base:  "{cdn_base_url}/datagrid.filterbase",
+        handlebars: "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min"
+    }};
+
+    var existing_config = require.s.contexts._.config;
+    if (!existing_config.paths['underscore']){{
+        path_dictionary['underscore'] = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min";
+    }}
+
+    if (!existing_config.paths['moment']){{
+        path_dictionary['moment'] = "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min";
+    }}
+
+    if (!existing_config.paths['jqueryui']){{
+        path_dictionary['jqueryui'] = "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min";
+    }}
+
     require.config({{
-        paths: {{
-            jquery_drag: "{cdn_base_url}/lib/jquery.event.drag-2.2",
-            slick_core: "{cdn_base_url}/lib/slick.core.2.2",
-            slick_data_view: "{cdn_base_url}/lib/slick.dataview.2.2",
-            slick_grid: "{cdn_base_url}/lib/slick.grid.2.2",
-            data_grid: "{cdn_base_url}/datagrid",
-            date_filter: "{cdn_base_url}/datagrid.datefilter",
-            slider_filter: "{cdn_base_url}/datagrid.sliderfilter",
-            filter_base:  "{cdn_base_url}/datagrid.filterbase",
-            handlebars: "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min",
-            jquery: [
-                "components/jquery/jquery.min",
-                "https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min"
-            ],
-            underscore: [
-                "components/underscore/underscore-min",
-                "http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min"
-            ],
-            moment: [
-                "components/moment/moment",
-                "http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min"
-            ],
-            jqueryui: [
-                "components/jquery-ui/ui/minified/jquery-ui.min",
-                "https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min"
-            ]
-        }}
+        paths: path_dictionary
     }});
+
+    if (typeof jQuery === 'function') {{
+        define('jquery', function() {{ return jQuery; }});
+    }}
 
     require([
         'jquery',
@@ -111,7 +112,7 @@ class QuantopianGrid(object):
             column_types_json = json.dumps(self.column_types)
             data_frame_json = self.df_copy.to_json(orient="records", double_precision=self.precision)
 
-            debug = False
+            debug = True
             if debug:
                 cdn_base_url = "/nbextensions"
             else:
@@ -126,7 +127,7 @@ class QuantopianGrid(object):
             display_html(raw_html, raw=True)
             display_javascript(raw_js, raw=True)
         except Exception, err:
-            display_html('ERROR: %s\n' % str(err))
+            display_html('ERROR: {}'.format(str(err)), raw=True)
 
 def qgrid(dataframe):
     return QuantopianGrid(dataframe)
