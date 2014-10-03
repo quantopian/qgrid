@@ -102,6 +102,18 @@ define([
       enableColumnReorder: false
     };
 
+    var grid_height = max_row_height;
+    var max_row_height = options.rowHeight * 15;
+    // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
+    // The '+ 1' accounts for the height of the column header.
+    var total_row_height = (this.row_data.length + 1) * options.rowHeight + 1;
+    if (total_row_height <= max_row_height){
+      grid_height = total_row_height;
+      this.grid_elem.addClass('hide-scrollbar');
+    }
+    var grid_height = Math.min(max_row_height, total_row_height);
+    this.grid_elem.height(grid_height);
+
     this.slick_grid = new Slick.Grid(this.grid_elem_selector, this.data_view, this.columns, options);
     this.update_sort_indicators();
     this.slick_grid.render();

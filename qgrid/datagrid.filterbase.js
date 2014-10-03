@@ -70,13 +70,15 @@ define([
 
       // position the dropdown
       var top = this.filter_btn.offset().top + this.filter_btn.height();
-      var left = 0;
+      var left = this.filter_btn.offset().left;
 
-      if (this.column.rightAlignFilter){
-        left = (this.filter_btn.offset().left + this.filter_btn.width()) - this.filter_elem.width();
-      }else {
-        left = this.filter_btn.offset().left;
+      var filter_width = this.filter_elem.width();
+      var elem_right = left + filter_width;
+      var container = $('#notebook-container');
+      if (elem_right > container.outerWidth() + (parseInt(container.css("margin-right"), 10) * 2)){
+        left = (this.filter_btn.offset().left + this.filter_btn.width()) - filter_width;
       }
+
       this.filter_elem.offset({ top: 0, left: 0 });
       this.filter_elem.offset({ top: top, left: left });
     }
