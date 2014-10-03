@@ -72,6 +72,9 @@ define([
       var filter_width = this.filter_elem.width();
       var elem_right = left + filter_width;
       var container = $('#notebook-container');
+      if (container.length == 0){
+        container = $('body');
+      }
       if (elem_right > container.outerWidth() + (parseInt(container.css("margin-right"), 10) * 2)){
         left = (this.filter_btn.offset().left + this.filter_btn.width()) - filter_width;
       }
