@@ -13,9 +13,7 @@ two-dimensional data in pandas.
 
 Qgrid renders pandas DataFrames as SlickGrids, which enables users to explore 
 the entire contents of a DataFrame using intuitive sorting and filtering controls.  It's designed to be used within 
-IPython notebook, but it's also fully functional when rendered in [nbviewer](http://nbviewer.ipython
-.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb).
+IPython notebook, but it's also fully functional when rendered in [nbviewer](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb).
 
 #### Demo:
-See the demo by viewing [qgrid_demo.ipynb](http://nbviewer.ipython
-.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb) in nbviewer.
+See the demo by viewing [qgrid_demo.ipynb](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb) in nbviewer.
