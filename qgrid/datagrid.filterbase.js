@@ -6,9 +6,6 @@ define([
   var FilterBase = function(field){
     this.field = field;
     this.has_multiple_values = true;
-//    this.context_elem = context_elem;
-//    this.filter_elem = this.context_elem.find(".#{this.field}-filter");
-//    this.filter_elem.data("filter", this);
   }
 
   FilterBase.prototype.render_filter_button = function(column_header_elem, slick_grid){

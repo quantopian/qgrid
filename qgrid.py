@@ -110,9 +110,9 @@ class QuantopianGrid(object):
     def _ipython_display_(self):
         try:
             column_types_json = json.dumps(self.column_types)
-            data_frame_json = self.df_copy.to_json(orient="records", double_precision=self.precision)
+            data_frame_json = self.df_copy.to_json(orient='records', date_format='iso', double_precision=self.precision)
 
-            debug = False
+            debug = True
             if debug:
                 cdn_base_url = "/nbextensions"
             else:

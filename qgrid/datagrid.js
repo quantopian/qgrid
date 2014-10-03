@@ -102,17 +102,20 @@ define([
       enableColumnReorder: false
     };
 
-    var grid_height = max_row_height;
-    var max_row_height = options.rowHeight * 15;
+    var max_height = options.rowHeight * 15;
+    var grid_height = max_height;
     // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
     // The '+ 1' accounts for the height of the column header.
     var total_row_height = (this.row_data.length + 1) * options.rowHeight + 1;
-    if (total_row_height <= max_row_height){
+    if (total_row_height <= max_height){
       grid_height = total_row_height;
       this.grid_elem.addClass('hide-scrollbar');
     }
-    var grid_height = Math.min(max_row_height, total_row_height);
     this.grid_elem.height(grid_height);
+
+    if (this.columns.length < 5){
+      this.grid_elem.width(this.columns.length * 200);
+    }
 
     this.slick_grid = new Slick.Grid(this.grid_elem_selector, this.data_view, this.columns, options);
     this.update_sort_indicators();
@@ -164,15 +167,19 @@ define([
   }
 
   DataGrid.prototype.apply_filters = function(excluded_filter){
-//    for (var i=0; i < this.filters; i++){
-//      if cur_filter instanceof quanto.SliderFilter  && cur_filter != excluded_filter
-//        cur_filter.reset_min_max();
-//    }
+    for (var i=0; i < this.filter_list.length; i++){
+      var cur_filter = this.filter_list[i];
+      if ((cur_filter instanceof slider_filter.SliderFilter)  && cur_filter != excluded_filter){
+        cur_filter.reset_min_max();
+      }
+    }
     this.data_view.refresh();
-//    for (var i=0; i < this.filters; i++){
-//      if cur_filter instanceof quanto.SliderFilter && cur_filter != excluded_filter
-//        cur_filter.handle_filtering_done()
-//    }
+    for (var i=0; i < this.filter_list.length; i++){
+      var cur_filter = this.filter_list[i];
+      if ((cur_filter instanceof slider_filter.SliderFilter) && cur_filter != excluded_filter){
+        cur_filter.handle_filtering_done();
+      }
+    }
   }
 
   DataGrid.prototype.include_row = function(item, args){
@@ -186,8 +193,9 @@ define([
       }
     }
 
-    for (var i=0; i < this.filters; i++){
-      if (Object.prototype.toString.call(cur_filter) === "SliderFilter"){
+    for (var i=0; i < this.filter_list.length; i++){
+      var cur_filter = this.filter_list[i];
+      if (cur_filter instanceof slider_filter.SliderFilter){
         cur_filter.update_min_max(item);
       }
     }

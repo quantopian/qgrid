@@ -100,14 +100,15 @@ define([
   }
 
   DateFilter.prototype.include_item = function(item){
+    var cur_row_date = new Date(item[this.field]);
     if (this.filter_start_date){
-      if (item[this.field] < this.filter_start_date){
+      if (cur_row_date < new Date(this.filter_start_date)){
         return false;
       }
     }
 
     if (this.filter_end_date){
-      if (item[this.field] > this.filter_end_date){
+      if (cur_row_date > new Date(this.filter_end_date)){
         return false;
       }
     }
