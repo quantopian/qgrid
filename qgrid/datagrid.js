@@ -147,7 +147,7 @@ define([
     var show_clear_filter_button = false;
     for (var i=0; i < this.filter_list.length; i++){
       var cur_filter = this.filter_list[i];
-      var filter_button = this.grid_elem.find(".slick-header-column." + cur_filter.field + "-header .filter-button");
+      var filter_button = cur_filter.column_header_elem.find(".filter-button");
       if (cur_filter.is_active()){
         show_clear_filter_button = true;
         filter_button.addClass("filter-active");
