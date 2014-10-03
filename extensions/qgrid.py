@@ -14,7 +14,7 @@ SLICK_GRID_CSS = dedent(
             "<link href='{cdn_base_url}/lib/slick.grid.css' rel='stylesheet'>",
             "<link href='{cdn_base_url}/lib/slick-default-theme.css' rel='stylesheet'>",
             "<link href='http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css' rel='stylesheet'>",
-            "<link id='dg-css' href='{cdn_base_url}/datagrid.css' rel='stylesheet'>"
+            "<link id='dg-css' href='{cdn_base_url}/qgrid.css' rel='stylesheet'>"
         ]);
     }}
     </script>
@@ -31,10 +31,10 @@ SLICK_GRID_JS = dedent(
         slick_core: "{cdn_base_url}/lib/slick.core.2.2",
         slick_data_view: "{cdn_base_url}/lib/slick.dataview.2.2",
         slick_grid: "{cdn_base_url}/lib/slick.grid.2.2",
-        data_grid: "{cdn_base_url}/datagrid",
-        date_filter: "{cdn_base_url}/datagrid.datefilter",
-        slider_filter: "{cdn_base_url}/datagrid.sliderfilter",
-        filter_base:  "{cdn_base_url}/datagrid.filterbase",
+        data_grid: "{cdn_base_url}/qgrid",
+        date_filter: "{cdn_base_url}/qgrid.datefilter",
+        slider_filter: "{cdn_base_url}/qgrid.sliderfilter",
+        filter_base:  "{cdn_base_url}/qgrid.filterbase",
         handlebars: "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min"
     }};
 
@@ -69,7 +69,7 @@ SLICK_GRID_JS = dedent(
         $('#{div_id}').closest('.rendered_html').removeClass('rendered_html');
         require(['slick_grid'], function(){{
             require(["data_grid"], function(dgrid){{
-                var grid = new dgrid.DataGrid('#{div_id}', {data_frame_json}, {column_types_json});
+                var grid = new dgrid.QGrid('#{div_id}', {data_frame_json}, {column_types_json});
                 grid.initialize_slick_grid();
             }});
         }});
@@ -114,7 +114,7 @@ class QuantopianGrid(object):
             data_frame_json = self.df_copy.to_json(orient='records', date_format='iso', double_precision=self.precision)
 
             if self.remote:
-                cdn_base_url = "https://rawgit.com/quantopian/SlickDataFrame/master/qgrid"
+                cdn_base_url = "https://rawgit.com/quantopian/SlickDataFrame/master/nbextensions"
             else:
                 cdn_base_url = "/nbextensions"
 
