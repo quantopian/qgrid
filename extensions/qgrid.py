@@ -78,8 +78,9 @@ SLICK_GRID_JS = dedent(
 )
 
 class QuantopianGrid(object):
-    def __init__(self, data_frame):
+    def __init__(self, data_frame, remote):
         self.data_frame = data_frame
+        self.remote = remote
         self.div_id = str(uuid.uuid4())
 
         self.df_copy = data_frame.copy()
@@ -112,11 +113,10 @@ class QuantopianGrid(object):
             column_types_json = json.dumps(self.column_types)
             data_frame_json = self.df_copy.to_json(orient='records', date_format='iso', double_precision=self.precision)
 
-            debug = True
-            if debug:
-                cdn_base_url = "/nbextensions"
-            else:
+            if self.remote:
                 cdn_base_url = "https://rawgit.com/quantopian/SlickDataFrame/master/qgrid"
+            else:
+                cdn_base_url = "/nbextensions"
 
             raw_html = SLICK_GRID_CSS.format(div_id=self.div_id, cdn_base_url=cdn_base_url)
             raw_js = SLICK_GRID_JS.format(cdn_base_url=cdn_base_url,
@@ -129,8 +129,8 @@ class QuantopianGrid(object):
         except Exception, err:
             display_html('ERROR: {}'.format(str(err)), raw=True)
 
-def qgrid(dataframe):
-    return QuantopianGrid(dataframe)
+def qgrid(dataframe, remote=True):
+    return QuantopianGrid(dataframe, remote)
 
 def load_ipython_extension(ipython):
     """
