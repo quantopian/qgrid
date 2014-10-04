@@ -24,6 +24,8 @@ setup(
     author_email='tshawver@quantopian.com',
     packages=find_packages(),
     license='Apache 2.0',
+    include_package_data=True,
+    zip_safe=False,
     classifiers=[
         'Development Status :: 1 - Alpha',
         'License :: OSI Approved :: Apache Software License',
