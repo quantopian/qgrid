@@ -1,4 +1,4 @@
 include README.md
 include LICENSE
 
-recursive-include nbextensions *
+recursive-include qgrid *.*
