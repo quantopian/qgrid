@@ -1,4 +1,4 @@
 include README.md
 include LICENSE
 
-recursive-include qgrid *.*
+recursive-include qgrid/assets *.*
