@@ -79,7 +79,7 @@ SLICK_GRID_JS = dedent(
     """
 )
 
-class qgrid(object):
+class SlickGrid(object):
     remote_mode = True
     def __init__(self, data_frame):
         self.data_frame = data_frame
@@ -115,8 +115,8 @@ class qgrid(object):
             column_types_json = json.dumps(self.column_types)
             data_frame_json = self.df_copy.to_json(orient='records', date_format='iso', double_precision=self.precision)
 
-            if qgrid.remote_mode:
-                cdn_base_url = "https://rawgit.com/quantopian/qgrid/master/nbextensions/qgridjs"
+            if SlickGrid.remote_mode:
+                cdn_base_url = "https://rawgit.com/quantopian/qgrid/master/qgridjs"
             else:
                 cdn_base_url = "/nbextensions/qgridjs"
 
@@ -132,7 +132,10 @@ class qgrid(object):
             display_html('ERROR: {}'.format(str(err)), raw=True)
 
 def set_remote_mode(remote_mode=True):
-    qgrid.remote_mode = remote_mode
+    SlickGrid.remote_mode = remote_mode
+
+def show_grid(data_frame):
+    return SlickGrid(data_frame)
 
 def load_ipython_extension(ipython):
     """
@@ -144,12 +147,9 @@ def load_ipython_extension(ipython):
     if js_pkg != None:
         qgridjs_path = js_pkg.filename
         nb_ext.install_nbextension(qgridjs_path, overwrite=True, symlink=False, verbose=0)
-        set_remote_mode(False)
-    else:
-        set_remote_mode(True)
 
-    ipython.push(
-        {
-            'qgrid': qgrid
-        }
-    )
+    # ipython.push(
+    #     {
+    #         'qgrid': qgrid
+    #     }
+    # )
