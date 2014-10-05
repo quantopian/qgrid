@@ -3,6 +3,8 @@ import numpy as np
 from textwrap import dedent
 import uuid
 import json
+import pkgutil
+import IPython.html.nbextensions as nb_ext
 
 from IPython.display import display_html, display_javascript
 
@@ -77,10 +79,10 @@ SLICK_GRID_JS = dedent(
     """
 )
 
-class QuantopianGrid(object):
-    def __init__(self, data_frame, remote):
+class qgrid(object):
+    remote_mode = True
+    def __init__(self, data_frame):
         self.data_frame = data_frame
-        self.remote = remote
         self.div_id = str(uuid.uuid4())
 
         self.df_copy = data_frame.copy()
@@ -113,10 +115,10 @@ class QuantopianGrid(object):
             column_types_json = json.dumps(self.column_types)
             data_frame_json = self.df_copy.to_json(orient='records', date_format='iso', double_precision=self.precision)
 
-            if self.remote:
-                cdn_base_url = "https://rawgit.com/quantopian/SlickDataFrame/master/nbextensions"
+            if qgrid.remote_mode:
+                cdn_base_url = "https://rawgit.com/quantopian/qgrid/master/nbextensions/qgridjs"
             else:
-                cdn_base_url = "/nbextensions"
+                cdn_base_url = "/nbextensions/qgridjs"
 
             raw_html = SLICK_GRID_CSS.format(div_id=self.div_id, cdn_base_url=cdn_base_url)
             raw_js = SLICK_GRID_JS.format(cdn_base_url=cdn_base_url,
@@ -129,14 +131,23 @@ class QuantopianGrid(object):
         except Exception, err:
             display_html('ERROR: {}'.format(str(err)), raw=True)
 
-def qgrid(dataframe, remote=True):
-    return QuantopianGrid(dataframe, remote)
+def set_remote_mode(remote_mode=True):
+    qgrid.remote_mode = remote_mode
 
 def load_ipython_extension(ipython):
     """
     Entrypoint for ipython.  Add objects to the user's namespace by adding them
     to the dictionary passed to ipython.push.
     """
+
+    js_pkg = pkgutil.get_loader("qgridjs")
+    if js_pkg != None:
+        qgridjs_path = js_pkg.filename
+        nb_ext.install_nbextension(qgridjs_path, overwrite=True, symlink=False, verbose=0)
+        set_remote_mode(False)
+    else:
+        set_remote_mode(True)
+
     ipython.push(
         {
             'qgrid': qgrid
