@@ -17,7 +17,7 @@ define([
       "<div class='date-range-filter grid-filter dropdown-menu {{type}}-filter'>" +
         "<h3 class='popover-title'>" +
           "<div class='dropdown-title'>Filter by {{name}}</div>" +
-          "<i class='fa fa-times'/>" +
+          "<i class='fa fa-times icon-remove close-button'/>" +
         "</h3>" +
         "<div class='dropdown-body'>" +
           "<input class='datepicker ignore start-date'/>" +

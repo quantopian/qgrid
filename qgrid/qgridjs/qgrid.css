@@ -193,7 +193,7 @@
   font-size: 13px;
 }
 
-.q-grid-container .grid-filter i.fa-times {
+.q-grid-container .grid-filter i.close-button {
   position: absolute;
   right: 11px;
   top: 7px;
@@ -202,7 +202,7 @@
   cursor: pointer;
 }
 
-.q-grid-container .grid-filter i.fa-times:hover {
+.q-grid-container .grid-filter i.close-button:hover {
   color: #777777;
 }
 

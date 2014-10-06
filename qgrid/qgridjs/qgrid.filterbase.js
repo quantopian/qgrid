@@ -14,7 +14,7 @@ define([
 
     this.column_header_elem = column_header_elem;
     this.slick_grid = slick_grid;
-    this.filter_btn = $("<div class='fa fa-filter filter-button'>");
+    this.filter_btn = $("<div class='fa fa-filter icon-filter filter-button'>");
     this.filter_btn.appendTo(this.column_header_elem);
     this.filter_btn.click($.proxy(this.handle_filter_button_clicked, this));
     this.update_filter_button_disabled();
@@ -126,7 +126,7 @@ define([
     this.filter_elem.find("a.reset-link").click($.proxy(this.handle_reset_filter_clicked, this));
 
     var self = this;
-    this.filter_elem.find("i.fa-times").click(function(e){
+    this.filter_elem.find("i.close-button").click(function(e){
       self.hide_filter();
       return false;
     });
