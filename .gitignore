@@ -1,3 +1,5 @@
+# Python
+*.pyc
 # IntelliJ IDEA (IDE-related files)
 *.iml
 .idea/*
