@@ -146,9 +146,9 @@ def load_ipython_extension(ipython):
     if js_pkg != None:
         qgridjs_path = js_pkg.filename
         nb_ext.install_nbextension(qgridjs_path, overwrite=True, symlink=False, verbose=0)
-        SlickGrid.set_remote_mode(False)
+        SlickGrid.remote_mode = False
     else:
-        SlickGrid.set_remote_mode(True)
+        SlickGrid.remote_mode = True
     # ipython.push(
     #     {
     #         'qgrid': qgrid
