@@ -116,7 +116,7 @@ class SlickGrid(object):
             data_frame_json = self.df_copy.to_json(orient='records', date_format='iso', double_precision=self.precision)
 
             if SlickGrid.remote_mode:
-                cdn_base_url = "https://rawgit.com/quantopian/qgrid/master/qgridjs"
+                cdn_base_url = "https://cdn.rawgit.com/quantopian/qgrid/a1abd45434b0dddc835fbb1279670dd689dbfc30/qgridjs"
             else:
                 cdn_base_url = "/nbextensions/qgridjs"
 
