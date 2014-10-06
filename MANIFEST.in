@@ -1,4 +1,5 @@
 include README.md
 include LICENSE
 
-recursive-include qgridjs *.*
+recursive-include qgrid/qgridjs *.*
+recursive-include qgrid/templates *.*
