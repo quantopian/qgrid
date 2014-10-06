@@ -142,12 +142,13 @@ def load_ipython_extension(ipython):
     Entrypoint for ipython.  Add objects to the user's namespace by adding them
     to the dictionary passed to ipython.push.
     """
-
     js_pkg = pkgutil.get_loader("qgridjs")
     if js_pkg != None:
         qgridjs_path = js_pkg.filename
         nb_ext.install_nbextension(qgridjs_path, overwrite=True, symlink=False, verbose=0)
-
+        SlickGrid.set_remote_mode(False)
+    else:
+        SlickGrid.set_remote_mode(True)
     # ipython.push(
     #     {
     #         'qgrid': qgrid
