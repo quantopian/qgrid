@@ -5,10 +5,6 @@ def show_grid(data_frame):
     return SlickGrid(data_frame)
 
 
-def set_remote_mode(remote_mode=True):
-    SlickGrid.remote_mode = remote_mode
-
-
 def nbinstall(overwrite=False):
     """
     """

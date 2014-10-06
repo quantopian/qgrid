@@ -23,10 +23,9 @@ SLICK_GRID_JS = template_contents('slickgrid.js.template')
 
 class SlickGrid(object):
 
-    remote_mode = True
-
-    def __init__(self, data_frame):
+    def __init__(self, data_frame, remote_js=False):
         self.data_frame = data_frame
+        self.remote_js = remote_js
         self.div_id = str(uuid.uuid4())
 
         self.df_copy = data_frame.copy()
