@@ -13,17 +13,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='qgrid',
     version='0.1.0',
-    description='An extension for viewing pandas DataFrames in IPython notebook.',
+    description='A Pandas DataFrame viewer for IPython Notebook.',
     author='Quantopian Inc.',
     author_email='tshawver@quantopian.com',
-    packages=['qgridjs'],
-    py_modules = ['qgrid'],
+    packages=['qgrid'],
     license='Apache 2.0',
     include_package_data=True,
     zip_safe=False,
@@ -38,11 +36,11 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Office/Business :: Financial',
         'Topic :: Scientific/Engineering :: Information Analysis',
-        'Topic :: System :: Distributed Computing',
         ],
     install_requires=[
         'numpy',
-        'pandas'
+        'pandas',
+        'ipython[notebook]',
     ],
     url="https://github.com/quantopian/qgrid"
 )
