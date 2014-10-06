@@ -62,7 +62,7 @@ class SlickGrid(object):
 
             if self.remote_js:
                 cdn_base_url = \
-                    "https://rawgit.com/quantopian/qgrid/master/qgrid/qgridjs"
+                    "https://cdn.rawgit.com/quantopian/qgrid/094b5bc102ec423e37af50aa0c3e63746025196b/qgrid/qgridjs/"
             else:
                 cdn_base_url = "/nbextensions/qgridjs"
 
