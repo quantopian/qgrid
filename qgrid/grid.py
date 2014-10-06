@@ -60,7 +60,7 @@ class SlickGrid(object):
                 double_precision=self.precision,
             )
 
-            if self.remote_mode:
+            if self.remote_js:
                 cdn_base_url = \
                     "https://rawgit.com/quantopian/qgrid/master/qgrid/qgridjs"
             else:
