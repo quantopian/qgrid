@@ -32,6 +32,10 @@ These extensions are able to respond to javascript events that they're given acc
 notebook's javascript API, and the examples I've seen tend to run some javascript once when the notebook is 
 initialized.  For example, I've seen nbextensions that add a button to the notebook toolbar or create a 
 floating table of contents.
+
+Initially I was expecting that Qgrid would be an nbextension because it's basically just a Javascript grid.  That 
+turned out to mostly incorrect, and Qgrid ended up being implemented as a python package that contains an 
+nbextension.
  
 ##### Why not a standard nbextension?
 * Qgrid needs to run javascript at the time of cell execution rather than notebook startup.  
@@ -45,8 +49,8 @@ python code in the extension, for the purpose of providing that API.
   * pip is more well suited for the task of distributing a package with dependencies.
 * Qgrid's API is a python module, so it makes sense for it to be distributed with pip, like any other python module.
 
-##### The solution: A python package that contains a folder of Javascript/CSS dependencies.
-* Qgrid's python API is accessed by importing the qgrid module with `import qgrid`.
+##### The solution: A python package that contains an nbextension.
+* The qgrid python package can be installed using pip, and the qgrid module can be imported using `import qgrid`
 * The qgrid module includes an `nbinstall` function for installing qgrid's Javascript/CSS dependencies.  When 
 `nbinstall` is run, the qgrid module copies it's Javascript/CSS folder into the nbextensions folder, effectively deploying it as an 
 nbextension.
