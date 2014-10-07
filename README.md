@@ -16,12 +16,10 @@ the entire contents of a DataFrame using intuitive sorting and filtering control
 IPython notebook, but it's also fully functional when rendered in [nbviewer](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb).
 
 #### Demo:
-See the demo by viewing [qgrid_demo.ipynb](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo
-.ipynb) in nbviewer.
+See the demo by viewing [qgrid_demo.ipynb](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb) in nbviewer.
 
 #### Installation:
-Installation instruction can be found in the same notebook as the demo, [qgrid_demo.ipynb](http://nbviewer.ipython
-.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb).
+Installation instruction can be found in the same notebook as the demo, [qgrid_demo.ipynb](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb).
 
 #### How it works:
 
