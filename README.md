@@ -24,19 +24,19 @@ Installation instruction can be found in the same notebook as the demo, [qgrid_d
 #### How it works:
 
 ##### Background on nbextensions:
-IPython notebook has a standard way of implementing purely client-side extensions (aka nbextensions), 
+IPython notebook has a standard way of implementing purely client-side extensions, 
 which involves placing the extension in the nbextensions folder and configuring IPython notebook to load it.
-These extensions are able to respond to javascript events that they're given access to through IPython 
-notebook's javascript API, and the examples I've seen tend to run some javascript once when the notebook is 
+These "nbextensions" are able to respond to Javascript events that they're given access to through IPython 
+notebook's Javascript API, and the examples I've seen tend to run some javascript once when the notebook is 
 initialized.  For example, I've seen nbextensions that add a button to the notebook toolbar or create a 
 floating table of contents.
 
-Initially I was expecting that Qgrid would be an nbextension because it's basically just a Javascript grid.  That 
-turned out to mostly incorrect, and Qgrid ended up being implemented as a python package that contains an 
+Initially I was expecting that qgrid would be an nbextension because it's basically just a Javascript grid.  That 
+turned out to mostly incorrect, and qgrid ended up being implemented as a python package that contains an 
 nbextension.
  
 ##### Why not a standard nbextension?
-* Qgrid needs to run javascript at the time of cell execution rather than notebook startup.  
+* Qgrid needs to run Javascript at the time of cell execution rather than notebook startup.  
   * In particular, when `show_grid` gets called from a cell in an IPython notebook, qgrid needs to be able to inject 
 HTML and Javascript into the DOM.   
 * Qgrids are generated through a python API (i.e. the `show_grid` function), so there has to be some 
@@ -52,7 +52,7 @@ python code in the extension, for the purpose of providing that API.
 * The qgrid module includes an `nbinstall` function for installing qgrid's Javascript/CSS dependencies.  When 
 `nbinstall` is run, the qgrid module copies it's Javascript/CSS folder into the nbextensions folder, effectively deploying it as an 
 nbextension.
-* The qgrid module also contains the `show_grid` function, which is the one that actually generates a qgrid from a 
+* The qgrid module also contains `show_grid`, which is the function that actually generates a qgrid from a 
 DataFrame.  The show_grid function generates the qgrid by returning a custom object with its `_ipython_display_` 
 function overridden.  I learned about this strategy from the "Custom Display Logic" sample notebook 
 provided with the IPython git repository, found [here on GitHub](https://github.com/ipython/ipython/blob/master/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb).
