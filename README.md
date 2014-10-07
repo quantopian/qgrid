@@ -34,23 +34,23 @@ initialized.  For example, I've seen nbextensions that add a button to the noteb
 floating table of contents.
  
 ##### Why not a standard nbextension?
-1. Qgrid needs to run javascript at the time of cell execution rather than notebook startup.  
-  * In particular, when 'show_grid' gets called from a cell in an IPython notebook, qgrid needs to be able to inject HTML and Javascript into the DOM.   
-2. Qgrids are generated through a Python API (i.e. the show_grid function), so there will need to be at least some 
+* Qgrid needs to run javascript at the time of cell execution rather than notebook startup.  
+  * In particular, when `show_grid` gets called from a cell in an IPython notebook, qgrid needs to be able to inject 
+HTML and Javascript into the DOM.   
+* Qgrids are generated through a python API (i.e. the `show_grid` function), so there will need to be at least some 
 python code in the extension, for the purpose of providing that API.
 
 ##### Why not a standard IPython extension?
-1. Qgrid has many of dependencies and %install_ext was designed for the case of installing an extension that 
-consists of a single python file.  
-* pip is more well suited for the task of distributing a package with dependencies
+* Qgrid includes a bunch of Javascript/CSS files and `%install_ext` was designed for the case of installing an extension that consists of a single python file.  
+  * pip is more well suited for the task of distributing a package with dependencies.
 * Qgrid's API is a python module, so it makes sense for it to be distributed with pip, like any other python module.
 
-##### The solution:
-* A python package (installable with 'pip') that contains a folder of Javascript/CSS dependencies.  
-* The API provided by the package includes a special function called `nbinstall`.  When `nbinstall` is run, 
-the qgrid module copies it's javascritp/css folder into the nbextensions folder, effectively deploying it as an 
+##### The solution: A python package that contains a folder of Javascript/CSS dependencies.
+* Qgrid's python API is accessed by importing the qgrid module with `import qgrid`.
+* The qgrid module includes an `nbinstall` function for installing qgrid's Javascript/CSS dependencies.  When 
+`nbinstall` is run, the qgrid module copies it's Javascript/CSS folder into the nbextensions folder, effectively deploying it as an 
 nbextension.
-* The other function in the python API is `show_grid`, the one which actually renders the qgrid.  Internally, 
-the show_grid function returns an custom object with it's `_ipython_display_` function overridden.  This is a 
-strategy that was explained in one of the sample notebooks provided with IPython, 
-found [here on GitHub](https://github.com/ipython/ipython/blob/master/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb).
+* The qgrid module also contains a `show_grid` function, which is the one that actually generates a qgrid from a 
+DataFrame.  The show_grid generates the qgrid by returning a custom object with it's `_ipython_display_` 
+function overridden.  This is a strategy that was explained in the "Custom Display Logic" sample notebook provided with
+ the IPython git repository, found [here on GitHub](https://github.com/ipython/ipython/blob/master/examples/IPython%20Kernel/Custom%20Display%20Logic.ipynb).
