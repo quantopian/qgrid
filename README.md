@@ -1,5 +1,6 @@
 qgrid
 ==============
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/quantopian/qgrid?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Qgrid is an IPython extension which uses SlickGrid to render pandas DataFrames within an IPython notebook. It's 
 being developed for use in [Quantopian's hosted research environment](https://www.quantopian.com/research), 
