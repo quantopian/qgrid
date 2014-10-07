@@ -2,7 +2,7 @@ qgrid
 ==============
 
 Qgrid is an IPython extension which uses SlickGrid to render pandas DataFrames within an IPython notebook. It's 
-being developed for use in [Quantopian's hosted research environment](https://www.quantopian.com/research), 
+being developed for use in [Quantopian's hosted research environment](https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo), 
 and this repository holds the latest source code.
 
 #### Overview:
