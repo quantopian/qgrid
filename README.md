@@ -39,7 +39,7 @@ nbextension.
 * Qgrid needs to run javascript at the time of cell execution rather than notebook startup.  
   * In particular, when `show_grid` gets called from a cell in an IPython notebook, qgrid needs to be able to inject 
 HTML and Javascript into the DOM.   
-* Qgrids are generated through a python API (i.e. the `show_grid` function), so there will need to be at least some 
+* Qgrids are generated through a python API (i.e. the `show_grid` function), so there has to be some 
 python code in the extension, for the purpose of providing that API.
 
 ##### Why not a standard IPython extension?
