@@ -4,3 +4,7 @@
 *.iml
 .idea/*
 .ipynb_checkpoints/*
+
+# Setuptools.
+dist
+*.egg-info
