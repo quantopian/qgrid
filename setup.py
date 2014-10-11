@@ -17,7 +17,7 @@ from setuptools import setup
 
 setup(
     name='qgrid',
-    version='0.1.0',
+    version='0.1.1',
     description='A Pandas DataFrame viewer for IPython Notebook.',
     author='Quantopian Inc.',
     author_email='tshawver@quantopian.com',
