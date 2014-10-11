@@ -3,8 +3,9 @@ define([
     "underscore",
     'moment',
     'date_filter',
-    'slider_filter'
-], function ($, _, moment, date_filter, slider_filter) {
+    'slider_filter',
+    'text_filter'
+], function ($, _, moment, date_filter, slider_filter, text_filter) {
   "use strict";
 
   var dependencies_loaded = false;
@@ -23,7 +24,7 @@ define([
     this.sort_ascending = true;
 
     this.python_types = {
-      Character: "string",
+      Character: "text",
       Float: "number",
       Complex: "number",
       Datetime: "date",
@@ -38,7 +39,7 @@ define([
         var cur_column = column_types[i];
 
         if (!cur_column.type){
-          cur_column.type = "string";
+          cur_column.type = "text";
         }else{
           cur_column.type = this.python_types[cur_column.type];
         }
@@ -99,7 +100,8 @@ define([
       syncColumnCellResize: true,
       forceFitColumns: true,
       rowHeight: 28,
-      enableColumnReorder: false
+      enableColumnReorder: false,
+      enableTextSelectionOnCells: true
     };
 
     var max_height = options.rowHeight * 15;
@@ -118,6 +120,7 @@ define([
     }
 
     this.slick_grid = new Slick.Grid(this.grid_elem_selector, this.data_view, this.columns, options);
+    this.slick_grid.setSelectionModel(new Slick.RowSelectionModel())
     this.update_sort_indicators();
     this.slick_grid.render();
 
@@ -252,15 +255,15 @@ define([
     return new slider_filter.SliderFilter(field);
   }
 
+  QGrid.prototype.create_text_filter = function(field){
+    return new text_filter.TextFilter(field);
+  }
+
 //
 //  QGrid.prototype.create_ticker_filter = function(field){
 //    return new quanto.SecurityFilter(@$tab_elem, field);
 //  }
 //
-//  QGrid.prototype.create_text_filter = function(field){
-//    return new quanto.TextFilter(@$tab_elem, field);
-//  }
-
 //  QGrid.prototype.format_money = function(row, cell, value, columnDef, dataContext){
 //    if (!value.value)
 //      return "<span class='number no-value'>- -</span>";

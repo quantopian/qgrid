@@ -122,6 +122,8 @@
 .q-grid .slick-cell {
   border-bottom: 1px solid #e1e8ed !important;
   border-right: none !important;
+  border-top: 1px solid transparent;
+  border-left: 1px solid transparent;
   font-size: 14px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding-top: 3px;
@@ -133,6 +135,10 @@
 .q-grid .slick-cell.l0.r0 {
   border-left: none;
   padding-left: 6px;
+}
+
+.q-grid .slick-cell.selected {
+  background-color: #deeaf7;
 }
 
 /* Filter button */
@@ -265,6 +271,74 @@
   position: relative;
   top: 4px;
 }
+
+.text-filter-grid * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.text-filter .slick-viewport {
+  overflow: auto !important;
+}
+
+.text-filter .input-area {
+  padding: 12px;
+}
+
+.text-filter .search-input {
+  height: 30px;
+  width: 100%;
+  margin-bottom: 0px;
+  box-sizing: border-box;
+}
+
+.text-filter .text-filter-grid {
+  width: 300px;
+  height: 250px;
+  box-sizing: border-box;
+}
+
+.text-filter .slick-header {
+  border: none;
+}
+
+.text-filter .slick-header-columns {
+  height: 0px;
+}
+
+.text-filter .slick-cell {
+  line-height: 30px;
+  border-left: none;
+  border-right: none;
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e1e8ed !important;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.text-filter .slick-row.odd .slick-cell {
+  background: #fafafa !important;
+}
+
+.text-filter .slick-row.active .slick-cell {
+  background-color: #deeaf7 !important;
+  border-top: 1px solid transparent !important;
+}
+
+.text-filter .check-box-cell {
+  text-align: center;
+  line-height: 28px;
+}
+
+.text-filter .check-box-cell input {
+  margin: 0;
+}
+
+/*.text-filter .slick-row:hover .slick-cell {
+  background-color: transparent;
+}*/
 
 /* from custom-bootstrap *****************/
 

@@ -1,40 +1,94 @@
-quanto.TextFilter = class TextFilter extends quanto.FilterBase
-  constructor: ($context_elem, field) ->
-    super($context_elem, field)
-    @items_hash = {}
+define([
+    'jquery',
+    "underscore",
+    'handlebars',
+    'filter_base',
+    'jqueryui'
+], function ($, _, handlebars, filter_base) {
+  "use strict";
 
-  initialize_min_max: (item) =>
-    super(item)
-    item_value = item[@field]
-    @items_hash[item_value] = {id: item_value, value: item_value}
+  var TextFilter = function(field){
+    this.base = filter_base.FilterBase;
+    this.base(field);
+    this.items_hash = {};
+  }
+  TextFilter.prototype = new filter_base.FilterBase;
 
-  initialize_controls: (sid_info_list) =>
-    super(sid_info_list)
-    @grid_items = _.values(@items_hash)
+  TextFilter.prototype.get_filter_template = function(){
+    return handlebars.compile(
+      "<div class='text-filter grid-filter dropdown-menu {{type}}-filter'>" +
+        "<h3 class='popover-title'>" +
+          "<div class='dropdown-title'>Filter by {{name}}</div>" +
+          "<i class='fa fa-times icon-remove close-button'/>" +
+        "</h3>" +
+        "<div class='dropdown-body'>" +
+          "<div class='input-area'>" +
+            "<input class='search-input' type='text'/>" +
+          "</div>" +
+          "<div class='text-filter-grid'/>" +
+        "</div>" +
+        "<div class='dropdown-footer'>" +
+          "<a class='select-all-link' href='#'>Select All</a>"+
+          "<a class='reset-link' href='#'>Reset</a>"+
+        "</div>" +
+      "</div>"
+    );
+  }
 
-    @data_view = new Slick.Data.DataView({
+  TextFilter.prototype.initialize_min_max = function(item){
+    $.proxy(this.base.prototype.initialize_min_max.call(this, item), this);
+    var item_value = item[this.field];
+    this.items_hash[item_value] = {id: item_value, value: item_value}
+  }
+
+  TextFilter.prototype.initialize_controls = function(){
+    $.proxy(this.base.prototype.initialize_controls.call(this), this);
+    this.filter_grid_elem = this.filter_elem.find(".text-filter-grid");
+    this.search_string = "";
+
+    this.grid_items = _.values(this.items_hash);
+
+    this.data_view = new Slick.Data.DataView({
       inlineFilters: false,
       enableTextSelectionOnCells: true
-    })
+    });
 
-    sort_comparer = (x, y) =>
-      x_value = x.value
-      y_value = y.value
-      return if x_value > y_value then 1 else -1
+    this.sort_comparer = function(x, y){
+      var x_value = x.value;
+      var y_value = y.value;
 
-    @data_view.beginUpdate()
-    @data_view.setItems(@grid_items)
-    @data_view.sort(sort_comparer, true)
-    @data_view.endUpdate()
+      // selected row should be sorted to the top
+      if (x.selected != y.selected){
+        return x.selected ? -1 : 1;
+      }
 
-    row_formatter = (row, cell, value, columnDef, dataContext) =>
-      return "<span class='text-filter-value'>#{dataContext.value}</span>"
+      return x_value > y_value ? 1 : -1;
+    }
 
-    checkboxSelector = new Slick.CheckboxSelectColumn({
+    var text_filter = function(item, args){
+      if (this.search_string){
+        if (item.value.toLowerCase().indexOf(this.search_string.toLowerCase()) == -1){
+          return false;
+        }
+      }
+      return true;
+    }
+
+    this.data_view.beginUpdate();
+    this.data_view.setItems(this.grid_items);
+    this.data_view.setFilter($.proxy(text_filter, this));
+    this.data_view.sort($.proxy(this.sort_comparer, this), true);
+    this.data_view.endUpdate();
+
+    var row_formatter = function(row, cell, value, columnDef, dataContext){
+      return "<span class='text-filter-value'>" + dataContext.value + "</span>";
+    }
+
+    var checkboxSelector = new Slick.CheckboxSelectColumn({
       cssClass: "check-box-cell"
     })
 
-    columns = [
+    var columns = [
       checkboxSelector.getColumnDefinition(),
       {
         id: "name",
@@ -42,9 +96,9 @@ quanto.TextFilter = class TextFilter extends quanto.FilterBase
         field: "name",
         formatter: row_formatter,
         sortable: true
-      }]
+      }];
 
-    options =
+    var options = {
       enableCellNavigation: true,
       fullWidthRows: true,
       syncColumnCellResize: true,
@@ -52,72 +106,213 @@ quanto.TextFilter = class TextFilter extends quanto.FilterBase
       forceFitColumns: true,
       enableColumnReorder: false,
       autoHeight: true
+    };
 
-    @filter_grid = new Slick.Grid(@$filter_elem.find(".text-filter-grid"), @data_view,  columns, options)
-    @filter_grid.registerPlugin(checkboxSelector)
+    var max_height = options.rowHeight * 10;
+    var grid_height = max_height;
+    // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
+    var total_row_height = (this.grid_items.length) * options.rowHeight;
+    if (total_row_height <= max_height){
+      grid_height = total_row_height;
+      this.filter_grid_elem.addClass('hide-scrollbar');
+    }
+    this.filter_grid_elem.height(grid_height);
 
-    @row_selection_model = new Slick.RowSelectionModel({selectActiveRow: false})
-    @row_selection_model.onSelectedRangesChanged.subscribe(@handle_selection_changed)
+    this.filter_grid = new Slick.Grid(this.filter_grid_elem, this.data_view,  columns, options);
+    this.filter_grid.registerPlugin(checkboxSelector);
 
-    @filter_grid.setSelectionModel(@row_selection_model);
-    @data_view.syncGridSelection(@filter_grid, true, true)
-    @filter_grid.render()
+    this.row_selection_model = new Slick.RowSelectionModel({selectActiveRow: false});
+    this.row_selection_model.onSelectedRangesChanged.subscribe($.proxy(this.handle_selection_changed, this));
 
-    @data_view.onRowCountChanged.subscribe((e, args) =>
-      @filter_grid.updateRowCount()
-      @filter_grid.render()
-    )
+    this.filter_grid.setSelectionModel(this.row_selection_model);
+    this.data_view.syncGridSelection(this.filter_grid, true, true);
+    this.filter_grid.render();
 
-    @data_view.onRowsChanged.subscribe((e, args) =>
-      @filter_grid.invalidateRows(args.rows)
-      @filter_grid.render()
-    )
+    this.data_view.onRowCountChanged.subscribe($.proxy(function(e, args){
+      this.filter_grid.updateRowCount();
+      this.filter_grid.render();
+    }, this));
 
-    @filter_grid.onClick.subscribe(@handle_grid_clicked)
-    @filter_grid.onKeyDown.subscribe(@handle_grid_key_down)
+    this.data_view.onRowsChanged.subscribe($.proxy(function(e, args){
+      this.filter_grid.invalidateRows(args.rows);
+      this.filter_grid.render();
+    }, this));
 
-  toggle_row_selected: (row_index) =>
-    old_selected_rows = @row_selection_model.getSelectedRows()
-    # if the row is already selected, remove it from the selected rows array.
-    selected_rows = old_selected_rows.filter (word) -> word isnt row_index
-    # otherwise add it to the selected rows array so it gets selected
-    if selected_rows.length == old_selected_rows.length
-      selected_rows.push(row_index)
-    @row_selection_model.setSelectedRows(selected_rows)
+    this.security_search = this.filter_elem.find(".search-input");
+    this.security_search.keyup($.proxy(this.handle_text_input_key_up, this));
+    this.security_search.click($.proxy(this.handle_text_input_click, this));
 
-  handle_grid_clicked: (e, args) =>
-    @toggle_row_selected(args.row)
-    active_cell = @filter_grid.getActiveCell()
-    if !active_cell?
-      e.stopImmediatePropagation()
+    this.filter_grid.onClick.subscribe($.proxy(this.handle_grid_clicked, this));
+    this.filter_grid.onKeyDown.subscribe($.proxy(this.handle_grid_key_down, this));
 
-  handle_selection_changed: (e, args) =>
-    rows = @row_selection_model.getSelectedRows()
-    @filter_list = {}
-    if rows.length > 0
-      for row_index in rows
-        row = @data_view.getItem(row_index)
-        @filter_list[row.value] = row.value
-    else
-      @filter_list = null
+    this.filter_elem.find("a.select-all-link").click($.proxy(function(e){
+      this.reset_filter();
+      var all_row_indices = [];
+      var all_rows = this.data_view.getItems();
+      for (var i=0; i< all_rows.length; i++){
+        all_row_indices.push(i)
+      }
+      this.row_selection_model.setSelectedRows(all_row_indices);
+      $(this).trigger("filter_changed");
+      return false;
+    }, this));
+  }
 
-    $(@).trigger("filter_changed")
+  TextFilter.prototype.toggle_row_selected = function(row_index){
+    var old_selected_rows = this.row_selection_model.getSelectedRows();
+    // if the row is already selected, remove it from the selected rows array.
+    var selected_rows = old_selected_rows.filter(function(word){
+      return word !== row_index;
+    });
+    // otherwise add it to the selected rows array so it gets selected
+    if (selected_rows.length == old_selected_rows.length){
+      selected_rows.push(row_index);
+    }
+    this.row_selection_model.setSelectedRows(selected_rows);
+  }
 
-  handle_filter_button_clicked: (e) =>
-    super(e)
-    @filter_grid.setColumns(@filter_grid.getColumns())
-    @filter_grid.resizeCanvas()
-    return false
+  TextFilter.prototype.handle_grid_clicked = function(e, args){
+    this.toggle_row_selected(args.row);
+    var active_cell = this.filter_grid.getActiveCell();
+    if (!active_cell){
+      e.stopImmediatePropagation();
+    }
+  }
 
-  is_active: () =>
-    return @filter_list?
+  TextFilter.prototype.handle_grid_key_down = function(e, args){
+    var active_cell = this.filter_grid.getActiveCell();
+    if (active_cell){
+      if (e.keyCode == 13){ // enter key
+        this.toggle_row_selected(active_cell.row);
+        return;
+      }
 
-  reset_filter: () =>
-    @row_selection_model.setSelectedRows([])
-    @filter_list = null
+      // focus on the search box for any key other than the up/down arrows
+      if (e.keyCode != 40 && e.keyCode != 38){
+        this.focus_on_search_box();
+        return;
+      }
 
-  include_item: (item) =>
-    if @filter_list?
-      if !@filter_list[item[@field]]?
-        return false
-    return true
+      // also focus on the search box if we're at the top of the grid and this is the up arrow
+      else if (active_cell.row == 0 && e.keyCode == 38){
+        this.focus_on_search_box();
+        e.preventDefault();
+        return;
+      }
+    }
+  }
+
+  TextFilter.prototype.sort_if_needed = function(force){
+    if (force || this.sort_needed){
+      this.data_view.sort(this.sort_comparer, true);
+      this.sort_needed = false;
+    }
+  }
+
+  TextFilter.prototype.focus_on_search_box = function(){
+    this.security_search.focus().val(this.search_string);
+    this.filter_grid.resetActiveCell();
+  }
+
+  TextFilter.prototype.handle_text_input_key_up = function(e){
+    var old_search_string = this.search_string;
+    if (e.keyCode == 40){ // down arrow
+      this.filter_grid.focus();
+      this.filter_grid.setActiveCell(0, 0);
+      return;
+    }
+    if (e.keyCode == 13){ // enter key
+      if (this.security_grid.getDataLength() > 0){
+        this.toggle_row_selected(0);
+        this.security_search.val("");
+      }
+    }
+
+    this.search_string = this.security_search.val();
+    if (old_search_string != this.search_string){
+      this.data_view.refresh();
+      this.sort_if_needed();
+    }
+  }
+
+  TextFilter.prototype.handle_text_input_click = function(e){
+    this.filter_grid.resetActiveCell();
+  }
+
+  TextFilter.prototype.handle_selection_changed = function(e, args){
+    var all_rows = this.data_view.getItems();
+
+    // Set selected to false for all visible rows (non visible rows
+    // aren't included in the getSelectedRows, so we should leave the
+    // state of those untouched)
+    for (var row_index=0; row_index < all_rows.length; row_index++){
+      var cur_row = all_rows[row_index];
+      if (this.data_view.getRowById(cur_row.id) !== undefined){
+        cur_row.selected = false;
+      }
+    }
+    // Set selected to true for all selected rows
+    var rows = this.row_selection_model.getSelectedRows();
+    if (rows.length > 0){
+      for (var row_index=0; row_index < rows.length; row_index++){
+        var data_row_index = rows[row_index];
+        var row = this.data_view.getItem(data_row_index);
+        row.selected = true;
+      }
+    }
+    // Regenerate the filter_sid_list by looping through all rows
+    // (visible and filtered out) and adding them to the list if selected is true.
+    this.filter_list = {};
+    var something_selected = false
+    for (var row_index=0; row_index < all_rows.length; row_index++){
+      var row = all_rows[row_index];
+      if (row.selected){
+        something_selected = true;
+        this.filter_list[row.value] = row.value;
+      }
+    }
+    // If nothing is selected, then indicate that the grid should be unfiltered by setting
+    // the filter_sid_list to null.
+    if (!something_selected){
+      this.filter_list = null;
+    }
+
+    // We want to resort the grid, but not immediately when a row is checked, because
+    // it's jarring to have the row that the user just checked jump to the top of the grid.
+    // Instead, we just set this flag so that we know to resort the grid the next time the filter
+    // changes or the filter dropdown gets re-opened.
+    this.sort_needed = true;
+
+    $(this).trigger("filter_changed");
+  }
+
+  TextFilter.prototype.handle_filter_button_clicked = function(e){
+    $.proxy(this.base.prototype.handle_filter_button_clicked.call(this, e), this);
+    this.filter_grid.setColumns(this.filter_grid.getColumns());
+    this.filter_grid.resizeCanvas();
+    this.sort_if_needed();
+    this.focus_on_search_box();
+    return false;
+  }
+
+  TextFilter.prototype.is_active = function(){
+    return this.filter_list != null;
+  }
+
+  TextFilter.prototype.reset_filter = function(){
+    this.search_string = "";
+    this.security_search.val("");
+    this.data_view.refresh();
+    this.row_selection_model.setSelectedRows([]);
+    this.filter_list = null;
+  }
+
+  TextFilter.prototype.include_item = function(item){
+    if (this.filter_list && !this.filter_list[item[this.field]]){
+      return false;
+    }
+    return true;
+  }
+
+  return {'TextFilter': TextFilter}
+});

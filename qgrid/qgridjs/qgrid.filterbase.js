@@ -108,11 +108,13 @@ define([
       this.disabled_tooltip_showing = false;
     }
   }
-//
-//  handle_body_key_up: (e) =>
-//    if e.keyCode == 27 # esc key
-//      this.hide_filter()
-//
+
+  FilterBase.prototype.handle_body_key_up = function(e){
+    if (e.keyCode == 27){ // esc key
+      this.hide_filter();
+    }
+  }
+
   FilterBase.prototype.handle_body_mouse_down = function (e){
     if (this.filter_elem[0] != e.target &&
       !$.contains(this.filter_elem[0], e.target) &&
