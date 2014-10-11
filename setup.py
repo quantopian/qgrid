@@ -26,7 +26,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     classifiers=[
-        'Development Status :: 1 - Alpha',
+        'Framework :: IPython',
+        'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python',
