@@ -23,3 +23,12 @@ def nbinstall(overwrite=False):
         symlink=False,
         verbose=0,
     )
+
+
+def monkey_patch(pandas, remote_js=False):
+    "Make qgrid the default display method for DataFrames."
+
+    def _ipython_display_(self):
+        return show_grid(self, remote_js=remote_js)._ipython_display_()
+
+    pandas.DataFrame._ipython_display_ = _ipython_display_
