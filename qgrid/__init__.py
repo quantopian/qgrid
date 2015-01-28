@@ -5,7 +5,7 @@ def show_grid(data_frame, remote_js=False):
     return SlickGrid(data_frame, remote_js)
 
 
-def nbinstall(overwrite=False):
+def nbinstall(user=True, overwrite=False):
     """
     """
     # Lazy imports so we don't pollute the namespace.
@@ -20,6 +20,7 @@ def nbinstall(overwrite=False):
     install_nbextension(
         qgridjs_path,
         overwrite=overwrite,
+        user=user,
         symlink=False,
         verbose=0,
     )
