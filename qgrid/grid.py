@@ -20,6 +20,15 @@ def template_contents(filename):
 SLICK_GRID_CSS = template_contents('slickgrid.css.template')
 SLICK_GRID_JS = template_contents('slickgrid.js.template')
 
+SLICK_GRID_DEFAULT_OPTIONS = {
+    'enableCellNavigation': True,
+    'fullWidthRows': True,
+    'syncColumnCellResize': True,
+    'forceFitColumns': True,
+    'rowHeight': 28,
+    'enableColumnReorder': False,
+    'enableTextSelectionOnCells': True, }
+
 
 def show_grid(data_frame, *args, **kwargs):
     return SlickGrid(data_frame, *args, **kwargs)
@@ -27,7 +36,8 @@ def show_grid(data_frame, *args, **kwargs):
 
 class SlickGrid(object):
 
-    def __init__(self, data_frame, remote_js=False, precision=None):
+    def __init__(self, data_frame, remote_js=False, precision=None,
+                 options={}):
         self.data_frame = data_frame
         self.remote_js = remote_js
         self.div_id = str(uuid.uuid4())
@@ -60,6 +70,11 @@ class SlickGrid(object):
         else:
             raise TypeError('precision')
 
+        if not isinstance(options, dict):
+            raise TypeError('options')
+        self.options = SLICK_GRID_DEFAULT_OPTIONS.copy()
+        self.options.update(options)
+
     def _ipython_display_(self):
         try:
             column_types_json = json.dumps(self.column_types)
@@ -68,6 +83,7 @@ class SlickGrid(object):
                 date_format='iso',
                 double_precision=self.precision,
             )
+            options_json = json.dumps(self.options)
 
             if self.remote_js:
                 cdn_base_url = \
@@ -84,6 +100,7 @@ class SlickGrid(object):
                 div_id=self.div_id,
                 data_frame_json=data_frame_json,
                 column_types_json=column_types_json,
+                options_json=options_json,
             )
 
             display_html(raw_html, raw=True)

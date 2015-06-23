@@ -81,7 +81,7 @@ define([
     }, this);
   }
 
-  QGrid.prototype.initialize_slick_grid = function () {
+  QGrid.prototype.initialize_slick_grid = function (options) {
     this.data_view = new Slick.Data.DataView({
       inlineFilters: false,
       enableTextSelectionOnCells: true
@@ -93,16 +93,6 @@ define([
     this.data_view.setItems(this.row_data);
     this.data_view.setFilter($.proxy(this.include_row, this));
     this.data_view.endUpdate();
-
-    var options = {
-      enableCellNavigation: true,
-      fullWidthRows: true,
-      syncColumnCellResize: true,
-      forceFitColumns: true,
-      rowHeight: 28,
-      enableColumnReorder: false,
-      enableTextSelectionOnCells: true
-    };
 
     var max_height = options.rowHeight * 15;
     var grid_height = max_height;

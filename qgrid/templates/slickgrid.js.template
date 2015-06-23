@@ -49,7 +49,7 @@ function($){{
     ], function(){{
         require(["data_grid"], function(dgrid){{
             var grid = new dgrid.QGrid('#{div_id}', {data_frame_json}, {column_types_json});
-            grid.initialize_slick_grid();
+            grid.initialize_slick_grid({options_json});
         }});
     }});
 }});
