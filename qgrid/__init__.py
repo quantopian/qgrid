@@ -18,21 +18,10 @@ def nbinstall(user=True, overwrite=False):
         'qgridjs',
     )
 
-    if version_info >= (3, 0, 0, ''):
-        install_nbextension(
-            qgridjs_path,
-            overwrite=overwrite,
-            user=user,
-            symlink=False,
-            verbose=0,
-        )
-    elif version_info >= (2, 0, 0, ''):
-        # Leave out the user argument with IPython 2.x series
-        install_nbextension(
-            qgridjs_path,
-            overwrite=overwrite,
-            symlink=False,
-            verbose=0,
-        )
-    else:
-        raise NotImplementedError("Only supported for IPython>=2.0.")
+    install_nbextension(
+        qgridjs_path,
+        overwrite=overwrite,
+        symlink=False,
+        verbose=0,
+        **({'user': user} if version_info>=(3, 0, 0, '') else {})
+    )
