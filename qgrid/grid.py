@@ -62,7 +62,7 @@ class _DefaultSettings(object):
         if precision is not None:
             self._precision = precision
         if js_options is not None:
-            self._js_options = None
+            self._js_options = js_options
 
     @property
     def js_options(self):
