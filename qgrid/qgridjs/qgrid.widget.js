@@ -118,48 +118,31 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
                 var column = columns[args.cell].name;
                 var msg = {'row': args.row, 'column': column,
                            'value': args.item[column], 'type': 'cell_change'};
-                that.sendMsg(msg);
+                that.send(msg);
             });
 
             // subscribe to incoming messages from the QGridWidget
-            this.model.on('change:py_msg', this.handleMsg, this);
+            this.model.on('msg:custom', this.handleMsg, this);
         },
         
         /**
          * Handle messages from the QGridWidget.
          */
-        handleMsg: function() {
+        handleMsg: function(msg) {
             var sgrid = grid.slick_grid;
-            var msg = this.model.get('py_msg');
-            msg = JSON.parse(msg);
-
             if (msg.type === 'remove_row') {
                 var row = sgrid.getActiveCell().row;
                 var data = sgrid.getData().getItem(row);                         
                 grid.data_view.deleteItem(data.id);
                 msg = {'type': 'remove_row', 'row': row, 'id': data.id};
-                this.sendMsg(msg);
+                this.send(msg);
 
             } else if (msg.type === 'add_row') {
                 var dd = sgrid.getData();
                 dd.addItem(msg);
                 dd.refresh();
+                this.send(msg);
             }
-        },
-
-        /**
-         * Send a message to the QGridWidget.
-         */
-        sendMsg: function(msg) {
-            // add a unique id and send the message
-            var s = [];
-            var hexDigits = "0123456789ABCDEF";
-            for (var i = 0; i < 32; i++) {
-                s[i] = hexDigits.charAt(Math.floor(Math.random() * 0x10));
-            }
-            msg.uid = s.join("");
-            this.model.set('js_msg', JSON.stringify(msg));
-            this.touch();
         }
     });
 
