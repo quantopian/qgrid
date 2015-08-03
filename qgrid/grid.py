@@ -213,7 +213,7 @@ class QGridWidget(widgets.DOMWidget):
     _column_types_json = Unicode('', sync=True)
     _loop_guard = Bool(False)
     _index_name = Unicode('')
-    _cdn_base_url = Unicode('', sync=True)
+    _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
     js_msg = Unicode('', sync=True)
     py_msg = Unicode('', sync=True)
 
@@ -253,16 +253,19 @@ class QGridWidget(widgets.DOMWidget):
         self._column_types_json = json.dumps(column_types)
 
         precision = pd.get_option('display.precision') - 1
-        if self.remote_js:
-            self._cdn_base_url = REMOTE_URL
-        else:
-            self._cdn_base_url = "/nbextensions/qgridjs"
 
         self._df_json = df.to_json(
                 orient='records',
                 date_format='iso',
                 double_precision=precision,
             )
+
+    def _remote_js_changed(self):
+        print('remote_js_changed', self.remote_js)
+        if self.remote_js:
+            self._cdn_base_url = REMOTE_URL
+        else:
+            self._cdn_base_url = "/nbextensions/qgridjs"
 
     def add_row(self, value=None):
         """Append a row at the end of the dataframe."""
