@@ -18,17 +18,18 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
                 ]);
             }
             
-            // set the custom script load paths
             var path_dictionary = {
                 jquery_drag: cdn_base_url + "/lib/jquery.event.drag-2.2",
                 slick_core: cdn_base_url + "/lib/slick.core.2.2",
                 slick_data_view: cdn_base_url + "/lib/slick.dataview.2.2",
+                slick_check_box_column: cdn_base_url + "/lib/slick.checkboxselectcolumn",
+                slick_row_selection_model: cdn_base_url + "/lib/slick.rowselectionmodel",
                 slick_grid: cdn_base_url + "/lib/slick.grid.2.2",
                 data_grid: cdn_base_url + "/qgrid",
                 date_filter: cdn_base_url + "/qgrid.datefilter",
+                text_filter: cdn_base_url + "/qgrid.textfilter",
                 slider_filter: cdn_base_url + "/qgrid.sliderfilter",
                 filter_base:  cdn_base_url + "/qgrid.filterbase",
-                editors: cdn_base_url + "/qgrid.editors",
                 handlebars: "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min"
             };
 
