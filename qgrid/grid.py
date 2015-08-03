@@ -214,8 +214,6 @@ class QGridWidget(widgets.DOMWidget):
     _loop_guard = Bool(False)
     _index_name = Unicode('')
     _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
-    js_msg = Unicode('', sync=True)
-    py_msg = Unicode('', sync=True)
 
     df = Instance(pd.DataFrame)
     editable = Bool(True, sync=True)
@@ -226,6 +224,9 @@ class QGridWidget(widgets.DOMWidget):
         if self._loop_guard:
             return
         df = self.df.copy()
+
+        # register a callback for custom messages
+        self.on_msg(self._handle_qgrid_msg)
 
         if not df.index.name:
             df.index.name = 'Index'
@@ -261,7 +262,6 @@ class QGridWidget(widgets.DOMWidget):
             )
 
     def _remote_js_changed(self):
-        print('remote_js_changed', self.remote_js)
         if self.remote_js:
             self._cdn_base_url = REMOTE_URL
         else:
@@ -286,35 +286,27 @@ class QGridWidget(widgets.DOMWidget):
         msg[self._index_name] = str(last.name)
         msg['id'] = str(last.name)
         msg['type'] = 'add_row'
-        self._send_msg(msg)
+        self.send(msg)
 
     def remove_row(self, value):
         """Remove the current row from the table"""
-        self._send_msg({'type': 'remove_row'})
+        self.send({'type': 'remove_row'})
 
-    def _send_msg(self, msg):
-        """Send a message to the QGridView"""
-        msg['uid'] = uuid.uuid4().hex
-        self.py_msg = json.dumps(msg)
-
-    def _visible_changed(self):
-        display_javascript('alert("visible_changed"')
-
-    def _js_msg_changed(self):
+    def _handle_qgrid_msg(self, widget, msg):
         """Handle incoming messages from the QGridView"""
-        data = json.loads(self.js_msg)
-
-        if data['type'] == 'remove_row':
+        if 'type' not in msg:
+            return
+        if msg['type'] == 'remove_row':
             self._loop_guard = True
-            if data['row'] == 0:
+            if msg['row'] == 0:
                 self.df = self.df[1:]
-            self.df = pd.concat((self.df[:data['row']],
-                                 self.df[data['row'] + 1:]))
+            self.df = pd.concat((self.df[:msg['row']],
+                                 self.df[msg['row'] + 1:]))
             self._loop_guard = False
 
-        elif data['type'] == 'cell_change':
+        elif msg['type'] == 'cell_change':
             try:
-                self.df.set_value(self.df.index[data['row']], data['column'],
-                                  data['value'])
+                self.df.set_value(self.df.index[msg['row']], msg['column'],
+                                  msg['value'])
             except ValueError:
                 pass
