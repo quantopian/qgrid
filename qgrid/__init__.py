@@ -18,7 +18,7 @@ def edit_grid(data_frame, remote_js=False):
     from IPython.display import display, Javascript
 
     # create a visualization for the dataframe
-    grid = QGridWidget(df=data_frame)
+    grid = QGridWidget(df=data_frame, remote_js=remote_js)
 
     add_row = Button(description="Add Row")
     add_row.on_click(grid.add_row)
