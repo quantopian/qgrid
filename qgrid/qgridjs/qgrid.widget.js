@@ -85,7 +85,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
             this.$el.addClass('q-grid-container');
             var table = this.$el.append('div');
             table.addClass('q-grid');
-            var width = this.el.clientWidth.toString();
+            var width = this.el.parentElement.clientWidth.toString();
             this.el.setAttribute("style", "max-width:" + width + "px;");
 
             // create the table
