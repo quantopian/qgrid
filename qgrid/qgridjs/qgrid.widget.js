@@ -13,7 +13,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
                 $("head").append([
                     "<link href='" + cdn_base_url + "/lib/slick.grid.css' rel='stylesheet'>",
                     "<link href='" + cdn_base_url + "/lib/slick-default-theme.css' rel='stylesheet'>",
-                    "<link href='http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css' rel='stylesheet'>",
+                    "<link href='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.min.css' rel='stylesheet'>",
                     "<link id='dg-css' href='" + cdn_base_url + "/qgrid.css' rel='stylesheet'>"
                 ]);
             }
