@@ -30,6 +30,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
                 text_filter: cdn_base_url + "/qgrid.textfilter",
                 slider_filter: cdn_base_url + "/qgrid.sliderfilter",
                 filter_base:  cdn_base_url + "/qgrid.filterbase",
+                editors: cdn_base_url + "/qgrid.editors",
                 handlebars: "https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.min"
             };
 
