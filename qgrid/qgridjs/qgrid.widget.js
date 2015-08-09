@@ -106,14 +106,18 @@ define("QGridViewModule", ["widgets/js/widget"], function(widget){
                               'autoEdit': this.model.get('auto_edit')});
             var columns = sgrid.getColumns();
             for (var i = 1; i < columns.length; i++) {
-                if (columns[i].type === 'date') {
+                if (column_types[i].categories) {
+                    columns[i].editor = editors.SelectEditor;
+                    var options = {options: column_types[i].categories};
+                    columns[i].editorOptions = options;
+                } else if (columns[i].type === 'date') {
                    columns[i].editor = editors.DateEditor;
-                } else {
+                } else if (column_types[i]) {
                    columns[i].editor = editors.TextEditor;
                 }
                 if (columns[i].type === 'number') {
                    columns[i].validator = editors.validateNumber;
-                } 
+                }
             }
             sgrid.setColumns(columns);
 

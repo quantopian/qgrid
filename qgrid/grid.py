@@ -195,6 +195,9 @@ class SlickGrid(object):
 
         self.column_types = []
         for col_name, dtype in self.df_copy.dtypes.iteritems():
+            # XXXX: work around bug in to_json for categorical types
+            if str(dtype) == 'category':
+                self.df_copy[col_name] = self.df_copy[col_name].astype(str)
             column_type = {'field': col_name}
             for type_name, type_codes in tc.items():
                 if dtype.kind in type_codes:
@@ -256,6 +259,7 @@ class QGridWidget(widgets.DOMWidget):
         """Build the Data Table for the DataFrame."""
         if self._loop_guard:
             return
+
         df = self.df.copy()
 
         # register a callback for custom messages
@@ -278,6 +282,14 @@ class QGridWidget(widgets.DOMWidget):
 
         column_types = []
         for col_name, dtype in df.dtypes.iteritems():
+            if str(dtype) == 'category':
+                categories = list(df[col_name].cat.categories)
+                column_type = {'field': col_name,
+                               'categories': ','.join(categories)}
+                # XXXX: work around bug in to_json for categorical types
+                df[col_name] = df[col_name].astype(str)
+                column_types.append(column_type)
+                break
             column_type = {'field': col_name}
             for type_name, type_codes in tc.items():
                 if dtype.kind in type_codes:
