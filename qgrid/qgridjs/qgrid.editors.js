@@ -1,15 +1,15 @@
+  /**
+   * Input handlers
+   *
+   * Adapted from https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
+   * MIT License, Copyright (c) 2010 Michael Leibman
+   */
   define([
     'jquery',
     'jqueryui'
 ], function ($) {
   "use strict";
 
-  /**
-   * Date input handler.
-   *
-   * Adapted from https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
-   * MIT License, Copyright (c) 2010 Michael Leibman
-   */
   var DateEditor = function(args) {
       var $input;
       var defaultValue;
@@ -94,12 +94,6 @@
       this.init();
   }
 
-  /**
-   * Text input handler.
-   *
-   * From https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
-   * MIT License, Copyright (c) 2010 Michael Leibman
-   */
   var TextEditor = function(args) {
       var $input;
       var defaultValue;
@@ -168,6 +162,69 @@
 
       this.init();
   }
+
+  //  http://stackoverflow.com/a/22118349
+  function SelectEditor(args) {
+    var $select;
+    var defaultValue;
+    var scope = this;
+    var options = []
+
+    this.init = function() {
+
+        if (args.column.editorOptions.options){
+            options = args.column.editorOptions.options.split(',');
+        } else {
+            options ="yes,no".split(',');
+        }
+        var option_str = "";
+        for (var i in options) {
+            var opt = $.trim( options[i] ); // remove any white space including spaces after comma
+            option_str += "<OPTION value='" + opt + "'>" + opt + "</OPTION>";
+        }
+        $select = $("<SELECT tabIndex='0' class='editor-select'>"+ option_str +"</SELECT>");
+        $select.appendTo(args.container);
+        $select.focus();
+    };
+
+    this.destroy = function() {
+        $select.remove();
+    };
+
+    this.focus = function() {
+        $select.focus();
+    };
+
+    this.loadValue = function(item) {
+      defaultValue = item[args.column.field];
+      $select.val(defaultValue);
+    };
+
+    this.serializeValue = function() {
+        if (args.column.editorOptions.options) {
+            return $select.val();
+        } else {
+            return ($select.val() == "yes");
+        }
+    };
+
+    this.applyValue = function(item,state) {
+        item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function() {
+        return ($select.val() != defaultValue);
+    };
+
+    this.validate = function() {
+        return {
+            valid: true,
+            msg: null
+        };
+    };
+
+    this.init();
+}
   
   /**
    * Validator for numeric cells.
@@ -186,5 +243,6 @@
     }
 
     return {'DateEditor': DateEditor, 'TextEditor': TextEditor,
-            'validateNumber': validateNumber}
+            'validateNumber': validateNumber,
+            'SelectEditor': SelectEditor};
 });
