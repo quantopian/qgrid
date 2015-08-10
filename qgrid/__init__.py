@@ -3,6 +3,34 @@ from .grid import (
     set_grid_option,
     show_grid,
 )
+from .grid import QGridWidget
+import os
+
+QGRIDJS_PATH = os.path.join(
+        os.path.dirname(__file__),
+        'qgridjs',
+    )
+
+
+def edit_grid(data_frame, remote_js=False):
+    # Lazy imports so we don't pollute the namespace.
+    from IPython.html.widgets import Button, HBox
+    from IPython.display import display, Javascript
+
+    # create a visualization for the dataframe
+    grid = QGridWidget(df=data_frame)
+
+    add_row = Button(description="Add Row")
+    add_row.on_click(grid.add_row)
+
+    rem_row = Button(description="Remove Row")
+    rem_row.on_click(grid.remove_row)
+
+    with open(os.path.join(QGRIDJS_PATH, 'qgrid.widget.js')) as fid:
+        display(Javascript(fid.read()))
+    display(HBox((add_row, rem_row)), grid)
+
+    return grid
 
 
 def nbinstall(overwrite=False, user=True):
@@ -28,22 +56,15 @@ def nbinstall(overwrite=False, user=True):
     """
 
     # Lazy imports so we don't pollute the namespace.
-    import os
     from IPython.html.nbextensions import install_nbextension
     from IPython import version_info
 
-    qgridjs_path = os.path.join(
-        os.path.dirname(__file__),
-        'qgridjs',
-    )
-
     install_nbextension(
-        qgridjs_path,
+        QGRIDJS_PATH,
         overwrite=overwrite,
         symlink=False,
         verbose=0,
         **({'user': user} if version_info >= (3, 0, 0, '') else {})
     )
 
-
-__all__ = ['nbinstall', 'show_grid', 'set_defaults', 'set_grid_option']
+__all__ = ['nbinstall', 'show_grid', 'set_defaults', 'set_grid_option', 'edit_grid']
