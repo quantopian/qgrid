@@ -289,8 +289,8 @@ class QGridWidget(widgets.DOMWidget):
         """Append a row at the end of the dataframe."""
         df = self.df
         if not df.index.is_integer():
-            msg = 'alert("Cannot add a row a table with a non-integer index")'
-            display(Javascript(msg))
+            msg = "Cannot add a row to a table with a non-integer index"
+            display(Javascript('alert("%s")' % msg))
             return
         last = df.iloc[-1]
         last.name += 1
