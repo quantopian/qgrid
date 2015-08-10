@@ -6,6 +6,9 @@ import json
 from numbers import Integral
 
 from IPython.display import display_html, display_javascript
+from IPython.html import widgets
+from IPython.display import display, Javascript
+from IPython.utils.traitlets import Unicode, Instance, Bool
 
 
 def template_contents(filename):
@@ -20,6 +23,8 @@ def template_contents(filename):
 
 SLICK_GRID_CSS = template_contents('slickgrid.css.template')
 SLICK_GRID_JS = template_contents('slickgrid.js.template')
+REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
+              "ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/")
 
 
 class _DefaultSettings(object):
@@ -180,8 +185,7 @@ class SlickGrid(object):
             options_json = json.dumps(self.grid_options)
 
             if self.remote_js:
-                cdn_base_url = \
-                    "https://cdn.rawgit.com/quantopian/qgrid/ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/"
+                cdn_base_url = REMOTE_URL
             else:
                 cdn_base_url = "/nbextensions/qgridjs"
 
@@ -201,3 +205,113 @@ class SlickGrid(object):
             display_javascript(raw_js, raw=True)
         except Exception as err:
             display_html('ERROR: {}'.format(str(err)), raw=True)
+
+
+class QGridWidget(widgets.DOMWidget):
+    _view_name = Unicode('QGridView', sync=True)
+    _df_json = Unicode('', sync=True)
+    _column_types_json = Unicode('', sync=True)
+    _loop_guard = Bool(False)
+    _index_name = Unicode('')
+    _cdn_base_url = Unicode('', sync=True)
+    js_msg = Unicode('', sync=True)
+    py_msg = Unicode('', sync=True)
+
+    df = Instance(pd.DataFrame)
+    editable = Bool(True, sync=True)
+    remote_js = Bool(False)
+
+    def _df_changed(self):
+        """Build the Data Table for the DataFrame."""
+        if self._loop_guard:
+            return
+        df = self.df.copy()
+
+        if not df.index.name:
+            df.index.name = 'Index'
+
+        if type(df.index) == pd.core.index.MultiIndex:
+            df.reset_index(inplace=True)
+        else:
+            df.insert(0, df.index.name, df.index)
+
+        self._index_name = df.index.name
+
+        tc = dict(np.typecodes)
+        for key in np.typecodes.keys():
+            if "All" in key:
+                del tc[key]
+
+        column_types = []
+        for col_name, dtype in df.dtypes.iteritems():
+            column_type = {'field': col_name}
+            for type_name, type_codes in tc.items():
+                if dtype.kind in type_codes:
+                    column_type['type'] = type_name
+                    break
+            column_types.append(column_type)
+        self._column_types_json = json.dumps(column_types)
+
+        precision = pd.get_option('display.precision') - 1
+        if self.remote_js:
+            self._cdn_base_url = REMOTE_URL
+        else:
+            self._cdn_base_url = "/nbextensions/qgridjs"
+
+        self._df_json = df.to_json(
+                orient='records',
+                date_format='iso',
+                double_precision=precision,
+            )
+
+    def add_row(self, value=None):
+        """Append a row at the end of the dataframe."""
+        df = self.df
+        if not df.index.is_integer():
+            msg = 'alert("Cannot add a row a table with a non-integer index")'
+            display(Javascript(msg))
+            return
+        last = df.loc[df.index[-1], :]
+        last.name += 1
+        self._loop_guard = True
+        self.df = self.df.append(last)
+        self._loop_guard = False
+        precision = pd.get_option('display.precision') - 1
+        row_data = last.to_json(date_format='iso',
+                                double_precision=precision)
+        msg = json.loads(row_data)
+        msg[self._index_name] = str(last.name)
+        msg['id'] = str(last.name)
+        msg['type'] = 'add_row'
+        self._send_msg(msg)
+
+    def remove_row(self, value):
+        """Remove the current row from the table"""
+        self._send_msg({'type': 'remove_row'})
+
+    def _send_msg(self, msg):
+        """Send a message to the QGridView"""
+        msg['uid'] = uuid.uuid4().hex
+        self.py_msg = json.dumps(msg)
+
+    def _visible_changed(self):
+        display_javascript('alert("visible_changed"')
+
+    def _js_msg_changed(self):
+        """Handle incoming messages from the QGridView"""
+        data = json.loads(self.js_msg)
+
+        if data['type'] == 'remove_row':
+            self._loop_guard = True
+            if data['row'] == 0:
+                self.df = self.df[1:]
+            self.df = pd.concat((self.df[:data['row']],
+                                 self.df[data['row'] + 1:]))
+            self._loop_guard = False
+
+        elif data['type'] == 'cell_change':
+            try:
+                self.df.set_value(self.df.index[data['row']], data['column'],
+                                  data['value'])
+            except ValueError:
+                pass
