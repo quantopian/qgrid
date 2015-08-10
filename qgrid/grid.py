@@ -209,6 +209,7 @@ class SlickGrid(object):
 
 class QGridWidget(widgets.DOMWidget):
     _view_name = Unicode('QGridView', sync=True)
+    _view_module = Unicode('QGridViewModule', sync=True)
     _df_json = Unicode('', sync=True)
     _column_types_json = Unicode('', sync=True)
     _loop_guard = Bool(False)
@@ -217,7 +218,8 @@ class QGridWidget(widgets.DOMWidget):
 
     df = Instance(pd.DataFrame)
     editable = Bool(True, sync=True)
-    remote_js = Bool(False)
+    auto_edit = Bool(True, sync=True)
+    remote_js = Bool(True)
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
@@ -261,6 +263,8 @@ class QGridWidget(widgets.DOMWidget):
                 double_precision=precision,
             )
 
+        self._remote_js_changed()
+
     def _remote_js_changed(self):
         if self.remote_js:
             self._cdn_base_url = REMOTE_URL
@@ -274,7 +278,7 @@ class QGridWidget(widgets.DOMWidget):
             msg = 'alert("Cannot add a row a table with a non-integer index")'
             display(Javascript(msg))
             return
-        last = df.loc[df.index[-1], :]
+        last = df.iloc[-1]
         last.name += 1
         self._loop_guard = True
         self.df = self.df.append(last)
