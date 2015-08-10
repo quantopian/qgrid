@@ -1,8 +1,8 @@
-from .grid import SlickGrid
-
-
-def show_grid(data_frame, remote_js=False):
-    return SlickGrid(data_frame, remote_js)
+from .grid import (
+    set_defaults,
+    set_js_option,
+    show_grid,
+)
 
 
 def nbinstall(user=True, overwrite=False):
@@ -25,3 +25,6 @@ def nbinstall(user=True, overwrite=False):
         verbose=0,
         **({'user': user} if version_info>=(3, 0, 0, '') else {})
     )
+
+
+__all__ = ['show_grid', 'set_defaults', 'set_js_option']
