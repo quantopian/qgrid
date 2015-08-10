@@ -1,4 +1,4 @@
-require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
+define("QGridViewModule", ["widgets/js/widget"], function(widget){
 
     var grid;
 
@@ -103,7 +103,7 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
 
             var sgrid = grid.slick_grid;
             sgrid.setOptions({'editable': true, 
-                              'autoEdit': false});
+                              'autoEdit': this.model.get('auto_edit')});
             var columns = sgrid.getColumns();
             for (var i = 1; i < columns.length; i++) {
                 if (columns[i].type === 'date') {
@@ -135,20 +135,45 @@ require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager){
         handleMsg: function(msg) {
             var sgrid = grid.slick_grid;
             if (msg.type === 'remove_row') {
-                var row = sgrid.getActiveCell().row;
-                var data = sgrid.getData().getItem(row);                         
+                var cell = sgrid.getActiveCell();
+                if (!cell) {
+                    console.log('no cell');
+                    return;
+                }
+                var data = sgrid.getData().getItem(cell.row);
                 grid.data_view.deleteItem(data.id);
-                msg = {'type': 'remove_row', 'row': row, 'id': data.id};
+                msg = {'type': 'remove_row', 'row': cell.row, 'id': data.id};
+                this.updateSize();
                 this.send(msg);
 
             } else if (msg.type === 'add_row') {
                 var dd = sgrid.getData();
                 dd.addItem(msg);
                 dd.refresh();
+                this.updateSize();
                 this.send(msg);
             }
-        }
+        },
+
+        /**
+         * Update the size of the dataframe.
+         */
+        updateSize: function() {
+          var rowHeight = 28;
+          var max_height = rowHeight * 15;
+          var grid_height = max_height;
+          var total_row_height = (grid.row_data.length + 1) * rowHeight + 1;
+          if (total_row_height <= max_height){
+            grid_height = total_row_height;
+            grid.grid_elem.addClass('hide-scrollbar');
+          } else {
+            grid.grid_elem.removeClass('hide-scrollbar');
+          }
+          grid.grid_elem.height(grid_height);
+          grid.slick_grid.render();
+          grid.slick_grid.resizeCanvas();
+         }
     });
 
-    manager.WidgetManager.register_widget_view('QGridView', QGridView);
+    return {QGridView: QGridView};
 });
