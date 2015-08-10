@@ -1,6 +1,6 @@
 from .grid import (
     set_defaults,
-    set_js_option,
+    set_grid_option,
     show_grid,
 )
 
@@ -27,4 +27,4 @@ def nbinstall(user=True, overwrite=False):
     )
 
 
-__all__ = ['show_grid', 'set_defaults', 'set_js_option']
+__all__ = ['show_grid', 'set_defaults', 'set_grid_option']

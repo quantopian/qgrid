@@ -37,7 +37,7 @@ class _DefaultSettings(object):
         self._remote_js = False
         self._precision = None  # Defer to pandas.get_option
 
-    def set_js_option(self, optname, optvalue):
+    def set_grid_option(self, optname, optvalue):
         """
         Set an option value to be passed to javascript SlickGrid instances
 
@@ -77,7 +77,7 @@ class _DefaultSettings(object):
 
 defaults = _DefaultSettings()
 set_defaults = defaults.set_defaults
-set_js_option = defaults.set_js_option
+set_grid_option = defaults.set_grid_option
 
 
 def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
@@ -114,7 +114,7 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
     See Also
     --------
     qgrid.set_defaults : Permanently set global defaults for `show_grid`.
-    qgrid.set_js_option : Permanently set individual Javascript options.
+    qgrid.set_grid_option : Permanently set individual Javascript options.
     """
 
     if remote_js is None:
