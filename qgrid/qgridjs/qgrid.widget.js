@@ -1,5 +1,5 @@
 
-require(["nbextensions/widgets/widgets/js/widget", "nbextensions/widgets/widgets/js/manager"], function(widget, manager) {
+require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager) {
 
     var grid;
     var QGridView = widget.DOMWidgetView.extend({
