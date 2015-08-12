@@ -28,10 +28,11 @@ def nbinstall(user=True, overwrite=False):
         verbose=0,
         **({'user': user} if version_info>=(3, 0, 0, '') else {})
     )
-    cm = ConfigManager()
-    cm.update('notebook', {"load_extensions": {"qgridjs/qgrid.widget": True}})
+    #cm = ConfigManager()
+    #cm.update('notebook', {"load_extensions": {"qgridjs/qgrid.widget": True}})
 
-    display(Javascript("IPython.load_extensions('qgridjs/qgrid.widget');"))
+    with open(os.path.join(qgridjs_path, 'qgrid.widget.js')) as fid:
+        display(Javascript(fid.read()))
 
 
 __all__ = ['show_grid', 'set_defaults', 'set_grid_option', 'edit_grid']

@@ -6,9 +6,15 @@ import json
 from numbers import Integral
 
 from IPython.display import display_html, display_javascript
-from IPython.html import widgets
+try:
+    from ipywidgets import widgets
+except ImportError:
+    from IPython.html import widgets
 from IPython.display import display, Javascript
-from IPython.utils.traitlets import Unicode, Instance, Bool
+try:
+    from traitlets import Unicode, Instance, Bool
+except ImportError:
+    from IPython.utils.traitlets import Unicode, Instance, Bool
 
 
 def template_contents(filename):
@@ -144,22 +150,19 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
 
 
 def edit_grid(data_frame, auto_edit=False, remote_js=False):
-    # Lazy imports so we don't pollute the namespace.
-    from IPython.html.widgets import Button, HBox
-    from IPython.display import display
-
     # create a visualization for the dataframe
     grid = QGridWidget(df=data_frame, auto_edit=auto_edit, remote_js=remote_js)
 
-    add_row = Button(description="Add Row")
+    add_row = widgets.Button(description="Add Row")
     add_row.on_click(grid.add_row)
 
-    rem_row = Button(description="Remove Row")
+    rem_row = widgets.Button(description="Remove Row")
     rem_row.on_click(grid.remove_row)
 
-    display(HBox((add_row, rem_row)), grid)
+    export = widgets.Button(description="Export")
+    export.on_click(grid.export)
 
-    return grid
+    display(widgets.HBox((add_row, rem_row, export)), grid)
 
 
 class SlickGrid(object):
@@ -232,10 +235,9 @@ class SlickGrid(object):
 
 class QGridWidget(widgets.DOMWidget):
     _view_name = Unicode('QGridView', sync=True)
-    _view_module = Unicode('QGridViewModule', sync=True)
     _df_json = Unicode('', sync=True)
     _column_types_json = Unicode('', sync=True)
-    _loop_guard = Bool(False)
+    _grid_options = Unicode('', sync=True)
     _index_name = Unicode('')
     _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
 
@@ -246,9 +248,6 @@ class QGridWidget(widgets.DOMWidget):
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
-        if self._loop_guard:
-            return
-
         df = self.df.copy()
 
         # register a callback for custom messages
@@ -287,6 +286,7 @@ class QGridWidget(widgets.DOMWidget):
                     break
             column_types.append(column_type)
         self._column_types_json = json.dumps(column_types)
+        self._grid_options = json.dumps(defaults.grid_options)
 
         precision = pd.get_option('display.precision') - 1
 
@@ -313,9 +313,7 @@ class QGridWidget(widgets.DOMWidget):
             return
         last = df.iloc[-1]
         last.name += 1
-        self._loop_guard = True
-        self.df = self.df.append(last)
-        self._loop_guard = False
+        df.loc[last.name] = last.values
         precision = pd.get_option('display.precision') - 1
         row_data = last.to_json(date_format='iso',
                                 double_precision=precision)
@@ -325,25 +323,28 @@ class QGridWidget(widgets.DOMWidget):
         msg['type'] = 'add_row'
         self.send(msg)
 
-    def remove_row(self, value):
+    def remove_row(self, value=None):
         """Remove the current row from the table"""
         self.send({'type': 'remove_row'})
 
-    def _handle_qgrid_msg(self, widget, msg):
+    def _handle_qgrid_msg(self, widget, content, buffers=None):
         """Handle incoming messages from the QGridView"""
-        if 'type' not in msg:
+        if 'type' not in content:
             return
-        if msg['type'] == 'remove_row':
-            self._loop_guard = True
-            if msg['row'] == 0:
-                self.df = self.df[1:]
-            self.df = pd.concat((self.df[:msg['row']],
-                                 self.df[msg['row'] + 1:]))
-            self._loop_guard = False
+        if content['type'] == 'remove_row':
+            self.df.drop(content['row'], inplace=True)
 
-        elif msg['type'] == 'cell_change':
+        elif content['type'] == 'cell_change':
             try:
-                self.df.set_value(self.df.index[msg['row']], msg['column'],
-                                  msg['value'])
+                self.df.set_value(self.df.index[content['row']],
+                                  content['column'], content['value'])
             except ValueError:
                 pass
+
+    def export(self, value=None):
+        div_id = str(uuid.uuid4())
+        display_html("""
+            <div class='q-grid-container'>
+            <div id=%s class='q-grid'></div>
+            </div>""" % div_id, raw=True)
+        self.send(dict(type='export', div_id=div_id))
