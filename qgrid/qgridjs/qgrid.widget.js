@@ -1,13 +1,14 @@
-define("QGridViewModule", ["widgets/js/widget"], function(widget){
+
+require(["nbextensions/widgets/widgets/js/widget", "nbextensions/widgets/widgets/js/manager"], function(widget, manager) {
 
     var grid;
-
     var QGridView = widget.DOMWidgetView.extend({
 
         render: function() {
+            console.log('render yo');
             var that = this;
             var cdn_base_url = this.model.get('_cdn_base_url');
-            
+
             // Load the custom css
             if ($("#dg-css").length == 0){
                 $("head").append([
@@ -81,6 +82,7 @@ define("QGridViewModule", ["widgets/js/widget"], function(widget){
          */
         setupQGrid: function(dgrid, editors) {
             var that = this;
+            this.dgrid = dgrid;
             // set up the divs and styles
             this.$el.addClass('q-grid-container');
             var table = this.$el.append('div');
@@ -91,9 +93,9 @@ define("QGridViewModule", ["widgets/js/widget"], function(widget){
             // create the table
             var df = JSON.parse(this.model.get('_df_json'));
             var column_types = JSON.parse(this.model.get('_column_types_json'));
-            
+            var options = JSON.parse(this.model.get('_grid_options'));
             grid = new dgrid.QGrid(table[0], df, column_types);
-            grid.initialize_slick_grid();
+            grid.initialize_slick_grid(options);
 
             // set up editing
             var editable = this.model.get('editable');
@@ -156,6 +158,15 @@ define("QGridViewModule", ["widgets/js/widget"], function(widget){
                 dd.refresh();
                 this.updateSize();
                 this.send(msg);
+            
+            } else if (msg.type === 'export') {
+                var df = JSON.parse(this.model.get('_df_json'));
+                var column_types = JSON.parse(this.model.get('_column_types_json'));
+                var options = JSON.parse(this.model.get('_grid_options'));
+                var egrid = new this.dgrid.QGrid('#' + msg.div_id, df,
+                                            column_types);
+                egrid.initialize_slick_grid(options);
+                console.log(egrid);
             }
         },
 
@@ -178,6 +189,5 @@ define("QGridViewModule", ["widgets/js/widget"], function(widget){
           grid.slick_grid.resizeCanvas();
          }
     });
-
-    return {QGridView: QGridView};
+    manager.WidgetManager.register_widget_view('QGridView', QGridView);
 });
