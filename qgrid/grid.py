@@ -174,6 +174,25 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
     )
 
 
+def edit_grid(data_frame, auto_edit=False, remote_js=False):
+    # Lazy imports so we don't pollute the namespace.
+    from IPython.html.widgets import Button, HBox
+    from IPython.display import display
+
+    # create a visualization for the dataframe
+    grid = QGridWidget(df=data_frame, auto_edit=auto_edit, remote_js=remote_js)
+
+    add_row = Button(description="Add Row")
+    add_row.on_click(grid.add_row)
+
+    rem_row = Button(description="Remove Row")
+    rem_row.on_click(grid.remove_row)
+
+    display(HBox((add_row, rem_row)), grid)
+
+    return grid
+
+
 class SlickGrid(object):
 
     def __init__(self, data_frame, remote_js, precision, grid_options):
