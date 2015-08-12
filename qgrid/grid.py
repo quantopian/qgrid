@@ -373,6 +373,8 @@ class QGridWidget(widgets.DOMWidget):
                 pass
 
     def export(self, value=None):
+        # trigger an update of the df json
+        self._df_changed()
         div_id = str(uuid.uuid4())
         display_html("""
             <div class='q-grid-container'>

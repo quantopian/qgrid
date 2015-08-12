@@ -166,7 +166,6 @@ require(["nbextensions/widgets/widgets/js/widget", "nbextensions/widgets/widgets
                 var egrid = new this.dgrid.QGrid('#' + msg.div_id, df,
                                             column_types);
                 egrid.initialize_slick_grid(options);
-                console.log(egrid);
             }
         },
 
