@@ -1,11 +1,14 @@
-
-require(["widgets/js/widget", "widgets/js/manager"], function(widget, manager) {
+if (IPython.version[0] !== '3') {
+    var path = 'nbextensions/widgets/'
+} else {
+    var path = ''
+}
+require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widget, manager) {
 
     var grid;
     var QGridView = widget.DOMWidgetView.extend({
 
         render: function() {
-            console.log('render yo');
             var that = this;
             var cdn_base_url = this.model.get('_cdn_base_url');
 
