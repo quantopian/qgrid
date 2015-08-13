@@ -11,8 +11,12 @@ def nbinstall(user=True, overwrite=False):
     """
     # Lazy imports so we don't pollute the namespace.
     import os
-    from IPython.html.nbextensions import install_nbextension
-    from IPython.html.services.config import ConfigManager
+    try:
+        from notebook import install_nbextension
+        from notebook.services.config import ConfigManager
+    except ImportError:
+        from IPython.html.nbextensions import install_nbextension
+        from IPython.html.services.config import ConfigManager
     from IPython import version_info
     from IPython.display import display, Javascript
 
