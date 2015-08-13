@@ -7,6 +7,17 @@ from numbers import Integral
 
 from IPython.display import display_html, display_javascript
 
+from IPython import get_ipython
+ipython = get_ipython()
+if ipython and ('NotebookApp' in ipython.config) and \
+        ('base_url' in ipython.config['NotebookApp']):
+    NOTEBOOK_BASE_URL = ipython.config['NotebookApp']['base_url']
+else:
+    NOTEBOOK_BASE_URL = ''
+LOCAL_BASE_URL = NOTEBOOK_BASE_URL + "/nbextensions/qgridjs"
+CDN_BASE_URL = "https://cdn.rawgit.com/quantopian/qgrid/"\
+    + "ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/"
+
 
 def template_contents(filename):
     template_filepath = os.path.join(
@@ -180,10 +191,9 @@ class SlickGrid(object):
             options_json = json.dumps(self.grid_options)
 
             if self.remote_js:
-                cdn_base_url = \
-                    "https://cdn.rawgit.com/quantopian/qgrid/ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/"
+                cdn_base_url = CDN_BASE_URL
             else:
-                cdn_base_url = "/nbextensions/qgridjs"
+                cdn_base_url = LOCAL_BASE_URL
 
             raw_html = SLICK_GRID_CSS.format(
                 div_id=self.div_id,
