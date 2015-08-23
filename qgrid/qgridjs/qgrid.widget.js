@@ -160,16 +160,6 @@ require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widg
                 dd.refresh();
                 this.updateSize();
                 this.send(msg);
-            
-            } else if (msg.type === 'export') {
-                var df = JSON.parse(this.model.get('_df_json'));
-                var column_types = JSON.parse(this.model.get('_column_types_json'));
-                var options = JSON.parse(this.model.get('grid_options'));
-                options['editable'] = false;
-                var egrid = new this.dgrid.QGrid('#' + msg.div_id, df,
-                                            column_types);
-                egrid.initialize_slick_grid(options);
-            }
         },
 
         /**

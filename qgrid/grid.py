@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
 import uuid
+import os
 import json
 from numbers import Integral
 
-from IPython.display import display_html
+from IPython.display import display_html, display_javascript
 try:
     from ipywidgets import widgets
 except ImportError:
@@ -16,6 +17,18 @@ except ImportError:
     from IPython.utils.traitlets import Unicode, Instance, Bool, Integer
 
 
+def template_contents(filename):
+    template_filepath = os.path.join(
+        os.path.dirname(__file__),
+        'templates',
+        filename,
+    )
+    with open(template_filepath) as f:
+        return f.read()
+
+
+SLICK_GRID_CSS = template_contents('slickgrid.css.template')
+SLICK_GRID_JS = template_contents('slickgrid.js.template')
 REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
               "ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/")
 
@@ -288,9 +301,22 @@ class QGridWidget(widgets.DOMWidget):
     def export(self, value=None):
         # trigger an update of the df json
         self._df_changed()
+        self.remote_js = True
         div_id = str(uuid.uuid4())
-        display_html("""
-            <div class='q-grid-container'>
-            <div id=%s class='q-grid'></div>
-            </div>""" % div_id, raw=True)
-        self.send(dict(type='export', div_id=div_id))
+        grid_options = json.loads(self.grid_options)
+        grid_options['editable'] = False
+
+        raw_html = SLICK_GRID_CSS.format(
+            div_id=div_id,
+            cdn_base_url=self._cdn_base_url,
+        )
+        raw_js = SLICK_GRID_JS.format(
+            cdn_base_url=self._cdn_base_url,
+            div_id=div_id,
+            data_frame_json=self._df_json,
+            column_types_json=self._column_types_json,
+            options_json=json.dumps(grid_options),
+        )
+
+        display_html(raw_html, raw=True)
+        display_javascript(raw_js, raw=True)
