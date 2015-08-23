@@ -1,34 +1,21 @@
 import pandas as pd
 import numpy as np
-import os
 import uuid
 import json
 from numbers import Integral
 
-from IPython.display import display_html, display_javascript
+from IPython.display import display_html
 try:
     from ipywidgets import widgets
 except ImportError:
     from IPython.html import widgets
 from IPython.display import display, Javascript
 try:
-    from traitlets import Unicode, Instance, Bool
+    from traitlets import Unicode, Instance, Bool, Integer
 except ImportError:
-    from IPython.utils.traitlets import Unicode, Instance, Bool
+    from IPython.utils.traitlets import Unicode, Instance, Bool, Integer
 
 
-def template_contents(filename):
-    template_filepath = os.path.join(
-        os.path.dirname(__file__),
-        'templates',
-        filename,
-    )
-    with open(template_filepath) as f:
-        return f.read()
-
-
-SLICK_GRID_CSS = template_contents('slickgrid.css.template')
-SLICK_GRID_JS = template_contents('slickgrid.js.template')
 REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
               "ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/")
 
@@ -44,6 +31,8 @@ class _DefaultSettings(object):
             'rowHeight': 28,
             'enableColumnReorder': False,
             'enableTextSelectionOnCells': True,
+            'editable': True,
+            'autoEdit': False
         }
         self._remote_js = False
         self._precision = None  # Defer to pandas.get_option
@@ -120,6 +109,8 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
             'rowHeight': 28,
             'enableColumnReorder': False,
             'enableTextSelectionOnCells': True,
+            'editable': True,
+            'autoEdit': False
         }
 
     See Also
@@ -141,17 +132,10 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
                 "grid_options must be dict, not %s" % type(grid_options)
             )
 
-    return SlickGrid(
-        data_frame,
-        remote_js=remote_js,
-        precision=precision,
-        grid_options=grid_options,
-    )
-
-
-def edit_grid(data_frame, auto_edit=False, remote_js=False):
     # create a visualization for the dataframe
-    grid = QGridWidget(df=data_frame, auto_edit=auto_edit, remote_js=remote_js)
+    grid = QGridWidget(df=data_frame, precision=precision,
+                       grid_options=json.dumps(grid_options),
+                       remote_js=remote_js)
 
     add_row = widgets.Button(description="Add Row")
     add_row.on_click(grid.add_row)
@@ -165,89 +149,21 @@ def edit_grid(data_frame, auto_edit=False, remote_js=False):
     display(widgets.HBox((add_row, rem_row, export)), grid)
 
 
-class SlickGrid(object):
-
-    def __init__(self, data_frame, remote_js, precision, grid_options):
-        self.data_frame = data_frame
-        self.remote_js = remote_js
-        self.div_id = str(uuid.uuid4())
-
-        self.df_copy = data_frame.copy()
-
-        if type(self.df_copy.index) == pd.core.index.MultiIndex:
-            self.df_copy.reset_index(inplace=True)
-        else:
-            self.df_copy.insert(0, self.df_copy.index.name, self.df_copy.index)
-
-        tc = dict(np.typecodes)
-        for key in np.typecodes.keys():
-            if "All" in key:
-                del tc[key]
-
-        self.column_types = []
-        for col_name, dtype in self.df_copy.dtypes.iteritems():
-            # XXXX: work around bug in to_json for categorical types
-            # https://github.com/pydata/pandas/issues/10778
-            if str(dtype) == 'category':
-                self.df_copy[col_name] = self.df_copy[col_name].astype(str)
-            column_type = {'field': col_name}
-            for type_name, type_codes in tc.items():
-                if dtype.kind in type_codes:
-                    column_type['type'] = type_name
-                    break
-            self.column_types.append(column_type)
-
-        self.precision = precision
-        self.grid_options = grid_options
-
-    def _ipython_display_(self):
-        try:
-            column_types_json = json.dumps(self.column_types)
-            data_frame_json = self.df_copy.to_json(
-                orient='records',
-                date_format='iso',
-                double_precision=self.precision,
-            )
-            options_json = json.dumps(self.grid_options)
-
-            if self.remote_js:
-                cdn_base_url = REMOTE_URL
-            else:
-                cdn_base_url = "/nbextensions/qgridjs"
-
-            raw_html = SLICK_GRID_CSS.format(
-                div_id=self.div_id,
-                cdn_base_url=cdn_base_url,
-            )
-            raw_js = SLICK_GRID_JS.format(
-                cdn_base_url=cdn_base_url,
-                div_id=self.div_id,
-                data_frame_json=data_frame_json,
-                column_types_json=column_types_json,
-                options_json=options_json,
-            )
-
-            display_html(raw_html, raw=True)
-            display_javascript(raw_js, raw=True)
-        except Exception as err:
-            display_html('ERROR: {}'.format(str(err)), raw=True)
-
-
 class QGridWidget(widgets.DOMWidget):
     _view_name = Unicode('QGridView', sync=True)
     _df_json = Unicode('', sync=True)
     _column_types_json = Unicode('', sync=True)
-    _grid_options = Unicode('', sync=True)
     _index_name = Unicode('')
     _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
 
     df = Instance(pd.DataFrame)
-    editable = Bool(True, sync=True)
-    auto_edit = Bool(True, sync=True)
+    precision = Integer()
+    grid_options = Unicode('', sync=True)
     remote_js = Bool(True)
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
+
         df = self.df.copy()
 
         # register a callback for custom messages
@@ -286,14 +202,11 @@ class QGridWidget(widgets.DOMWidget):
                     break
             column_types.append(column_type)
         self._column_types_json = json.dumps(column_types)
-        self._grid_options = json.dumps(defaults.grid_options)
-
-        precision = pd.get_option('display.precision') - 1
 
         self._df_json = df.to_json(
                 orient='records',
                 date_format='iso',
-                double_precision=precision,
+                double_precision=self.precision,
             )
 
         self._remote_js_changed()

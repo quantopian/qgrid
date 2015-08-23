@@ -1,8 +1,7 @@
 from .grid import (
     set_defaults,
     set_grid_option,
-    show_grid,
-    edit_grid
+    show_grid
 )
 
 
@@ -39,4 +38,4 @@ def nbinstall(user=True, overwrite=False):
         display(Javascript(fid.read()))
 
 
-__all__ = ['show_grid', 'set_defaults', 'set_grid_option', 'edit_grid']
+__all__ = ['set_defaults', 'set_grid_option', 'show_grid']

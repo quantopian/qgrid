@@ -90,25 +90,24 @@ require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widg
             this.$el.addClass('q-grid-container');
             var table = this.$el.append('div');
             table.addClass('q-grid');
-            var width = this.el.parentElement.clientWidth.toString();
-            this.el.setAttribute("style", "max-width:" + width + "px;");
+            
+            // fill the portion of the widget area not in the prompt
+            var parent = this.el.parentElement;
+            while (parent.className !== 'widget-area') {
+                parent = parent.parentElement;
+            }
+            var width = (parent.clientWidth - parent.childNodes[0].clientWidth);
+            this.el.setAttribute("style", "max-width:" + String(width) + "px;");
 
             // create the table
             var df = JSON.parse(this.model.get('_df_json'));
             var column_types = JSON.parse(this.model.get('_column_types_json'));
-            var options = JSON.parse(this.model.get('_grid_options'));
+            var options = JSON.parse(this.model.get('grid_options'));
             grid = new dgrid.QGrid(table[0], df, column_types);
             grid.initialize_slick_grid(options);
 
             // set up editing
-            var editable = this.model.get('editable');
-            if (!editable) {
-                return;
-            }
-
             var sgrid = grid.slick_grid;
-            sgrid.setOptions({'editable': true, 
-                              'autoEdit': this.model.get('auto_edit')});
             var columns = sgrid.getColumns();
             for (var i = 1; i < columns.length; i++) {
                 if (column_types[i].categories) {
@@ -165,7 +164,8 @@ require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widg
             } else if (msg.type === 'export') {
                 var df = JSON.parse(this.model.get('_df_json'));
                 var column_types = JSON.parse(this.model.get('_column_types_json'));
-                var options = JSON.parse(this.model.get('_grid_options'));
+                var options = JSON.parse(this.model.get('grid_options'));
+                options['editable'] = false;
                 var egrid = new this.dgrid.QGrid('#' + msg.div_id, df,
                                             column_types);
                 egrid.initialize_slick_grid(options);
