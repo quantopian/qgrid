@@ -1,8 +1,7 @@
 from .grid import (
     set_defaults,
     set_grid_option,
-    show_grid,
-    edit_grid
+    show_grid
 )
 
 
@@ -57,4 +56,5 @@ def nbinstall(overwrite=False, user=True):
     with open(os.path.join(qgridjs_path, 'qgrid.widget.js')) as fid:
         display(Javascript(fid.read()))
 
-__all__ = ['nbinstall', 'show_grid', 'set_defaults', 'set_grid_option', 'edit_grid']
+__all__ = ['set_defaults', 'set_grid_option', 'show_grid']
+
