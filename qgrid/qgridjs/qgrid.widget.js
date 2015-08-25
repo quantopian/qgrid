@@ -160,6 +160,7 @@ require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widg
                 dd.refresh();
                 this.updateSize();
                 this.send(msg);
+            }
         },
 
         /**
