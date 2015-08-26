@@ -168,6 +168,7 @@ class QGridWidget(widgets.DOMWidget):
     _column_types_json = Unicode('', sync=True)
     _index_name = Unicode('')
     _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
+    _multi_index = Bool(False)
 
     df = Instance(pd.DataFrame)
     precision = Integer()
@@ -182,13 +183,15 @@ class QGridWidget(widgets.DOMWidget):
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
 
-        if not df.index.name:
-            df.index.name = 'Index'
-
         if type(df.index) == pd.core.index.MultiIndex:
             df.reset_index(inplace=True)
+            self._multi_index = True
         else:
             df.insert(0, df.index.name, df.index)
+            self._multi_index = False
+
+        if not df.index.name:
+            df.index.name = 'Index'
 
         self._index_name = df.index.name
 
@@ -223,6 +226,7 @@ class QGridWidget(widgets.DOMWidget):
             )
 
         self._remote_js_changed()
+        print(self.grid_options)
 
     def _remote_js_changed(self):
         if self.remote_js:
@@ -251,6 +255,10 @@ class QGridWidget(widgets.DOMWidget):
 
     def remove_row(self, value=None):
         """Remove the current row from the table"""
+        if self._multi_index:
+            msg = "Cannot remove a row from a table with a multi index"
+            display(Javascript('alert("%s")' % msg))
+            return
         self.send({'type': 'remove_row'})
 
     def _handle_qgrid_msg(self, widget, content, buffers=None):
