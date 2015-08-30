@@ -95,7 +95,6 @@ def set_defaults(remote_js=None, precision=None, grid_options=None):
     """
     defaults.set_defaults(remote_js, precision, grid_options)
 
-
 def set_grid_option(optname, optvalue):
     """
     Set the default value for one of the options that gets passed into the
@@ -116,7 +115,10 @@ def set_grid_option(optname, optvalue):
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for the full
     list of available options.
     """
-def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
+    self._grid_options[optname] = optvalue
+
+def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
+              show_toolbar=False):
     """
     Main entry point for rendering DataFrames as SlickGrids.
 
@@ -155,6 +157,9 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
             'editable': True,
             'autoEdit': False
         }
+    show_toolbar: bool
+        Whether to show a toolbar with options for adding/removing rows and
+        exporting the widget to a static view.
 
 
     See Also
@@ -181,16 +186,19 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
                        grid_options=json.dumps(grid_options),
                        remote_js=remote_js)
 
-    add_row = widgets.Button(description="Add Row")
-    add_row.on_click(grid.add_row)
+    if show_toolbar:
+        add_row = widgets.Button(description="Add Row")
+        add_row.on_click(grid.add_row)
 
-    rem_row = widgets.Button(description="Remove Row")
-    rem_row.on_click(grid.remove_row)
+        rem_row = widgets.Button(description="Remove Row")
+        rem_row.on_click(grid.remove_row)
 
-    export = widgets.Button(description="Export")
-    export.on_click(grid.export)
+        export = widgets.Button(description="Export")
+        export.on_click(grid.export)
 
-    display(widgets.HBox((add_row, rem_row, export)), grid)
+        display(widgets.HBox((add_row, rem_row, export)), grid)
+    else:
+        display(grid)
 
 
 class QGridWidget(widgets.DOMWidget):
@@ -257,7 +265,6 @@ class QGridWidget(widgets.DOMWidget):
             )
 
         self._remote_js_changed()
-        print(self.grid_options)
 
     def _remote_js_changed(self):
         if self.remote_js:
