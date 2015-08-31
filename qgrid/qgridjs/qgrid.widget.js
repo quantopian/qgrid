@@ -3,7 +3,7 @@ if (IPython.version[0] !== '3') {
 } else {
     var path = ''
 }
-require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widget, manager) {
+define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widget, manager) {
 
     var grid;
     var QGridView = widget.DOMWidgetView.extend({
@@ -182,5 +182,6 @@ require([path + "widgets/js/widget", path + "widgets/js/manager"], function(widg
           grid.slick_grid.resizeCanvas();
          }
     });
-    manager.WidgetManager.register_widget_view('QGridView', QGridView);
+
+    return {QGridView: QGridView}
 });
