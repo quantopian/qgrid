@@ -21,6 +21,9 @@ See the demo by viewing [qgrid_demo.ipynb](http://nbviewer.ipython.org/github/qu
 #### Installation:
 Installation instruction can be found in the same notebook as the demo, [qgrid_demo.ipynb](http://nbviewer.ipython.org/github/quantopian/qgrid/blob/master/qgrid_demo.ipynb).
 
+#### API Documentation:
+Read the full [API documentation ](http://qgrid.readthedocs.org/en/latest/) on readthedocs.
+
 #### How it works:
 
 ##### Background on nbextensions:

@@ -1,0 +1,3 @@
+ipython[notebook]==3.2.1
+numpy==1.9.2
+pandas==0.16.2

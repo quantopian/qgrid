@@ -26,7 +26,6 @@ class _DefaultSettings(object):
 
     def __init__(self):
         self._grid_options = {
-            'enableCellNavigation': True,
             'fullWidthRows': True,
             'syncColumnCellResize': True,
             'forceFitColumns': True,
@@ -38,24 +37,9 @@ class _DefaultSettings(object):
         self._precision = None  # Defer to pandas.get_option
 
     def set_grid_option(self, optname, optvalue):
-        """
-        Set an option value to be passed to javascript SlickGrid instances
-
-        Parameters
-        ----------
-        optname : str
-            The name of the option to override
-        optvalue : object
-            The new value
-        """
         self._grid_options[optname] = optvalue
 
     def set_defaults(self, remote_js=None, precision=None, grid_options=None):
-        """
-        Set a default value to be passed to Python SlickGrid instances.
-
-        See documentation for `show_grid` for more info on configurable values.
-        """
         if remote_js is not None:
             self._remote_js = remote_js
         if precision is not None:
@@ -76,10 +60,49 @@ class _DefaultSettings(object):
         return self._precision or pd.get_option('display.precision') - 1
 
 defaults = _DefaultSettings()
-set_defaults = defaults.set_defaults
-set_grid_option = defaults.set_grid_option
+
+def set_defaults(remote_js=None, precision=None, grid_options=None):
+    """
+    Set the default qgrid options.  The options that you can set here are the
+    same ones that you can pass into ``show_grid``.  See the documentation
+    for ``show_grid`` for more information.
+
+    Notes
+    -----
+    This function will be useful to you if you find yourself
+    setting the same options every time you make a call to ``show_grid``.
+    Calling this ``set_defaults`` function once sets the options for the
+    lifetime of the kernel, so you won't have to include the same options
+    every time you call ``show_grid``.
+
+    See Also
+    --------
+    show_grid :
+        The function whose default behavior is changed by ``set_defaults``.
+    """
+    defaults.set_defaults(remote_js, precision, grid_options)
 
 
+def set_grid_option(optname, optvalue):
+    """
+    Set the default value for one of the options that gets passed into the
+    SlickGrid constructor.
+
+    Parameters
+    ----------
+    optname : str
+        The name of the option to set.
+    optvalue : object
+        The new value to set.
+
+    Notes
+    -----
+    The options you can set here are the same ones
+    that you can set via the ``grid_options`` parameter of the ``set_defaults``
+    or ``show_grid`` functions.  See the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for the full
+    list of available options.
+    """
 def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
     """
     Main entry point for rendering DataFrames as SlickGrids.
@@ -98,11 +121,18 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
         `pandas.get_option('display.precision')`.
     grid_options : dict
         Options to use when creating javascript SlickGrid instances.  See
-        the SlickGrid documentation for information on the available
-        options.  Default options are as follows:
+        the `SlickGrid documentation <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for
+        information on the available options.  See the Notes section below for
+        the list of options that qgrid sets by default.
 
+    Notes
+    -----
+    By default, the following options get passed into SlickGrid when
+    ``show_grid`` is called.  See the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for information
+    about these options.
+    ::
         {
-            'enableCellNavigation': True,
             'fullWidthRows': True,
             'syncColumnCellResize': True,
             'forceFitColumns': True,
@@ -111,10 +141,11 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None):
             'enableTextSelectionOnCells': True,
         }
 
+
     See Also
     --------
-    qgrid.set_defaults : Permanently set global defaults for `show_grid`.
-    qgrid.set_grid_option : Permanently set individual Javascript options.
+    set_defaults : Permanently set global defaults for `show_grid`.
+    set_grid_option : Permanently set individual SlickGrid options.
     """
 
     if remote_js is None:
@@ -181,7 +212,7 @@ class SlickGrid(object):
 
             if self.remote_js:
                 cdn_base_url = \
-                    "https://cdn.rawgit.com/quantopian/qgrid/ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/"
+                    "https://cdn.rawgit.com/quantopian/qgrid/72d356cb123fab413dba73ec46616e4916fbd827/qgrid/qgridjs/"
             else:
                 cdn_base_url = "/nbextensions/qgridjs"
 
