@@ -42,7 +42,7 @@ def nbinstall(overwrite=False, user=True):
         overwrite=overwrite,
         symlink=False,
         verbose=0,
-        **({'user': user} if version_info>=(3, 0, 0, '') else {})
+        **({'user': user} if version_info >= (3, 0, 0, '') else {})
     )
 
 
