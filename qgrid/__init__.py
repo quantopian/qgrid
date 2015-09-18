@@ -1,7 +1,7 @@
 from .grid import (
     set_defaults,
     set_grid_option,
-    show_grid,
+    show_grid
 )
 
 
@@ -29,8 +29,14 @@ def nbinstall(overwrite=False, user=True):
 
     # Lazy imports so we don't pollute the namespace.
     import os
-    from IPython.html.nbextensions import install_nbextension
+    try:
+        from notebook import install_nbextension
+        from notebook.services.config import ConfigManager
+    except ImportError:
+        from IPython.html.nbextensions import install_nbextension
+        from IPython.html.services.config import ConfigManager
     from IPython import version_info
+    from IPython.display import display, Javascript
 
     qgridjs_path = os.path.join(
         os.path.dirname(__file__),
@@ -45,5 +51,5 @@ def nbinstall(overwrite=False, user=True):
         **({'user': user} if version_info >= (3, 0, 0, '') else {})
     )
 
+__all__ = ['set_defaults', 'set_grid_option', 'show_grid']
 
-__all__ = ['nbinstall', 'show_grid', 'set_defaults', 'set_grid_option']
