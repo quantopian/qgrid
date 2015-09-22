@@ -30,7 +30,7 @@ def template_contents(filename):
 SLICK_GRID_CSS = template_contents('slickgrid.css.template')
 SLICK_GRID_JS = template_contents('slickgrid.js.template')
 REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
-              "ddf33c0efb813cd574f3838f6cf1fd584b733621/qgrid/qgridjs/")
+              "master/qgrid/qgridjs/")
 
 
 class _DefaultSettings(object):
