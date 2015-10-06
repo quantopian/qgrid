@@ -128,8 +128,6 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding-top: 3px;
   padding-left: 0px;
-  &.l0.r0
-   border-left: none;
 }
 
 .q-grid .slick-cell.l0.r0 {
