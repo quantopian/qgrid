@@ -72,7 +72,7 @@ define([
 
     var row_count = 0;
     _.each(this.data_frame, function (cur_row, key, list) {
-      cur_row.id = "row" + row_count;
+      cur_row.slick_grid_id = "row" + row_count;
       row_count++;
       this.row_data.push(cur_row);
       this.filter_list.forEach(function(cur_filter){
@@ -90,7 +90,7 @@ define([
     this.data_view.beginUpdate();
     var sort_comparer = this.get_sort_comparer(this.sort_field, this.sort_ascending)
     this.data_view.sort(sort_comparer, this.sort_ascending);
-    this.data_view.setItems(this.row_data);
+    this.data_view.setItems(this.row_data, 'slick_grid_id');
     this.data_view.setFilter($.proxy(this.include_row, this));
     this.data_view.endUpdate();
 
