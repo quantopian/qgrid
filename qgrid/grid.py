@@ -250,7 +250,7 @@ class QGridWidget(widgets.DOMWidget):
                 # https://github.com/pydata/pandas/issues/10778
                 df[col_name] = df[col_name].astype(str)
                 column_types.append(column_type)
-                break
+                continue
             column_type = {'field': col_name}
             for type_name, type_codes in tc.items():
                 if dtype.kind in type_codes:
