@@ -185,7 +185,7 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
     grid = QGridWidget(df=data_frame, precision=precision,
                        grid_options=json.dumps(grid_options),
                        remote_js=remote_js)
-    grid.update()
+    grid.update_table()
 
     if show_toolbar:
         add_row = widgets.Button(description="Add Row")
