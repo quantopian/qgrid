@@ -185,6 +185,7 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
     grid = QGridWidget(df=data_frame, precision=precision,
                        grid_options=json.dumps(grid_options),
                        remote_js=remote_js)
+    grid.update_table()
 
     if show_toolbar:
         add_row = widgets.Button(description="Add Row")
@@ -211,11 +212,11 @@ class QGridWidget(widgets.DOMWidget):
     _multi_index = Bool(False)
 
     df = Instance(pd.DataFrame)
-    precision = Integer()
+    precision = Integer(6)
     grid_options = Unicode('', sync=True)
     remote_js = Bool(True)
 
-    def _df_changed(self):
+    def update_table(self):
         """Build the Data Table for the DataFrame."""
 
         df = self.df.copy()
@@ -315,8 +316,7 @@ class QGridWidget(widgets.DOMWidget):
                 pass
 
     def export(self, value=None):
-        # trigger an update of the df json
-        self._df_changed()
+        self.update_table()
         self.remote_js = True
         div_id = str(uuid.uuid4())
         grid_options = json.loads(self.grid_options)
