@@ -1,7 +1,8 @@
 from .grid import (
     set_defaults,
     set_grid_option,
-    show_grid
+    show_grid,
+    QGridWidget
 )
 
 
@@ -51,5 +52,5 @@ def nbinstall(overwrite=False, user=True):
         **({'user': user} if version_info >= (3, 0, 0, '') else {})
     )
 
-__all__ = ['set_defaults', 'set_grid_option', 'show_grid']
+__all__ = ['set_defaults', 'set_grid_option', 'show_grid', 'QGridWidget']
 

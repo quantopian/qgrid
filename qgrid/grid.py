@@ -74,6 +74,7 @@ class _DefaultSettings(object):
 
 defaults = _DefaultSettings()
 
+
 def set_defaults(remote_js=None, precision=None, grid_options=None):
     """
     Set the default qgrid options.  The options that you can set here are the
@@ -95,6 +96,7 @@ def set_defaults(remote_js=None, precision=None, grid_options=None):
     """
     defaults.set_defaults(remote_js, precision, grid_options)
 
+
 def set_grid_option(optname, optvalue):
     """
     Set the default value for one of the options that gets passed into the
@@ -115,7 +117,8 @@ def set_grid_option(optname, optvalue):
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for the full
     list of available options.
     """
-    self._grid_options[optname] = optvalue
+    defaults._grid_options[optname] = optvalue
+
 
 def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
               show_toolbar=False):
@@ -185,7 +188,6 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
     grid = QGridWidget(df=data_frame, precision=precision,
                        grid_options=json.dumps(grid_options),
                        remote_js=remote_js)
-    grid.update_table()
 
     if show_toolbar:
         add_row = widgets.Button(description="Add Row")
@@ -214,7 +216,15 @@ class QGridWidget(widgets.DOMWidget):
     df = Instance(pd.DataFrame)
     precision = Integer(6)
     grid_options = Unicode('', sync=True)
-    remote_js = Bool(True)
+    remote_js = Bool(False)
+
+    def __init__(self, *args, **kwargs):
+        """Initialize all variables before building the table."""
+        kwargs.setdefault('grid_options', json.dumps(defaults.grid_options))
+        kwargs.setdefault('precision', defaults.precision)
+        kwargs.setdefault('remote_js', defaults.remote_js)
+        super(QGridWidget, self).__init__(*args, **kwargs)
+        self.update_table()
 
     def update_table(self):
         """Build the Data Table for the DataFrame."""
@@ -264,8 +274,6 @@ class QGridWidget(widgets.DOMWidget):
                 date_format='iso',
                 double_precision=self.precision,
             )
-
-        self._remote_js_changed()
         self.send({'type': 'draw_table'})
 
     def _remote_js_changed(self):
