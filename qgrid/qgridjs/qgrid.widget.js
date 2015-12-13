@@ -115,7 +115,7 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             // create the table
             var df = JSON.parse(this.model.get('_df_json'));
             var column_types = JSON.parse(this.model.get('_column_types_json'));
-            var options = JSON.parse(this.model.get('grid_options'));
+            var options = this.model.get('grid_options');
             grid = new this.dgrid.QGrid(this.tableDiv, df, column_types);
             grid.initialize_slick_grid(options);
 

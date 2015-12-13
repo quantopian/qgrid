@@ -12,9 +12,9 @@ except ImportError:
     from IPython.html import widgets
 from IPython.display import display, Javascript
 try:
-    from traitlets import Unicode, Instance, Bool, Integer
+    from traitlets import Unicode, Instance, Bool, Integer, Dict
 except ImportError:
-    from IPython.utils.traitlets import Unicode, Instance, Bool, Integer
+    from IPython.utils.traitlets import Unicode, Instance, Bool, Integer, Dict
 
 
 def template_contents(filename):
@@ -117,7 +117,7 @@ def set_grid_option(optname, optvalue):
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for the full
     list of available options.
     """
-    defaults._grid_options[optname] = optvalue
+    defaults.grid_options[optname] = optvalue
 
 
 def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
@@ -186,7 +186,7 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
 
     # create a visualization for the dataframe
     grid = QGridWidget(df=data_frame, precision=precision,
-                       grid_options=json.dumps(grid_options),
+                       grid_options=grid_options,
                        remote_js=remote_js)
 
     if show_toolbar:
@@ -210,28 +210,41 @@ class QGridWidget(widgets.DOMWidget):
     _df_json = Unicode('', sync=True)
     _column_types_json = Unicode('', sync=True)
     _index_name = Unicode('')
+    _dirty = Bool(False)
     _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
     _multi_index = Bool(False)
 
     df = Instance(pd.DataFrame)
     precision = Integer(6)
-    grid_options = Unicode('', sync=True)
+    grid_options = Dict(sync=True)
     remote_js = Bool(False)
 
     def __init__(self, *args, **kwargs):
         """Initialize all variables before building the table."""
-        kwargs.setdefault('grid_options', json.dumps(defaults.grid_options))
-        kwargs.setdefault('precision', defaults.precision)
-        kwargs.setdefault('remote_js', defaults.remote_js)
         super(QGridWidget, self).__init__(*args, **kwargs)
+        # register a callback for custom messages
+        self.on_msg(self._handle_qgrid_msg)
         self.update_table()
+
+    def _default_grid_options(self):
+        return defaults.grid_options
+
+    def _default_remote_js(self):
+        return defaults.remote_js
+
+    def _default_precision(self):
+        return defaults.precision
+
+    def _default__cdn_base_url(self):
+        return REMOTE_URL if self.remote_js else "/nbextensions/qgridjs"
 
     def update_table(self):
         """Build the Data Table for the DataFrame."""
-        df = self.df.copy()
+        self._update_table()
+        self.send({'type': 'draw_table'})
 
-        # register a callback for custom messages
-        self.on_msg(self._handle_qgrid_msg)
+    def _update_table(self):
+        df = self.df.copy()
 
         if not df.index.name:
             df.index.name = 'Index'
@@ -274,13 +287,7 @@ class QGridWidget(widgets.DOMWidget):
                 date_format='iso',
                 double_precision=self.precision,
             )
-        self.send({'type': 'draw_table'})
-
-    def _remote_js_changed(self):
-        if self.remote_js:
-            self._cdn_base_url = REMOTE_URL
-        else:
-            self._cdn_base_url = "/nbextensions/qgridjs"
+        self._dirty = False
 
     def add_row(self, value=None):
         """Append a row at the end of the dataframe."""
@@ -299,6 +306,7 @@ class QGridWidget(widgets.DOMWidget):
         msg[self._index_name] = str(last.name)
         msg['id'] = str(last.name)
         msg['type'] = 'add_row'
+        self._dirty = True
         self.send(msg)
 
     def remove_row(self, value=None):
@@ -315,27 +323,30 @@ class QGridWidget(widgets.DOMWidget):
             return
         if content['type'] == 'remove_row':
             self.df.drop(content['row'], inplace=True)
+            self._dirty = True
 
         elif content['type'] == 'cell_change':
             try:
                 self.df.set_value(self.df.index[content['row']],
                                   content['column'], content['value'])
+                self._dirty = True
             except ValueError:
                 pass
 
     def export(self, value=None):
-        self.update_table()
-        self.remote_js = True
+        if self._dirty:
+            self._update_table()
+        base_url = REMOTE_URL
         div_id = str(uuid.uuid4())
-        grid_options = json.loads(self.grid_options)
+        grid_options = self.grid_options
         grid_options['editable'] = False
 
         raw_html = SLICK_GRID_CSS.format(
             div_id=div_id,
-            cdn_base_url=self._cdn_base_url,
+            cdn_base_url=base_url,
         )
         raw_js = SLICK_GRID_JS.format(
-            cdn_base_url=self._cdn_base_url,
+            cdn_base_url=base_url,
             div_id=div_id,
             data_frame_json=self._df_json,
             column_types_json=self._column_types_json,
