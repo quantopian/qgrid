@@ -218,11 +218,13 @@ class QGridWidget(widgets.DOMWidget):
 
     def update_table(self):
         """Build the Data Table for the DataFrame."""
-
         df = self.df.copy()
 
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
+
+        if not df.index.name:
+            df.index.name = 'Index'
 
         if type(df.index) == pd.core.index.MultiIndex:
             df.reset_index(inplace=True)
@@ -230,9 +232,6 @@ class QGridWidget(widgets.DOMWidget):
         else:
             df.insert(0, df.index.name, df.index)
             self._multi_index = False
-
-        if not df.index.name:
-            df.index.name = 'Index'
 
         self._index_name = df.index.name
 
@@ -267,6 +266,7 @@ class QGridWidget(widgets.DOMWidget):
             )
 
         self._remote_js_changed()
+        self.send({'type': 'draw_table'})
 
     def _remote_js_changed(self):
         if self.remote_js:
