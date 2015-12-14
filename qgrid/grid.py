@@ -224,7 +224,7 @@ class QGridWidget(widgets.DOMWidget):
         super(QGridWidget, self).__init__(*args, **kwargs)
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
-        self.update_table()
+        self._update_table()
 
     def _grid_options_default(self):
         return defaults.grid_options
