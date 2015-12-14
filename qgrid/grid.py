@@ -226,16 +226,16 @@ class QGridWidget(widgets.DOMWidget):
         self.on_msg(self._handle_qgrid_msg)
         self.update_table()
 
-    def _default_grid_options(self):
+    def _grid_options_default(self):
         return defaults.grid_options
 
-    def _default_remote_js(self):
+    def _remote_js_default(self):
         return defaults.remote_js
 
-    def _default_precision(self):
+    def _precision_default(self):
         return defaults.precision
 
-    def _default__cdn_base_url(self):
+    def __cdn_base_url_default(self):
         return REMOTE_URL if self.remote_js else "/nbextensions/qgridjs"
 
     def update_table(self):
