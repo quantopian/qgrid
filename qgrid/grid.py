@@ -31,6 +31,7 @@ SLICK_GRID_CSS = template_contents('slickgrid.css.template')
 SLICK_GRID_JS = template_contents('slickgrid.js.template')
 REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
               "master/qgrid/qgridjs/")
+LOCAL_URL = "/nbextensions/qgridjs"
 
 
 class _DefaultSettings(object):
@@ -211,7 +212,7 @@ class QGridWidget(widgets.DOMWidget):
     _column_types_json = Unicode('', sync=True)
     _index_name = Unicode('')
     _dirty = Bool(False)
-    _cdn_base_url = Unicode("/nbextensions/qgridjs", sync=True)
+    _cdn_base_url = Unicode(LOCAL_URL, sync=True)
     _multi_index = Bool(False)
 
     df = Instance(pd.DataFrame)
@@ -234,9 +235,6 @@ class QGridWidget(widgets.DOMWidget):
 
     def _precision_default(self):
         return defaults.precision
-
-    def __cdn_base_url_default(self):
-        return REMOTE_URL if self.remote_js else "/nbextensions/qgridjs"
 
     def update_table(self):
         """Build the Data Table for the DataFrame."""
@@ -287,6 +285,7 @@ class QGridWidget(widgets.DOMWidget):
                 date_format='iso',
                 double_precision=self.precision,
             )
+        self._cdn_base_url = REMOTE_URL if self.remote_js else LOCAL_URL
         self._dirty = False
 
     def add_row(self, value=None):
