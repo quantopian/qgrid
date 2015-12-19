@@ -96,8 +96,13 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             table.addClass('q-grid');
             this.tableDiv = table[0];
 
-            // Make the table scroll horizontally.
-            this.el.setAttribute("style", "overflow-x: scroll");
+            // fill the portion of the widget area not in the prompt
+            var parent = this.el.parentElement;
+            while (parent.className !== 'widget-area') {
+                parent = parent.parentElement;
+            }
+            var width = (parent.clientWidth - parent.childNodes[0].clientWidth);
+            this.el.setAttribute("style", "max-width:" + String(width) + "px;");
         },
 
         /**
