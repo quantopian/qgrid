@@ -211,6 +211,7 @@ class QGridWidget(widgets.DOMWidget):
     _df_json = Unicode('', sync=True)
     _column_types_json = Unicode('', sync=True)
     _index_name = Unicode('')
+    _initialized = Bool(False)
     _dirty = Bool(False)
     _cdn_base_url = Unicode(LOCAL_URL, sync=True)
     _multi_index = Bool(False)
@@ -222,10 +223,13 @@ class QGridWidget(widgets.DOMWidget):
 
     def __init__(self, *args, **kwargs):
         """Initialize all variables before building the table."""
+        self._initialized = False
         super(QGridWidget, self).__init__(*args, **kwargs)
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
-        self._update_table()
+        self._initialized = True
+        if self.df is not None:
+            self._update_table()
 
     def _grid_options_default(self):
         return defaults.grid_options
@@ -236,8 +240,10 @@ class QGridWidget(widgets.DOMWidget):
     def _precision_default(self):
         return defaults.precision
 
-    def update_table(self):
+    def _df_changed(self):
         """Build the Data Table for the DataFrame."""
+        if not self._initialized:
+            return
         self._update_table()
         self.send({'type': 'draw_table'})
 
