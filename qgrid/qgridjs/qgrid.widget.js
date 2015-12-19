@@ -145,6 +145,12 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
                            'value': args.item[column], 'type': 'cell_change'};
                 that.send(msg);
             });
+
+            sgrid.onSelectedRowsChanged.subscribe(function(e, args) {
+                var rows = args.rows;
+                var msg = {'rows': args.rows, 'type': 'selection_change'};
+                that.send(msg);
+            });
         },
 
         /**

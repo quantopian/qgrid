@@ -12,9 +12,11 @@ except ImportError:
     from IPython.html import widgets
 from IPython.display import display, Javascript
 try:
-    from traitlets import Unicode, Instance, Bool, Integer, Dict
+    from traitlets import Unicode, Instance, Bool, Integer, Dict, List
 except ImportError:
-    from IPython.utils.traitlets import Unicode, Instance, Bool, Integer, Dict
+    from IPython.utils.traitlets import (
+        Unicode, Instance, Bool, Integer, Dict, List
+    )
 
 
 def template_contents(filename):
@@ -215,6 +217,7 @@ class QGridWidget(widgets.DOMWidget):
     _dirty = Bool(False)
     _cdn_base_url = Unicode(LOCAL_URL, sync=True)
     _multi_index = Bool(False)
+    _selected_rows = List()
 
     df = Instance(pd.DataFrame)
     precision = Integer(6)
@@ -228,6 +231,7 @@ class QGridWidget(widgets.DOMWidget):
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
         self._initialized = True
+        self._selected_rows = []
         if self.df is not None:
             self._update_table()
 
@@ -337,6 +341,14 @@ class QGridWidget(widgets.DOMWidget):
                 self._dirty = True
             except ValueError:
                 pass
+
+        elif content['type'] == 'selection_change':
+            self._selected_rows = content['rows']
+            print(self._selected_rows)
+
+    def get_selected_rows(self):
+        """Get the currently selected rows"""
+        return self._selected_rows
 
     def export(self, value=None):
         if self._dirty:
