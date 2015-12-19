@@ -43,6 +43,7 @@ class _DefaultSettings(object):
             'fullWidthRows': True,
             'syncColumnCellResize': True,
             'forceFitColumns': True,
+            'defaultColumnWidth': 150,
             'rowHeight': 28,
             'enableColumnReorder': False,
             'enableTextSelectionOnCells': True,
@@ -178,14 +179,18 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
         remote_js = defaults.remote_js
     if precision is None:
         precision = defaults.precision
-        if not isinstance(precision, Integral):
-            raise TypeError("precision must be int, not %s" % type(precision))
+    if not isinstance(precision, Integral):
+        raise TypeError("precision must be int, not %s" % type(precision))
     if grid_options is None:
         grid_options = defaults.grid_options
-        if not isinstance(grid_options, dict):
-            raise TypeError(
-                "grid_options must be dict, not %s" % type(grid_options)
-            )
+    else:
+        options = defaults.grid_options.copy()
+        options.update(grid_options)
+        grid_options = options
+    if not isinstance(grid_options, dict):
+        raise TypeError(
+            "grid_options must be dict, not %s" % type(grid_options)
+        )
 
     # create a visualization for the dataframe
     grid = QGridWidget(df=data_frame, precision=precision,
