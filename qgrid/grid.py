@@ -269,7 +269,7 @@ class QGridWidget(widgets.DOMWidget):
             df.insert(0, df.index.name, df.index)
             self._multi_index = False
 
-        self._index_name = df.index.name
+        self._index_name = df.index.name or 'Index'
 
         tc = dict(np.typecodes)
         for key in np.typecodes.keys():
