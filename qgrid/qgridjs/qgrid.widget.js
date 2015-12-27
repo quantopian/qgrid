@@ -179,6 +179,7 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
 
             } else if (msg.type === 'draw_table') {
                 this.drawTable();
+                this.updateSize();
             }
         },
 
