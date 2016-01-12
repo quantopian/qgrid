@@ -8,6 +8,7 @@
 .q-grid-container {
   position: relative;
   margin: 4px -5px;
+  overflow-x: scroll;
 }
 
 .q-grid {

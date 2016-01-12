@@ -21,7 +21,7 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
                     "<link id='dg-css' href='" + cdn_base_url + "/qgrid.css' rel='stylesheet'>"
                 ]);
             }
-            
+
             var path_dictionary = {
                 jquery_drag: cdn_base_url + "/lib/jquery.event.drag-2.2",
                 slick_core: cdn_base_url + "/lib/slick.core.2.2",
@@ -54,11 +54,11 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             require.config({
                 paths: path_dictionary
             });
-            
+
             if (typeof jQuery === 'function') {
                 define('jquery', function() { return jQuery; });
             }
-    
+
             /**
              * Load the required scripts and create the grid.
              */
@@ -72,25 +72,30 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             ],
             function() {
                 require(['slick_grid'], function() {
-                    require(["data_grid", "editors"], 
-                        function(dgrid, editors) {
-                            that.setupQGrid(dgrid, editors);
-                    });
+                    require(["data_grid", "editors"],function(dgrid, editors) {
+                            that.setupTable(dgrid, editors);
+                            that.drawTable();
+                        }
+                    );
                 });
             });
         },
 
         /**
-         * Set up our QGrid and event handlers.
+         * Set up the table div.
          */
-        setupQGrid: function(dgrid, editors) {
-            var that = this;
+        setupTable: function(dgrid, editors) {
             this.dgrid = dgrid;
+            this.editors = editors;
+            // subscribe to incoming messages from the QGridWidget
+            this.model.on('msg:custom', this.handleMsg, this);
+
             // set up the divs and styles
             this.$el.addClass('q-grid-container');
             var table = this.$el.append('div');
             table.addClass('q-grid');
-            
+            this.tableDiv = table[0];
+
             // fill the portion of the widget area not in the prompt
             var parent = this.el.parentElement;
             while (parent.className !== 'widget-area') {
@@ -98,12 +103,20 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             }
             var width = (parent.clientWidth - parent.childNodes[0].clientWidth);
             this.el.setAttribute("style", "max-width:" + String(width) + "px;");
+        },
+
+        /**
+         * Set up our QGrid and event handlers.
+         */
+        drawTable: function() {
+            var that = this;
+            var editors = this.editors;
 
             // create the table
             var df = JSON.parse(this.model.get('_df_json'));
             var column_types = JSON.parse(this.model.get('_column_types_json'));
-            var options = JSON.parse(this.model.get('grid_options'));
-            grid = new dgrid.QGrid(table[0], df, column_types);
+            var options = this.model.get('grid_options');
+            grid = new this.dgrid.QGrid(this.tableDiv, df, column_types);
             grid.initialize_slick_grid(options);
 
             // set up editing
@@ -133,10 +146,13 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
                 that.send(msg);
             });
 
-            // subscribe to incoming messages from the QGridWidget
-            this.model.on('msg:custom', this.handleMsg, this);
+            sgrid.onSelectedRowsChanged.subscribe(function(e, args) {
+                var rows = args.rows;
+                var msg = {'rows': args.rows, 'type': 'selection_change'};
+                that.send(msg);
+            });
         },
-        
+
         /**
          * Handle messages from the QGridWidget.
          */
@@ -160,6 +176,10 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
                 dd.refresh();
                 this.updateSize();
                 this.send(msg);
+
+            } else if (msg.type === 'draw_table') {
+                this.drawTable();
+                this.updateSize();
             }
         },
 
