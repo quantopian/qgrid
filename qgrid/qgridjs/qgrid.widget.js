@@ -141,14 +141,21 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             // set up callbacks
             sgrid.onCellChange.subscribe(function(e, args) {
                 var column = columns[args.cell].name;
-                var msg = {'row': args.row, 'column': column,
+                var id = args.grid.getDataItem(args.row).slick_grid_id;
+                var row = Number(id.replace('row', ''))
+                var msg = {'row': row, 'column': column,
                            'value': args.item[column], 'type': 'cell_change'};
                 that.send(msg);
             });
 
             sgrid.onSelectedRowsChanged.subscribe(function(e, args) {
-                var rows = args.rows;
-                var msg = {'rows': args.rows, 'type': 'selection_change'};
+                var rows = [];
+                var grid = args.grid;
+                for (var r = 0; r < args.rows.length; r++) {
+                    var id = grid.getDataItem(args.rows[r]).slick_grid_id;
+                    rows.push(Number(id.replace('row', '')));
+                }
+                var msg = {'rows': rows, 'type': 'selection_change'};
                 that.send(msg);
             });
         },
