@@ -124,13 +124,16 @@ def set_grid_option(optname, optvalue):
     defaults.grid_options[optname] = optvalue
 
 
-def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
-              show_toolbar=False):
+def show_grid(data_frame, show_toolbar=False, remote_js=None, precision=None,
+              grid_options=None):
     """
     Main entry point for rendering DataFrames as SlickGrids.
 
     Parameters
     ----------
+    show_toolbar: bool
+        Whether to show a toolbar with options for adding/removing rows and
+        exporting the widget to a static view.
     remote_js : bool
         Whether to load slickgrid.js from a local filesystem or from a
         remote CDN.  Loading from the local filesystem means that SlickGrid
@@ -164,9 +167,6 @@ def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
             'editable': True,
             'autoEdit': False
         }
-    show_toolbar: bool
-        Whether to show a toolbar with options for adding/removing rows and
-        exporting the widget to a static view.
 
 
     See Also
