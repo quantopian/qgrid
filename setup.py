@@ -14,6 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from setuptools import setup
+from os.path import (
+    join, dirname, abspath
+)
+
+def read_requirements(basename):
+    reqs_file = join(dirname(abspath(__file__)), basename)
+    with open(reqs_file) as f:
+        return [req.strip() for req in f.readlines()]
+
+reqs = read_requirements('requirements.txt')
 
 setup(
     name='qgrid',
@@ -38,10 +48,6 @@ setup(
         'Topic :: Office/Business :: Financial',
         'Topic :: Scientific/Engineering :: Information Analysis',
         ],
-    install_requires=[
-        'numpy',
-        'pandas',
-        'ipython[notebook]',
-    ],
+    install_requires=reqs,
     url="https://github.com/quantopian/qgrid"
 )

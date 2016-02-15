@@ -1,2 +1,3 @@
 notebook==4.1.0
 pandas==0.17.1
+ipywidgets==4.1.1
