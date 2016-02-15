@@ -349,7 +349,6 @@ class QGridWidget(widgets.DOMWidget):
 
         elif content['type'] == 'selection_change':
             self._selected_rows = content['rows']
-            print(self._selected_rows)
 
     def get_selected_rows(self):
         """Get the currently selected rows"""
