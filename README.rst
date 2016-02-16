@@ -54,7 +54,7 @@ Qgrid depends on the following three Python packages:
       A powerful data analysis / manipulation library for Python.  Qgrid requires that the data to be rendered as an
       interactive grid be provided in the form of a pandas DataFrame.
 
-These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/update-docs/requirements.txt>`_
+These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/master/requirements.txt>`_
 and will be automatically installed (if necessary) when qgrid is installed via pip.
 
 **Installing from PyPI:**
