@@ -41,17 +41,21 @@ Installation
 Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
 
-Qgrid depends on the following two Python packages:
+Qgrid depends on the following three Python packages:
 
     `Jupyter notebook <https://github.com/jupyter/notebook>`_
       This is the interactive Python environment in which qgrid runs.
+
+    `ipywidgets <https://github.com/pydata/pandas>`_
+      In order for Jupyter notebooks to be able to run widgets, you have to also install this ipywidgets package.
+      It's maintained by the Jupyter organization, the same people who created Jupyter notebook.
 
     `Pandas <http://pandas.pydata.org/>`_
       A powerful data analysis / manipulation library for Python.  Qgrid requires that the data to be rendered as an
       interactive grid be provided in the form of a pandas DataFrame.
 
 These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/update-docs/requirements.txt>`_
-and as such, will be automatically installed (if necessary) when qgrid is installed via pip.
+and will be automatically installed (if necessary) when qgrid is installed via pip.
 
 **Installing from PyPI:**
 
