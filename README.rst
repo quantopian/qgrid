@@ -22,12 +22,12 @@ Overview
 Qgrid renders pandas DataFrames as SlickGrids, which enables users to explore
 the entire contents of a DataFrame using intuitive sorting and filtering controls.  It's designed to be used within
 Jupyter notebook, but it's also fully functional when rendered in `nbviewer
-<http://nbviewer.jupyter.org/gist/TimShawver/2600c6648c6aaccaf3bf>`_.
+<http://nbviewer.jupyter.org/gist/TimShawver/b4bc80d1128407c56c9a>`_.
 
 Demo
 ----
 See the demo by viewing `qgrid_demo.ipynb
-<http://nbviewer.jupyter.org/gist/TimShawver/2600c6648c6aaccaf3bf>`_ in nbviewer.
+<http://nbviewer.jupyter.org/gist/TimShawver/b4bc80d1128407c56c9a>`_ in nbviewer.
 
 API Documentation
 -----------------
