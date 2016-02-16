@@ -46,7 +46,7 @@ Qgrid depends on the following three Python packages:
     `Jupyter notebook <https://github.com/jupyter/notebook>`_
       This is the interactive Python environment in which qgrid runs.
 
-    `ipywidgets <https://github.com/pydata/pandas>`_
+    `ipywidgets <https://github.com/ipython/ipywidgets>`_
       In order for Jupyter notebooks to be able to run widgets, you have to also install this ipywidgets package.
       It's maintained by the Jupyter organization, the same people who created Jupyter notebook.
 
