@@ -29,6 +29,10 @@ Demo
 See the demo by viewing `qgrid_demo.ipynb
 <http://nbviewer.jupyter.org/gist/TimShawver/2600c6648c6aaccaf3bf>`_ in nbviewer.
 
+API Documentation
+-----------------
+API documentation is hosted on `readthedocs <http://qgrid.readthedocs.org/en/latest/>`_.
+
 Installation
 ------------
 

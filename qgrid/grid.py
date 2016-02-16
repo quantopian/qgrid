@@ -124,16 +124,13 @@ def set_grid_option(optname, optvalue):
     defaults.grid_options[optname] = optvalue
 
 
-def show_grid(data_frame, show_toolbar=False, remote_js=None, precision=None,
-              grid_options=None):
+def show_grid(data_frame, remote_js=None, precision=None, grid_options=None,
+              show_toolbar=False):
     """
     Main entry point for rendering DataFrames as SlickGrids.
 
     Parameters
     ----------
-    show_toolbar: bool
-        Whether to show a toolbar with options for adding/removing rows and
-        exporting the widget to a static view.
     remote_js : bool
         Whether to load slickgrid.js from a local filesystem or from a
         remote CDN.  Loading from the local filesystem means that SlickGrid
@@ -145,10 +142,14 @@ def show_grid(data_frame, show_toolbar=False, remote_js=None, precision=None,
         values.  If unset, we use the value of
         `pandas.get_option('display.precision')`.
     grid_options : dict
-        Options to use when creating javascript SlickGrid instances.  See
-        the `SlickGrid documentation <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for
-        information on the available options.  See the Notes section below for
-        the list of options that qgrid sets by default.
+        Options to use when creating javascript SlickGrid instances.  See the Notes section below for
+        more information on the available options, as well as the default options that qgrid uses.
+    show_toolbar : bool
+        *EXPERIMENTAL* - Whether to show a toolbar with options for adding/removing rows and
+        exporting the widget to a static view.  This feature is marked as experimental because
+        add/remove rows is not fully functional yet.  The export feature should work fine,
+        so it's technically not experimental.  Most people will have no need for it though, so
+        I don't mind keeping it buried here under the experimental label.
 
     Notes
     -----
