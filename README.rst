@@ -1,28 +1,15 @@
 =====
 qgrid
 =====
-Qgrid is an `IPython widget <https://github.com/ipython/ipywidgets>`_ which uses SlickGrid to render pandas DataFrames
-within a Jupyter notebook. We originally developed it for use in `Quantopian's hosted research environment
+Qgrid is an IPython widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas DataFrames
+within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
+filtering controls, **as well as edit your DataFrames by double clicking a cell (new in v0.3.0)**.
+
+We originally developed qgrid it for use in `Quantopian's hosted research environment
 <https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_, but no longer have
 a specific project in mind for using qgrid in the research environment.  For that reason we haven't been investing
 much time in developing new features, and almost all of the forward development has come from the community. We've
 mainly just been reviewing PR's, writing docs, and occasionally making small contributions.
-
-Overview
---------
-
-`SlickGrid <https://github.com/mleibman/SlickGrid>`_
-  An interactive javascript grid which allows users to scroll,
-  sort, and filter hundreds of thousands of rows with extreme responsiveness.
-
-`Pandas <https://github.com/pydata/pandas>`_
-  A powerful data analysis / manipulation library for Python, and DataFrames are the primary way of storing and
-  manipulating two-dimensional data in pandas.
-
-Qgrid renders pandas DataFrames as SlickGrids, which enables users to explore
-the entire contents of a DataFrame using intuitive sorting and filtering controls.  It's designed to be used within
-Jupyter notebook, but it's also fully functional when rendered in `nbviewer
-<http://nbviewer.jupyter.org/gist/TimShawver/b4bc80d1128407c56c9a>`_.
 
 Demo
 ----
@@ -36,7 +23,7 @@ API documentation is hosted on `readthedocs <http://qgrid.readthedocs.org/en/lat
 Installation
 ------------
 
-**Dependencies:**
+**Python Dependencies:**
 
 Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
