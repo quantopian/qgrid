@@ -172,7 +172,7 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
                     return;
                 }
                 var data = sgrid.getData().getItem(cell.row);
-                grid.data_view.deleteItem(data.id);
+                grid.data_view.deleteItem(data.slick_grid_id);
                 msg = {'type': 'remove_row', 'row': cell.row, 'id': data.id};
                 this.updateSize();
                 this.send(msg);
