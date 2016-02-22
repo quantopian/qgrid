@@ -319,7 +319,7 @@ class QGridWidget(widgets.DOMWidget):
                                 double_precision=precision)
         msg = json.loads(row_data)
         msg[self._index_name] = str(last.name)
-        msg['id'] = str(last.name)
+        msg['slick_grid_id'] = str(last.name)
         msg['type'] = 'add_row'
         self._dirty = True
         self.send(msg)
