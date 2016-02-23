@@ -18,6 +18,7 @@ from os.path import (
     join, dirname, abspath
 )
 
+
 def read_requirements(basename):
     reqs_file = join(dirname(abspath(__file__)), basename)
     with open(reqs_file) as f:
@@ -27,7 +28,7 @@ reqs = read_requirements('requirements.txt')
 
 setup(
     name='qgrid',
-    version='0.2.0',
+    version='0.3.0',
     description='A Pandas DataFrame viewer for IPython Notebook.',
     author='Quantopian Inc.',
     author_email='tshawver@quantopian.com',
