@@ -1,5 +1,6 @@
-include README.md
+include README.rst
 include LICENSE
+include requirements*.txt
 
 recursive-include qgrid/qgridjs *.*
 recursive-include qgrid/templates *.*
