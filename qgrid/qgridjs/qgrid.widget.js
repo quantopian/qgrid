@@ -142,7 +142,7 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
             sgrid.onCellChange.subscribe(function(e, args) {
                 var column = columns[args.cell].name;
                 var id = args.grid.getDataItem(args.row).slick_grid_id;
-                var row = Number(id.replace('row', ''))
+                var row = Number(id.replace('row', ''));
                 var msg = {'row': row, 'column': column,
                            'value': args.item[column], 'type': 'cell_change'};
                 that.send(msg);
@@ -173,7 +173,8 @@ define([path + "widgets/js/widget", path + "widgets/js/manager"], function(widge
                 }
                 var data = sgrid.getData().getItem(cell.row);
                 grid.data_view.deleteItem(data.slick_grid_id);
-                msg = {'type': 'remove_row', 'row': cell.row, 'id': data.id};
+                var row = Number(data.slick_grid_id.replace('row', ''));
+                msg = {'type': 'remove_row', 'row': row, 'id': data.id};
                 this.updateSize();
                 this.send(msg);
 
