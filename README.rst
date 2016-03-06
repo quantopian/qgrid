@@ -64,8 +64,17 @@ want.  To run the latest code that is on master, install qgrid from GitHub inste
 
     pip install git+https://github.com/quantopian/qgrid
 
-Running the demo locally
---------------------------
+Running the demo notebook locally
+---------------------------------
+
+The qgrid repository includes a demo notebook which will help you get familiar with the functionality that qgrid
+provides.  This demo notebook doesn't get downloaded to your machine when you install qgrid with pip, so you'll need
+to clone the qgrid repository to get it.  Here are the steps to clone the repository and run the demo notebook:
+
+#. Clone the repository from GitHub and ``cd`` into it the top-level directory::
+
+    git clone https://github.com/quantopian/qgrid.git
+    cd qgrid
 
 #. Go to the top-level directory of the qgrid repository and run the notebook::
 
@@ -84,7 +93,7 @@ Running the demo locally
          The "notebook dashboard" for the jupyter notebook which shows all the files in the current directory.  Notice
          the demo notebook which is qgrid_demo.ipynb.
 
-#. Click on qgrid_demo.ipynb to open it.  Here's what that will should like:
+#. Click on qgrid_demo.ipynb to open it.  Here's what that should like:
 
      .. figure:: docs/images/notebook_screen.png
          :align: left
@@ -93,8 +102,16 @@ Running the demo locally
 
          The demo notebook, qgrid_demo.ipynb, rendered by a locally-running Jupyter notebook.
 
-#. Skip to the Notebook Installation section of the notebook because the Overview is copied from this document.
-   Read the text and execute the cells as you come to them to complete the demo.
+#. Click the "Cell" menu at the top of the notebook and click "Run All" to run all the cells in the notebook and
+   render a few sample qgrids.
+
+        .. figure:: docs/images/qgrid_screen.png
+         :align: left
+         :target: docs/images/qgrid_screen.png
+         :width: 800px
+
+         A sample qgrid, as seen in the demo notebook, qgrid_demo.ipynb.
+
 
 Running from source
 -------------------
@@ -118,15 +135,6 @@ to do this.
    it was installed (like a virualenv), pip will create a symbolic link which links to the directory you passed in to
    the ``pip install -e``.  The result is changes that you make to the source code will be reflected as soon as you restart
    the notebook.
-
-   If you have virtualenv and virtualenvwrapper installed, an easy way to verify that this "editable" install succeeded
-   is to do the following::
-
-    cdsitepackages # navigate to the directory where virtualenv installs packages
-    cat qgrid.egg-link # print out the contents of this symbolic link
-
-   You should find that the symbolic link points to the top level directory of the qgrid repository which you ran
-   the ``pip install -e`` command on.
 
 #. Follow the instructions in the previous section to run qgrid.  Now when you make changes to qgrid's Python code,
    those changes will take effect as soon as you restart the Jupyter notebook server.
