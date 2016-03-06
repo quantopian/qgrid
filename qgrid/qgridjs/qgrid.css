@@ -159,7 +159,7 @@
   height: 28px;
   width: 21px;
   text-align: center;
-  z-index: 900;
+  z-index: 10;
   background-image: none;
   margin-top: 0px;
 }
