@@ -162,8 +162,8 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
     By default, the following options get passed into SlickGrid when
     ``show_grid`` is called.  See the `SlickGrid documentation
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for information
-    about these options.
-    ::
+    about these options::
+
         {
             'fullWidthRows': True,
             'syncColumnCellResize': True,
@@ -174,7 +174,6 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
             'editable': True,
             'autoEdit': False
         }
-
 
     See Also
     --------
