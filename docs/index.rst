@@ -11,7 +11,7 @@ Qgrid is an `IPython widget <https://github.com/ipython/ipywidgets>`_ which uses
 within a `Jupyter notebook <https://github.com/jupyter/notebook>`_.
 
 Other qgrid resources
---------------------
+---------------------
 
 This page hosts only the API docs for the project.  You might also be interested in these other qgrid-related
 resources:
