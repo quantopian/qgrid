@@ -31,24 +31,26 @@ Installation
 
 **Python Dependencies:**
 
-Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
+Qgrid runs on `Python 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
 
 Qgrid depends on the following three Python packages:
 
-    `Jupyter notebook <https://github.com/jupyter/notebook>`_
+    `Jupyter notebook <https://github.com/jupyter/notebook>`_ (versions 4.0.0 - 4.1.0)
       This is the interactive Python environment in which qgrid runs.
 
-    `ipywidgets <https://github.com/ipython/ipywidgets>`_
+    `ipywidgets <https://github.com/ipython/ipywidgets>`_ (versions 4.0.0 - 4.1.1)
       In order for Jupyter notebooks to be able to run widgets, you have to also install this ipywidgets package.
       It's maintained by the Jupyter organization, the same people who created Jupyter notebook.
 
-    `Pandas <http://pandas.pydata.org/>`_
+    `Pandas <http://pandas.pydata.org/>`_ (version 0.17.1 and above)
       A powerful data analysis / manipulation library for Python.  Qgrid requires that the data to be rendered as an
       interactive grid be provided in the form of a pandas DataFrame.
 
 These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/master/requirements.txt>`_
 and will be automatically installed (if necessary) when qgrid is installed via pip.
+
+\*\*\* Please note that qgrid is not yet compatible with Jupyter notebook 4.2.x or ipywidgets 5.x.x \*\*\*
 
 **Installing from PyPI:**
 
@@ -140,7 +142,11 @@ to do this.
    the ``pip install -e``.  The result is changes that you make to the source code will be reflected as soon as you restart
    the notebook.
 
-#. Follow the instructions in the previous section to run qgrid.  Now when you make changes to qgrid's Python code,
+#. Run the notebook as you normally would with the following command::
+
+    jupyter notebook
+
+   Now when you make changes to qgrid's Python code,
    those changes will take effect as soon as you restart the Jupyter notebook server.
 
 #. If the code you need to change is in qgrid's javascript, then call the
