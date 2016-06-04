@@ -31,7 +31,7 @@ Installation
 
 **Python Dependencies:**
 
-Qgrid runs on `Python 3 <https://www.python.org/downloads/>`_.  You'll also need
+Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
 
 Qgrid depends on the following three Python packages:
@@ -99,7 +99,8 @@ to clone the qgrid repository to get it.  Here are the steps to clone the reposi
 
          The "notebook dashboard" for the jupyter notebook which shows all the files in the current directory.
 
-#. Click on qgrid_demo.ipynb to open it.  Here's what that should like:
+#. Click on qgrid_demo.ipynb to open it.  If you're using a Python 2 kernel with jupyter notebook then you should
+   open qgrid_demo_python2.ipynb instead.  Here's what the notebook should like:
 
      .. figure:: docs/images/notebook_screen.png
          :align: left
