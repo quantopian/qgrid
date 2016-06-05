@@ -31,7 +31,7 @@ Installation
 
 **Python Dependencies:**
 
-Qgrid runs on `Python 3 <https://www.python.org/downloads/>`_.  You'll also need
+Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
 
 Qgrid depends on the following three Python packages:
