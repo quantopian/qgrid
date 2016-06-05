@@ -52,13 +52,13 @@ and will be automatically installed (if necessary) when qgrid is installed via p
 
 **Compatibility:**
 
-qgrid           | IPython / Jupyter notebook | ipywidgets                   |
---------------- | -------------------------- | ---------------------------- |
-0.2.0           | 2.x                        | N/A                          |
-0.3.x, master   | 3.x                        | N/A                          |
-0.3.x, master   | 4.0                        | 4.0.x                        |
-0.3.x, master   | 4.1                        | 4.1.x                        |
-master          | 4.2                        | 5.x                          |
+| qgrid           | IPython / Jupyter notebook | ipywidgets                   |
+| --------------- | -------------------------- | ---------------------------- |
+| 0.2.0           | 2.x                        | N/A                          |
+| 0.3.x, master   | 3.x                        | N/A                          |
+| 0.3.x, master   | 4.0                        | 4.0.x                        |
+| 0.3.x, master   | 4.1                        | 4.1.x                        |
+| master          | 4.2                        | 5.x                          |
 
 **Installing from PyPI:**
 
