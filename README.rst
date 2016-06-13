@@ -56,10 +56,10 @@ and will be automatically installed (if necessary) when qgrid is installed via p
  qgrid             IPython / Jupyter notebook   ipywidgets
 =================  ===========================  ==============================
  0.2.0             2.x                          N/A
- 0.3.x, master     3.x                          N/A
- 0.3.x, master     4.0                          4.0.x
- 0.3.x, master     4.1                          4.1.x
- master            4.2                          5.x
+ 0.3.x             3.x                          N/A
+ 0.3.x             4.0                          4.0.x
+ 0.3.x             4.1                          4.1.x
+ 0.3.2             4.2                          5.x
 =================  ===========================  ==============================
 
 **Installing from PyPI:**
