@@ -20,7 +20,7 @@ mainly just been reviewing PR's, writing docs, and occasionally making small con
 Demo
 ----
 See the demo by viewing `qgrid_demo.ipynb
-<http://nbviewer.jupyter.org/gist/TimShawver/3c2f6b65529dcd08ffcc08f226dbd271>`_ in nbviewer.
+<http://nbviewer.jupyter.org/gist/TimShawver/8fcef51dd3c222ed25306c002ab89b60>`_ in nbviewer.
 
 API Documentation
 -----------------

@@ -26,7 +26,7 @@ resources:
   This is where you'll find the source code and the rest of the documentation for the project, including the
   instructions for installing and running qgrid.
 
-`qgrid demo on nbviewer <http://nbviewer.jupyter.org/gist/TimShawver/3c2f6b65529dcd08ffcc08f226dbd271>`_
+`qgrid demo on nbviewer <http://nbviewer.jupyter.org/gist/TimShawver/8fcef51dd3c222ed25306c002ab89b60>`_
   See a demo of qgrid in your browser without installing anything.  The functionality of qgrid is somewhat limited
   in this environment, but it'll give you an idea of how the grid will look and feel when you install it locally.
 
