@@ -104,8 +104,7 @@ define([
       syncColumnCellResize: true,
       rowHeight: 32,
       forceFitColumns: true,
-      enableColumnReorder: false,
-      autoHeight: true
+      enableColumnReorder: false
     };
 
     var max_height = options.rowHeight * 8;
