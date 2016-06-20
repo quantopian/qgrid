@@ -105,10 +105,6 @@ define([
     }
     this.grid_elem.height(grid_height);
 
-    if (this.columns.length < 5){
-      this.grid_elem.width(this.columns.length * 200);
-    }
-
     this.slick_grid = new Slick.Grid(this.grid_elem_selector, this.data_view, this.columns, options);
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel())
     this.update_sort_indicators();
@@ -225,8 +221,7 @@ define([
   }
 
   QGrid.prototype.format_date = function(row, cell, value, columnDef, dataContext){
-    var date = new Date(value);
-    return moment(date).format("YYYY-MM-DD");
+    return moment.parseZone(value).format("YYYY-MM-DD");
   }
 
   QGrid.prototype.format_string = function(row, cell, value, columnDef, dataContext){

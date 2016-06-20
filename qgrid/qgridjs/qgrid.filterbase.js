@@ -71,11 +71,9 @@ define([
 
       var filter_width = this.filter_elem.width();
       var elem_right = left + filter_width;
-      var container = $('#notebook-container');
-      if (container.length == 0){
-        container = $('body');
-      }
-      if (elem_right > container.outerWidth() + (parseInt(container.css("margin-right"), 10) * 2)){
+
+      var qgrid_area = this.filter_elem.closest('.q-grid-container');
+      if (elem_right > qgrid_area.offset().left + qgrid_area.width()){
         left = (this.filter_btn.offset().left + this.filter_btn.width()) - filter_width;
       }
 
