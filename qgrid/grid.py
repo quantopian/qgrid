@@ -137,12 +137,9 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
 
     Parameters
     ----------
-    show_toolbar : bool
-        Whether to show a toolbar with options for adding/removing rows and
-        exporting the widget to a static view.  Adding/removing rows only works with
-        DataFrames that have an integer index.  The export feature is used to
-        generate a copy of the grid that will be mostly functional when rendered in
-        nbviewer.jupyter.org or when exported to html via the notebook's File menu.
+    grid_options : dict
+        Options to use when creating javascript SlickGrid instances.  See the Notes section below for
+        more information on the available options, as well as the default options that qgrid uses.
     remote_js : bool
         Whether to load slickgrid.js from a local filesystem or from a
         remote CDN.  Loading from the local filesystem means that SlickGrid
@@ -153,9 +150,13 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         The number of digits of precision to display for floating-point
         values.  If unset, we use the value of
         `pandas.get_option('display.precision')`.
-    grid_options : dict
-        Options to use when creating javascript SlickGrid instances.  See the Notes section below for
-        more information on the available options, as well as the default options that qgrid uses.
+    show_toolbar : bool
+        Whether to show a toolbar with options for adding/removing rows and
+        exporting the widget to a static view.  Adding/removing rows is an
+        experimental feature which only works with DataFrames that have an
+        integer index.  The export feature is used to generate a copy of the
+        grid that will be mostly functional when rendered in nbviewer.jupyter.org
+        or when exported to html via the notebook's File menu.
 
     Notes
     -----
