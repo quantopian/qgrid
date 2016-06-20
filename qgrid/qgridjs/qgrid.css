@@ -7,7 +7,7 @@
 
 .q-grid-container {
   position: relative;
-  margin: 4px -5px;
+  margin: 3px 0;
   overflow-x: scroll;
 }
 
@@ -23,15 +23,16 @@
   height: 320px !important;
 }
 
-.q-grid.hide-scrollbar .slick-header {
+.q-grid.hide-scrollbar > .slick-header {
   margin-bottom: -1px;
 }
 
-.q-grid.hide-scrollbar .slick-viewport {
+.q-grid.hide-scrollbar > .slick-viewport {
   overflow: hidden !important;
+  height: 100%;
 }
 
-.q-grid.hide-scrollbar .slick-viewport .grid-canvas {
+.q-grid.hide-scrollbar > .slick-viewport > .grid-canvas {
   margin-top: 1px;
 }
 
@@ -59,10 +60,10 @@
   border-right: 1px solid transparent;
 }
 
-.q-grid.hide-scrollbar .slick-header-column:last-child .filter-button,
-.q-grid.hide-scrollbar .slick-header-column:last-child .filter-button:hover,
-.q-grid.hide-scrollbar .slick-header-column.active:last-child .filter-button:hover,
-.q-grid.hide-scrollbar .slick-header-column.active:last-child .filter-button.filter-active {
+.q-grid.hide-scrollbar > .slick_header .slick-header-column:last-child .filter-button,
+.q-grid.hide-scrollbar > .slick-header .slick-header-column:last-child .filter-button:hover,
+.q-grid.hide-scrollbar > .slick-header .slick-header-column.active:last-child .filter-button:hover,
+.q-grid.hide-scrollbar > .slick-header .slick-header-column.active:last-child .filter-button.filter-active {
   border-right: 1px solid transparent;
 }
 
@@ -191,7 +192,7 @@
 }
 
 .q-grid-container .grid-filter h3.popover-title {
-  padding: 5px 11px;
+  padding: 5px 30px 5px 11px;
   border-bottom: 1px solid #d3d3d3;
   border-radius: 0px;
 }
@@ -296,6 +297,7 @@
   width: 300px;
   height: 250px;
   box-sizing: border-box;
+  border-top: 1px solid #d3d3d3;
 }
 
 .text-filter .slick-header {
