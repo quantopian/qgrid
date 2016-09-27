@@ -235,7 +235,6 @@ class QGridWidget(widgets.DOMWidget):
     _cdn_base_url = Unicode(LOCAL_URL, sync=True)
     _multi_index = Bool(False)
     _selected_rows = List()
-    _export_df = None
     _export_callback = None
 
     df = Instance(pd.DataFrame)
@@ -363,12 +362,10 @@ class QGridWidget(widgets.DOMWidget):
 
         elif content['type'] == 'selection_change':
             self._selected_rows = content['rows']
-        elif content['type'] == 'export_row':
-            row = pd.DataFrame.from_records([content['row']], index='Index')
-            self._export_df = self._export_df.append(row, ignore_index=True, verify_integrity=True)
-        elif content['type'] == 'export_done':
+
+        elif content['type'] == 'export_data':
             if self._export_callback:
-                self._export_callback(self._export_df)
+                self._export_callback(pd.DataFrame(content['data']))
 
     def get_selected_rows(self):
         """Get the currently selected rows"""
@@ -403,10 +400,8 @@ class QGridWidget(widgets.DOMWidget):
     # either a dataframe containing the data, or None if an error occurred
     def export_view(self, callback):
         self._export_callback = callback
-        self._export_df = pd.DataFrame()
         self.send({ 'type' : 'export_view' })
 
     def export_all(self, callback):
         self._export_callback = callback
-        self._export_df = pd.DataFrame()
         self.send({ 'type' : 'export_all' })

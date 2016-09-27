@@ -204,6 +204,7 @@ define([path], function(widget) {
          * jchuahtacc: retrieve "included" items from grid.data_view and send them back as messages
          */
         exportView: function(all) {
+            results = [ ];
             for (var i in grid.row_data) {
                 var row = grid.row_data[i];
                 if (all || row.include) {
@@ -212,10 +213,10 @@ define([path], function(widget) {
                         var field = grid.columns[j].field;
                         data[field] = row[field];
                     }
-                    this.send({'type': 'export_row', 'row': data }); 
+                    results.push(data);
                 }
             }
-            this.send({ 'type': 'export_done' });
+            this.send({ 'type': 'export_data', 'data' : results });
         },
 
         /**
