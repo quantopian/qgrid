@@ -191,7 +191,31 @@ define([path], function(widget) {
             } else if (msg.type === 'draw_table') {
                 this.drawTable();
                 this.updateSize();
+            } 
+            // jchuahtacc: handle export_view message
+            else if (msg.type === 'export_view') {
+                this.exportView();
+            } else if (msg.type === 'export_all') {
+                this.exportView(true);
             }
+        },
+
+        /**
+         * jchuahtacc: retrieve "included" items from grid.data_view and send them back as messages
+         */
+        exportView: function(all) {
+            for (var i in grid.row_data) {
+                var row = grid.row_data[i];
+                if (all || row.include) {
+                    var data = { };
+                    for (var j in grid.columns) {
+                        var field = grid.columns[j].field;
+                        data[field] = row[field];
+                    }
+                    this.send({'type': 'export_row', 'row': data }); 
+                }
+            }
+            this.send({ 'type': 'export_done' });
         },
 
         /**
