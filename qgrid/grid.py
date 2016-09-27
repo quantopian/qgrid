@@ -220,6 +220,9 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
     else:
         display(grid)
 
+    #jchuahtacc: return the grid so client can call export_view, etc.
+    return grid
+
 
 class QGridWidget(widgets.DOMWidget):
     _view_module = Unicode("nbextensions/qgridjs/qgrid.widget", sync=True)
@@ -232,6 +235,7 @@ class QGridWidget(widgets.DOMWidget):
     _cdn_base_url = Unicode(LOCAL_URL, sync=True)
     _multi_index = Bool(False)
     _selected_rows = List()
+    _export_callback = None
 
     df = Instance(pd.DataFrame)
     precision = Integer(6)
@@ -359,6 +363,10 @@ class QGridWidget(widgets.DOMWidget):
         elif content['type'] == 'selection_change':
             self._selected_rows = content['rows']
 
+        elif content['type'] == 'export_data':
+            if self._export_callback:
+                self._export_callback(pd.DataFrame(content['data']))
+
     def get_selected_rows(self):
         """Get the currently selected rows"""
         return self._selected_rows
@@ -385,3 +393,15 @@ class QGridWidget(widgets.DOMWidget):
 
         display_html(raw_html, raw=True)
         display_javascript(raw_js, raw=True)
+
+    # jchuahtacc:
+    # export_view messages qgrid.widget.js to start returning visible rows
+    # when the export is complete, the callback will be invoked with
+    # either a dataframe containing the data, or None if an error occurred
+    def export_view(self, callback):
+        self._export_callback = callback
+        self.send({ 'type' : 'export_view' })
+
+    def export_all(self, callback):
+        self._export_callback = callback
+        self.send({ 'type' : 'export_all' })
