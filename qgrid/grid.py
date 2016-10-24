@@ -165,7 +165,7 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         grid that will be mostly functional when rendered in nbviewer.jupyter.org
         or when exported to html via the notebook's File menu.
     export_mode : bool
-        Whether to display the grid in a noebook or to prepare it to be exported
+        Whether to display the grid in a notebook or to prepare it to be exported
 
     Notes
     -----
