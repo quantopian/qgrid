@@ -12,7 +12,7 @@ except ImportError:
     from IPython.html import widgets
 from IPython.display import display, Javascript
 try:
-    from traitlets import Unicode, Instance, Bool, Integer, Dict, List
+    from traitlets import Unicode, Instance, Bool, Integer, Dict, List, observe
 except ImportError:
     from IPython.utils.traitlets import (
         Unicode, Instance, Bool, Integer, Dict, List
@@ -233,6 +233,7 @@ class QGridWidget(widgets.DOMWidget):
     _multi_index = Bool(False)
     _selected_rows = List()
 
+    filtered = List(sync=True)
     df = Instance(pd.DataFrame)
     precision = Integer(6)
     grid_options = Dict(sync=True)
@@ -385,3 +386,7 @@ class QGridWidget(widgets.DOMWidget):
 
         display_html(raw_html, raw=True)
         display_javascript(raw_js, raw=True)
+
+    @observe('filtered')
+    def filtered_changed(self, change):
+        self.filtered = change['new']
