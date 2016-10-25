@@ -122,6 +122,18 @@ define([path], function(widget) {
             grid = new this.dgrid.QGrid(this.tableDiv, df, column_types);
             grid.initialize_slick_grid(options);
 
+            grid.data_view.onRowCountChanged.subscribe(function(e, args) {
+                var items = grid.data_view.getItems();
+                var indexes = [ ];
+                for (var i in items) {
+                    if (items[i].include) {
+                        indexes.push(items[i].Index);
+                    }
+                }
+                that.model.set('filtered', indexes);
+                that.model.save_changes();
+            });
+
             // set up editing
             var sgrid = grid.slick_grid;
             var columns = sgrid.getColumns();
