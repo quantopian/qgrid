@@ -272,6 +272,8 @@ class QGridWidget(widgets.DOMWidget):
         if not df.index.name:
             df.index.name = 'Index'
 
+        self.filtered = df.index.tolist()
+
         if type(df.index) == pd.core.index.MultiIndex:
             df.reset_index(inplace=True)
             self._multi_index = True
