@@ -391,4 +391,7 @@ class QGridWidget(widgets.DOMWidget):
 
     @observe('filtered')
     def filtered_changed(self, change):
-        self.filtered = change['new']
+        self.filtered = [ ]
+        for index in change['new']:
+            self.filtered.append(int(index))
+
