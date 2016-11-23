@@ -219,6 +219,7 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         display(widgets.HBox((add_row, rem_row, export)), grid)
     else:
         display(grid)
+    return grid
 
 
 class QGridWidget(widgets.DOMWidget):
