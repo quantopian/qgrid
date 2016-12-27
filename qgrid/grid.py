@@ -51,13 +51,14 @@ class _DefaultSettings(object):
             'autoEdit': False
         }
         self._show_toolbar = False
+        self._export_mode = False
         self._remote_js = False
         self._precision = None  # Defer to pandas.get_option
 
     def set_grid_option(self, optname, optvalue):
         self._grid_options[optname] = optvalue
 
-    def set_defaults(self, show_toolbar=None, remote_js=None, precision=None, grid_options=None):
+    def set_defaults(self, show_toolbar=None, remote_js=None, precision=None, grid_options=None, export_mode=None):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
         if remote_js is not None:
@@ -66,10 +67,16 @@ class _DefaultSettings(object):
             self._precision = precision
         if grid_options is not None:
             self._grid_options = grid_options
+        if export_mode is not None:
+            self._export_mode = export_mode
 
     @property
     def show_toolbar(self):
         return self._show_toolbar
+
+    @property
+    def export_mode(self):
+        return self._export_mode
 
     @property
     def grid_options(self):
@@ -86,7 +93,7 @@ class _DefaultSettings(object):
 defaults = _DefaultSettings()
 
 
-def set_defaults(show_toolbar=None, remote_js=None, precision=None, grid_options=None):
+def set_defaults(show_toolbar=None, remote_js=None, precision=None, grid_options=None, export_mode=None):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``show_grid``.  See the documentation
@@ -105,7 +112,7 @@ def set_defaults(show_toolbar=None, remote_js=None, precision=None, grid_options
     show_grid :
         The function whose default behavior is changed by ``set_defaults``.
     """
-    defaults.set_defaults(show_toolbar, remote_js, precision, grid_options)
+    defaults.set_defaults(show_toolbar, remote_js, precision, grid_options, export_mode)
 
 
 def set_grid_option(optname, optvalue):
@@ -131,7 +138,7 @@ def set_grid_option(optname, optvalue):
     defaults.grid_options[optname] = optvalue
 
 
-def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, grid_options=None):
+def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, grid_options=None, export_mode=None):
     """
     Main entry point for rendering DataFrames as SlickGrids.
 
@@ -157,6 +164,8 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         integer index.  The export feature is used to generate a copy of the
         grid that will be mostly functional when rendered in nbviewer.jupyter.org
         or when exported to html via the notebook's File menu.
+    export_mode : bool
+        Whether to display the grid in a notebook or to prepare it to be exported
 
     Notes
     -----
@@ -184,6 +193,8 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
 
     if show_toolbar is None:
         show_toolbar = defaults.show_toolbar
+    if export_mode is None:
+        export_mode = defaults.export_mode
     if remote_js is None:
         remote_js = defaults.remote_js
     if precision is None:
@@ -218,9 +229,11 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
 
         display(widgets.HBox((add_row, rem_row, export)), grid)
     else:
-        display(grid)
+        if export_mode:
+            grid.export()
+        else:
+            display(grid)
     return grid
-
 
 class QGridWidget(widgets.DOMWidget):
     _view_module = Unicode("nbextensions/qgridjs/qgrid.widget", sync=True)

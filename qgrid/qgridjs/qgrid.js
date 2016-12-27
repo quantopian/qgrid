@@ -94,7 +94,7 @@ define([
     this.data_view.setFilter($.proxy(this.include_row, this));
     this.data_view.endUpdate();
 
-    var max_height = options.rowHeight * 15;
+    var max_height = options.height || options.rowHeight * 15;
     var grid_height = max_height;
     // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
     // The '+ 1' accounts for the height of the column header.
