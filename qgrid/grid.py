@@ -233,6 +233,7 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
             grid.export()
         else:
             display(grid)
+    return grid
 
 class QGridWidget(widgets.DOMWidget):
     _view_module = Unicode("nbextensions/qgridjs/qgrid.widget", sync=True)
