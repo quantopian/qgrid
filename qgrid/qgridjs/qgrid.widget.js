@@ -1,4 +1,4 @@
-if (IPython.version[0] === '4' && parseInt(IPython.version[2]) >= 2) {
+if (parseInt(IPython.version[0]) >= 5 || (IPython.version[0] === '4' && parseInt(IPython.version[2]) >= 2)) {
     var path = 'jupyter-js-widgets';
 } else {
     var path = 'widgets/js/widget';
