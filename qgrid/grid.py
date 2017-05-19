@@ -7,7 +7,7 @@ from numbers import Integral
 
 from IPython.display import display_html, display_javascript
 try:
-    from ipywidgets import widgets
+    import ipywidgets as widgets
 except ImportError:
     from IPython.html import widgets
 from IPython.display import display, Javascript
