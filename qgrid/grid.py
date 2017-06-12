@@ -227,13 +227,13 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         export = widgets.Button(description="Export")
         export.on_click(grid.export)
 
-        display(widgets.HBox((add_row, rem_row, export)), grid)
+        return widgets.VBox([widgets.HBox([add_row, rem_row, export]), grid])
     else:
         if export_mode:
             grid.export()
+            return None
         else:
-            display(grid)
-    return grid
+            return grid
 
 class QGridWidget(widgets.DOMWidget):
     _view_module = Unicode("nbextensions/qgridjs/qgrid.widget", sync=True)
