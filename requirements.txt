@@ -1,3 +1,4 @@
 notebook>=4.0.0
 pandas>=0.16.2
 ipywidgets>=4.0.0
+jupyter-pip>=0.3.0

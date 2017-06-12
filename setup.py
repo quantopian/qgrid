@@ -18,6 +18,12 @@ from os.path import (
     join, dirname, abspath
 )
 
+#jchuahtacc
+try:
+    from jupyterpip import cmdclass
+except:
+    import pip, importlib
+    pip.main(['install', 'jupyter-pip']); cmdclass = importlib.import_module('jupyterpip').cmdclass
 
 def read_requirements(basename):
     reqs_file = join(dirname(abspath(__file__)), basename)
@@ -50,5 +56,6 @@ setup(
         'Topic :: Scientific/Engineering :: Information Analysis',
         ],
     install_requires=reqs,
-    url="https://github.com/quantopian/qgrid"
+    url="https://github.com/quantopian/qgrid",
+    cmdclass=cmdclass('qgrid/qgridjs'),
 )
