@@ -60,6 +60,7 @@ and will be automatically installed (if necessary) when qgrid is installed via p
  0.3.x             4.0                          4.0.x
  0.3.x             4.1                          4.1.x
  0.3.2             4.2                          5.x
+ 0.3.3             5.x                          6.x
 =================  ===========================  ==============================
 
 **Installing from PyPI:**
