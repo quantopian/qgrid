@@ -2,21 +2,31 @@ define([
     'jquery',
     "underscore",
     'moment',
-    'date_filter',
-    'slider_filter',
-    'text_filter'
+    './qgrid.datefilter.js',
+    './qgrid.sliderfilter.js',
+    './qgrid.textfilter.js',
+    './qgrid.editors.js',
+    'slickgrid/lib/jquery.event.drag-2.3.0.js',
+    'slickgrid/slick.core.js',
+    'slickgrid/plugins/slick.rowselectionmodel.js',
+    'slickgrid/plugins/slick.checkboxselectcolumn.js',
+    'slickgrid/slick.dataview.js',
+    'slickgrid/slick.grid.js',
+    'style!slickgrid/slick.grid.css',
+    'style!slickgrid/slick-default-theme.css',
+    'style!jquery-ui/themes/base/minified/jquery-ui.min.css',
+    'style!./qgrid.css',
 ], function ($, _, moment, date_filter, slider_filter, text_filter) {
   "use strict";
 
   var dependencies_loaded = false;
-  var grids_to_initialize = []
+  var grids_to_initialize = [];
 
-  var QGrid = function (grid_elem_selector, data_frame, column_types) {
+  var QGrid = function (grid_elem_selector, data_view, column_types) {
     this.grid_elem_selector = grid_elem_selector;
-    this.grid_elem = $(this.grid_elem_selector)
-    this.data_frame = data_frame;
+    this.grid_elem = $(this.grid_elem_selector);
+    this.data_view = data_view;
 
-    this.row_data = [];
     this.columns = [];
     this.filters = {};
     this.filter_list = [];
@@ -71,34 +81,22 @@ define([
     }
 
     var row_count = 0;
-    _.each(this.data_frame, function (cur_row, key, list) {
-      cur_row.slick_grid_id = "row" + row_count;
-      row_count++;
-      this.row_data.push(cur_row);
-      this.filter_list.forEach(function(cur_filter){
-        cur_filter.handle_row_data(cur_row);
-      }, this);
-    }, this);
-  }
+    //_.each(this.data_frame, function (cur_row, key, list) {
+    //  cur_row.slick_grid_id = "row" + row_count;
+    //  row_count++;
+    //  this.row_data.push(cur_row);
+    //  this.filter_list.forEach(function(cur_filter){
+    //    cur_filter.handle_row_data(cur_row);
+    //  }, this);
+    //}, this);
+  };
 
   QGrid.prototype.initialize_slick_grid = function (options) {
-    this.data_view = new Slick.Data.DataView({
-      inlineFilters: false,
-      enableTextSelectionOnCells: true
-    })
-
-    this.data_view.beginUpdate();
-    var sort_comparer = this.get_sort_comparer(this.sort_field, this.sort_ascending)
-    this.data_view.sort(sort_comparer, this.sort_ascending);
-    this.data_view.setItems(this.row_data, 'slick_grid_id');
-    this.data_view.setFilter($.proxy(this.include_row, this));
-    this.data_view.endUpdate();
-
     var max_height = options.height || options.rowHeight * 15;
     var grid_height = max_height;
     // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
     // The '+ 1' accounts for the height of the column header.
-    var total_row_height = (this.row_data.length + 1) * options.rowHeight + 1;
+    var total_row_height = (this.data_view.getLength() + 1) * options.rowHeight + 1;
     if (total_row_height <= max_height){
       grid_height = total_row_height;
       this.grid_elem.addClass('hide-scrollbar');
@@ -106,6 +104,12 @@ define([
     this.grid_elem.height(grid_height);
 
     this.slick_grid = new Slick.Grid(this.grid_elem_selector, this.data_view, this.columns, options);
+    window.slick_grid = this.slick_grid;
+    setTimeout(function(){
+      this.slick_grid.init();
+      this.slick_grid.resizeCanvas();
+    }, 1);
+
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel())
     this.update_sort_indicators();
     this.slick_grid.render();
@@ -116,35 +120,38 @@ define([
     // Force the grid to re-render the column headers so the onHeaderCellRendered event is triggered.
     this.slick_grid.setColumns(this.slick_grid.getColumns());
 
-    var self = this;
-    this.data_view.onRowCountChanged.subscribe(function(e, args){
-      self.slick_grid.updateRowCount();
-      self.slick_grid.render();
-    });
-
-    this.data_view.onRowsChanged.subscribe(function(e, args){
-      self.slick_grid.invalidateRows(args.rows)
-      self.slick_grid.render()
-    });
+    //var self = this;
+    //this.data_view.onRowCountChanged.subscribe(function(e, args){
+    //  self.slick_grid.updateRowCount();
+    //  self.slick_grid.render();
+    //});
+    //
+    //this.data_view.onRowsChanged.subscribe(function(e, args){
+    //  self.slick_grid.invalidateRows(args.rows)
+    //  self.slick_grid.render()
+    //});
 
     $(window).resize(function(){
       self.slick_grid.resizeCanvas();
     });
-  }
+  };
 
   QGrid.prototype.handle_filter_changed = function(e, exclude_this_filter){
     var show_clear_filter_button = false;
-    for (var i=0; i < this.filter_list.length; i++){
-      var cur_filter = this.filter_list[i];
-      var filter_button = cur_filter.column_header_elem.find(".filter-button");
-      if (cur_filter.is_active()){
-        show_clear_filter_button = true;
-        filter_button.addClass("filter-active");
-      }
-      else {
-        filter_button.removeClass("filter-active");
-      }
-    }
+    var filter_hash = {};
+
+    //for (var i=0; i < this.filter_list.length; i++){
+    //  var cur_filter = this.filter_list[i];
+    //  var filter_button = cur_filter.column_header_elem.find(".filter-button");
+    //  if (cur_filter.is_active()){
+    //    show_clear_filter_button = true;
+    //    filter_button.addClass("filter-active");
+    //    filter_json
+    //  }
+    //  else {
+    //    filter_button.removeClass("filter-active");
+    //  }
+    //}
 //    if (show_clear_filter_button){
 //      this.tab_elem.find(".clear-filters").show();
 //    }
@@ -152,7 +159,7 @@ define([
 //      this.tab_elem.find(".clear-filters").hide();
 //    }
 
-    this.apply_filters(exclude_this_filter ? e.target : null)
+    //this.apply_filters(exclude_this_filter ? e.target : null)
   }
 
   QGrid.prototype.apply_filters = function(excluded_filter){

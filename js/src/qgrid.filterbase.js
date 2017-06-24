@@ -152,6 +152,11 @@ define([
 //  filter_done: () =>
 //    throw new Error("not implemented!")
 //
+
+  FilterBase.prototype.filter_json = function(item){
+      return null;
+  };
+
   FilterBase.prototype.include_item = function(item){
     throw new Error("not implemented!");
   }

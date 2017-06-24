@@ -10,3 +10,13 @@ dist
 *.egg-info
 
 docs/_build/*
+
+build/
+*.py[cod]
+node_modules/
+
+# Compiled javascript
+qgrid/static/
+
+# OS X
+.DS_Store

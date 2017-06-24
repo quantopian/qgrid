@@ -1,8 +1,8 @@
 define([
     'jquery',
     'handlebars',
-    'filter_base',
-    'jqueryui'
+    './qgrid.filterbase.js',
+    'jquery-ui'
 ], function ($, handlebars, filter_base) {
   "use strict";
 
@@ -153,7 +153,14 @@ define([
     }
 
     return include_item;
-  }
+  };
+
+  SliderFilter.prototype.json_model = function(item){
+      return {
+        "min": this.filter_value_min,
+        "max": this.filter_value_max
+      }
+  };
 
   // Slider filters adjust their min/max when other filters cause rows to be excluded from the grid.  This is so the range
   // of values offered remains appropriate based on the rows in the grid.  This function gets called after all filters
@@ -174,7 +181,7 @@ define([
       // in this column.  If there's only one value, the filter button gets greyed out and we show a tooltip when it
       // gets clicked to explain that the filter would do nothing since there's only one value in the column.
       this.update_has_multiple_values(item);
-  }
+  };
 
   return {'SliderFilter': SliderFilter}
 });

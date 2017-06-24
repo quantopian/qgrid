@@ -6,7 +6,7 @@
    */
   define([
     'jquery',
-    'jqueryui'
+    'jquery-ui'
 ], function ($) {
   "use strict";
 

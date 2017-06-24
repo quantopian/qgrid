@@ -1,40 +1,11 @@
+import ipywidgets as widgets
 import pandas as pd
 import numpy as np
-import uuid
-import os
 import json
+
+from math import floor
 from numbers import Integral
-
-from IPython.display import display_html, display_javascript
-try:
-    from ipywidgets import widgets
-except ImportError:
-    from IPython.html import widgets
-from IPython.display import display, Javascript
-try:
-    from traitlets import Unicode, Instance, Bool, Integer, Dict, List
-except ImportError:
-    from IPython.utils.traitlets import (
-        Unicode, Instance, Bool, Integer, Dict, List
-    )
-
-
-def template_contents(filename):
-    template_filepath = os.path.join(
-        os.path.dirname(__file__),
-        'templates',
-        filename,
-    )
-    with open(template_filepath) as f:
-        return f.read()
-
-
-SLICK_GRID_CSS = template_contents('slickgrid.css.template')
-SLICK_GRID_JS = template_contents('slickgrid.js.template')
-REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
-              "73eaa7adf1762f66eaf4d30ed9cbf385a7e9d9fa/qgrid/qgridjs/")
-LOCAL_URL = "/nbextensions/qgridjs"
-
+from traitlets import Unicode, Instance, Bool, Integer, Dict, List, Tuple
 
 class _DefaultSettings(object):
 
@@ -48,10 +19,10 @@ class _DefaultSettings(object):
             'enableColumnReorder': False,
             'enableTextSelectionOnCells': True,
             'editable': True,
-            'autoEdit': False
+            'autoEdit': False,
+            'explicitInitialization': True
         }
         self._show_toolbar = False
-        self._export_mode = False
         self._remote_js = False
         self._precision = None  # Defer to pandas.get_option
 
@@ -67,16 +38,10 @@ class _DefaultSettings(object):
             self._precision = precision
         if grid_options is not None:
             self._grid_options = grid_options
-        if export_mode is not None:
-            self._export_mode = export_mode
 
     @property
     def show_toolbar(self):
         return self._show_toolbar
-
-    @property
-    def export_mode(self):
-        return self._export_mode
 
     @property
     def grid_options(self):
@@ -193,8 +158,6 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
 
     if show_toolbar is None:
         show_toolbar = defaults.show_toolbar
-    if export_mode is None:
-        export_mode = defaults.export_mode
     if remote_js is None:
         remote_js = defaults.remote_js
     if precision is None:
@@ -213,7 +176,7 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         )
 
     # create a visualization for the dataframe
-    grid = QGridWidget(df=data_frame, precision=precision,
+    grid = QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
                        remote_js=remote_js)
 
@@ -224,28 +187,32 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         rem_row = widgets.Button(description="Remove Row")
         rem_row.on_click(grid.remove_row)
 
-        export = widgets.Button(description="Export")
-        export.on_click(grid.export)
-
-        return widgets.VBox([widgets.HBox([add_row, rem_row, export]), grid])
+        return widgets.VBox([widgets.HBox([add_row, rem_row]), grid])
     else:
-        if export_mode:
-            grid.export()
-            return None
-        else:
-            return grid
+        return grid
 
-class QGridWidget(widgets.DOMWidget):
-    _view_module = Unicode("nbextensions/qgridjs/qgrid.widget", sync=True)
-    _view_name = Unicode('QGridView', sync=True)
+@widgets.register('qgrid.QgridWidget')
+class QgridWidget(widgets.DOMWidget):
+    """"""
+    _view_name = Unicode('QgridView').tag(sync=True)
+    _model_name = Unicode('QgridModel').tag(sync=True)
+    _view_module = Unicode('qgrid').tag(sync=True)
+    _model_module = Unicode('qgrid').tag(sync=True)
+    _view_module_version = Unicode('^0.1.0').tag(sync=True)
+    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    value = Unicode('Hello World!').tag(sync=True)
+
     _df_json = Unicode('', sync=True)
     _column_types_json = Unicode('', sync=True)
     _index_name = Unicode('')
     _initialized = Bool(False)
     _dirty = Bool(False)
-    _cdn_base_url = Unicode(LOCAL_URL, sync=True)
     _multi_index = Bool(False)
     _selected_rows = List()
+    _page_size = Integer(100)
+    _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
+    _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
+    _row_count = Integer(0, sync=True)
 
     df = Instance(pd.DataFrame)
     precision = Integer(6)
@@ -255,7 +222,7 @@ class QGridWidget(widgets.DOMWidget):
     def __init__(self, *args, **kwargs):
         """Initialize all variables before building the table."""
         self._initialized = False
-        super(QGridWidget, self).__init__(*args, **kwargs)
+        super(QgridWidget, self).__init__(*args, **kwargs)
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
         self._initialized = True
@@ -281,6 +248,14 @@ class QGridWidget(widgets.DOMWidget):
 
     def _update_table(self):
         df = self.df.copy()
+
+        from_index = max(self._viewport_range[0] - self._page_size, 0)
+        to_index = max(self._viewport_range[0] + self._page_size, 0)
+        self._df_range = (from_index, to_index)
+
+        df = df.iloc[from_index:to_index]
+
+        self._row_count = len(self.df.index)
 
         if not df.index.name:
             df.index.name = 'Index'
@@ -323,7 +298,6 @@ class QGridWidget(widgets.DOMWidget):
                 date_format='iso',
                 double_precision=self.precision,
             )
-        self._cdn_base_url = REMOTE_URL if self.remote_js else LOCAL_URL
         self._dirty = False
 
     def add_row(self, value=None):
@@ -331,7 +305,7 @@ class QGridWidget(widgets.DOMWidget):
         df = self.df
         if not df.index.is_integer():
             msg = "Cannot add a row to a table with a non-integer index"
-            display(Javascript('alert("%s")' % msg))
+            # display(Javascript('alert("%s")' % msg))
             return
         last = df.iloc[-1]
         last.name += 1
@@ -350,7 +324,7 @@ class QGridWidget(widgets.DOMWidget):
         """Remove the current row from the table"""
         if self._multi_index:
             msg = "Cannot remove a row from a table with a multi index"
-            display(Javascript('alert("%s")' % msg))
+            # display(Javascript('alert("%s")' % msg))
             return
         self.send({'type': 'remove_row'})
 
@@ -372,30 +346,13 @@ class QGridWidget(widgets.DOMWidget):
 
         elif content['type'] == 'selection_change':
             self._selected_rows = content['rows']
+        elif content['type'] == 'viewport_changed':
+            self._viewport_range = (content['top'], content['bottom'])
+            self._update_table()
+            self.send({'type': 'update_data_view'})
 
     def get_selected_rows(self):
         """Get the currently selected rows"""
         return self._selected_rows
 
-    def export(self, value=None):
-        if self._dirty:
-            self._update_table()
-        base_url = REMOTE_URL
-        div_id = str(uuid.uuid4())
-        grid_options = self.grid_options
-        grid_options['editable'] = False
 
-        raw_html = SLICK_GRID_CSS.format(
-            div_id=div_id,
-            cdn_base_url=base_url,
-        )
-        raw_js = SLICK_GRID_JS.format(
-            cdn_base_url=base_url,
-            div_id=div_id,
-            data_frame_json=self._df_json,
-            column_types_json=self._column_types_json,
-            options_json=json.dumps(grid_options),
-        )
-
-        display_html(raw_html, raw=True)
-        display_javascript(raw_js, raw=True)
