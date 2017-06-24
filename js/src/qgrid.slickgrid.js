@@ -30,8 +30,6 @@ define([
     this.columns = [];
     this.filters = {};
     this.filter_list = [];
-    this.sort_field = "id";
-    this.sort_ascending = true;
 
     this.python_types = {
       Character: "text",
@@ -52,10 +50,6 @@ define([
           cur_column.type = "text";
         }else{
           cur_column.type = this.python_types[cur_column.type];
-        }
-
-        if (i === 0){
-          this.sort_field = cur_column.field;
         }
 
         cur_column = {
@@ -92,29 +86,34 @@ define([
   };
 
   QGrid.prototype.initialize_slick_grid = function (options) {
-    var max_height = options.height || options.rowHeight * 15;
-    var grid_height = max_height;
-    // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
-    // The '+ 1' accounts for the height of the column header.
-    var total_row_height = (this.data_view.getLength() + 1) * options.rowHeight + 1;
-    if (total_row_height <= max_height){
-      grid_height = total_row_height;
-      this.grid_elem.addClass('hide-scrollbar');
-    }
-    this.grid_elem.height(grid_height);
-
-    this.slick_grid = new Slick.Grid(this.grid_elem_selector, this.data_view, this.columns, options);
+    var self = this;
+    this.slick_grid = new Slick.Grid(
+        this.grid_elem_selector,
+        this.data_view,
+        this.columns,
+        options
+    );
     window.slick_grid = this.slick_grid;
     setTimeout(function(){
-      this.slick_grid.init();
-      this.slick_grid.resizeCanvas();
+      self.slick_grid.init();
+      var max_height = options.height || options.rowHeight * 20;
+      var grid_height = max_height;
+      // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
+      // The '+ 1' accounts for the height of the column header.
+      var total_row_height = (self.data_view.getLength() + 1) * options.rowHeight + 1;
+      if (total_row_height <= max_height){
+        grid_height = total_row_height;
+        self.grid_elem.addClass('hide-scrollbar');
+      } else {
+        self.grid_elem.removeClass('hide-scrollbar');
+      }
+      self.grid_elem.height(grid_height);
+      self.slick_grid.resizeCanvas();
     }, 1);
 
-    this.slick_grid.setSelectionModel(new Slick.RowSelectionModel())
-    this.update_sort_indicators();
+    this.slick_grid.setSelectionModel(new Slick.RowSelectionModel());
     this.slick_grid.render();
 
-    this.slick_grid.onSort.subscribe($.proxy(this.handle_sort_changed, this));
     this.slick_grid.onHeaderCellRendered.subscribe($.proxy(this.handle_header_cell_rendered, this))
 
     // Force the grid to re-render the column headers so the onHeaderCellRendered event is triggered.
@@ -197,27 +196,6 @@ define([
     }
 
     return item.include;
-  }
-
-  QGrid.prototype.handle_sort_changed = function(e, args){
-    this.sort_field = args.sortCol.field;
-    this.sort_ascending = args.sortAsc;
-
-    var sort_comparer = this.get_sort_comparer(this.sort_field, this.sort_ascending);
-    this.data_view.sort(sort_comparer, this.sort_ascending);
-  }
-
-  QGrid.prototype.update_sort_indicators = function(){
-    this.slick_grid.setSortColumns([ {columnId: this.sort_field, sortAsc: this.sort_ascending} ]);
-  }
-
-  QGrid.prototype.get_sort_comparer = function(field, ascending){
-    return function(x, y){
-      var x_value = x[field];
-      var y_value = y[field];
-
-      return (x_value > y_value) ? 1 : -1;
-    }
   }
 
   QGrid.prototype.handle_header_cell_rendered = function(e, args){

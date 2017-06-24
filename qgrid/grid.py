@@ -213,6 +213,8 @@ class QgridWidget(widgets.DOMWidget):
     _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
     _row_count = Integer(0, sync=True)
+    _sort_field = Unicode('', sync=True)
+    _sort_ascending = Bool(True, sync=True)
 
     df = Instance(pd.DataFrame)
     precision = Integer(6)
@@ -228,7 +230,7 @@ class QgridWidget(widgets.DOMWidget):
         self._initialized = True
         self._selected_rows = []
         if self.df is not None:
-            self._update_table()
+            self._update_table(send_update_msg=False)
 
     def _grid_options_default(self):
         return defaults.grid_options
@@ -243,10 +245,10 @@ class QgridWidget(widgets.DOMWidget):
         """Build the Data Table for the DataFrame."""
         if not self._initialized:
             return
-        self._update_table()
+        self._update_table(send_update_msg=False)
         self.send({'type': 'draw_table'})
 
-    def _update_table(self):
+    def _update_table(self, send_update_msg=True):
         df = self.df.copy()
 
         from_index = max(self._viewport_range[0] - self._page_size, 0)
@@ -299,6 +301,8 @@ class QgridWidget(widgets.DOMWidget):
                 double_precision=self.precision,
             )
         self._dirty = False
+        if send_update_msg:
+            self.send({'type': 'update_data_view'})
 
     def add_row(self, value=None):
         """Append a row at the end of the dataframe."""
@@ -343,13 +347,28 @@ class QgridWidget(widgets.DOMWidget):
                 self._dirty = True
             except ValueError:
                 pass
-
         elif content['type'] == 'selection_change':
             self._selected_rows = content['rows']
         elif content['type'] == 'viewport_changed':
             self._viewport_range = (content['top'], content['bottom'])
             self._update_table()
-            self.send({'type': 'update_data_view'})
+        elif content['type'] == 'sort_changed':
+            self._sort_field = content['sort_field']
+            self._sort_ascending = content['sort_ascending']
+            if self._sort_field in self.df.index.names:
+                self.df.sort_index(
+                    level=self._sort_field,
+                    ascending=self._sort_ascending,
+                    inplace=True
+                )
+            else:
+                self.df.sort_values(
+                    self._sort_field,
+                    ascending=self._sort_ascending,
+                    inplace=True
+                )
+            self._update_table()
+
 
     def get_selected_rows(self):
         """Get the currently selected rows"""

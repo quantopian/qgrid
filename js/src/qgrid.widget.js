@@ -36,36 +36,9 @@ var QgridModel = widgets.DOMWidgetModel.extend({
 // Custom View. Renders the widget model.
 var QgridView = widgets.DOMWidgetView.extend({
     render: function() {
-        this.model.on('change:_df_json', this.dataChanged(), this);
-        this.setupTable();
-        this.drawTable();
-    },
-
-    dataChanged: function() {
-
-
-    },
-
-    /**
-     * Set up the table div.
-     */
-    setupTable: function() {
         // subscribe to incoming messages from the QGridWidget
         this.model.on('msg:custom', this.handleMsg, this);
-
-        // set up the divs and styles
-        this.$el.addClass('q-grid-container');
-        var table = this.$el.append('div');
-        table.addClass('q-grid');
-        this.tableDiv = table[0];
-
-        // fill the portion of the widget area not in the prompt
-        //var parent = this.el.parentElement;
-        //while (parent.className !== 'widget-area') {
-        //    parent = parent.parentElement;
-        //}
-        //var width = (parent.clientWidth - parent.childNodes[0].clientWidth);
-        //this.el.setAttribute("style", "max-width:" + String(width) + "px;");
+        this.drawTable();
     },
 
     create_data_view: function() {
@@ -94,6 +67,14 @@ var QgridView = widgets.DOMWidgetView.extend({
     drawTable: function() {
         var that = this;
 
+        that.$el.empty();
+        if (!that.$el.hasClass('q-grid-container')){
+            this.$el.addClass('q-grid-container');
+        }
+        var table = this.$el.append('div');
+        table.addClass('q-grid');
+        that.tableDiv = table[0];
+
         // create the table
         var data_view = this.create_data_view();
         var column_types = JSON.parse(this.model.get('_column_types_json'));
@@ -119,6 +100,16 @@ var QgridView = widgets.DOMWidgetView.extend({
             }
         }
         sgrid.setColumns(columns);
+        sgrid.setSortColumns([]);
+
+        sgrid.onSort.subscribe(function (e, args){
+            var msg = {
+                'type': 'sort_changed',
+                'sort_field': args.sortCol.field,
+                'sort_ascending': args.sortAsc
+            };
+            that.send(msg);
+        });
 
         sgrid.onViewportChanged.subscribe(function (e, args) {
             if (that.viewport_timeout){
@@ -181,7 +172,6 @@ var QgridView = widgets.DOMWidgetView.extend({
             this.send(msg);
         } else if (msg.type === 'draw_table') {
             this.drawTable();
-            this.updateSize();
         } else if (msg.type == 'update_data_view') {
             if (that.update_timeout){
                 clearTimeout(that.update_timeout);
@@ -200,14 +190,14 @@ var QgridView = widgets.DOMWidgetView.extend({
      */
     updateSize: function() {
         var rowHeight = 28;
-        var max_height = rowHeight * 15;
+        var max_height = rowHeight * 20;
         var grid_height = max_height;
         var total_row_height = (grid.row_data.length + 1) * rowHeight + 1;
         if (total_row_height <= max_height){
-        grid_height = total_row_height;
-        grid.grid_elem.addClass('hide-scrollbar');
+            grid_height = total_row_height;
+            grid.grid_elem.addClass('hide-scrollbar');
         } else {
-        grid.grid_elem.removeClass('hide-scrollbar');
+            grid.grid_elem.removeClass('hide-scrollbar');
         }
         grid.grid_elem.height(grid_height);
         grid.slick_grid.render();
