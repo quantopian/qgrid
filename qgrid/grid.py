@@ -203,7 +203,9 @@ class QgridWidget(widgets.DOMWidget):
     value = Unicode('Hello World!').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
+    _flat_df = Instance(pd.DataFrame)
     _column_types_json = Unicode('', sync=True)
+    _columns = Dict({}, sync=True)
     _index_name = Unicode('')
     _initialized = Bool(False)
     _dirty = Bool(False)
@@ -217,6 +219,7 @@ class QgridWidget(widgets.DOMWidget):
     _sort_ascending = Bool(True, sync=True)
 
     df = Instance(pd.DataFrame)
+    unchanged_df = Instance(pd.DataFrame)
     precision = Integer(6)
     grid_options = Dict(sync=True)
     remote_js = Bool(False)
@@ -230,6 +233,7 @@ class QgridWidget(widgets.DOMWidget):
         self._initialized = True
         self._selected_rows = []
         if self.df is not None:
+            self.unchanged_df = self.df
             self._update_table(send_update_msg=False)
 
     def _grid_options_default(self):
@@ -245,11 +249,12 @@ class QgridWidget(widgets.DOMWidget):
         """Build the Data Table for the DataFrame."""
         if not self._initialized:
             return
+        self.unchanged_df = self.df.copy()
         self._update_table(send_update_msg=False)
         self.send({'type': 'draw_table'})
 
     def _update_table(self, send_update_msg=True):
-        df = self.df.copy()
+        self._flat_df = df = self.df.copy()
 
         from_index = max(self._viewport_range[0] - self._page_size, 0)
         to_index = max(self._viewport_range[0] + self._page_size, 0)
@@ -276,7 +281,7 @@ class QgridWidget(widgets.DOMWidget):
             if "All" in key:
                 del tc[key]
 
-        column_types = []
+        columns = {}
         for col_name, dtype in df.dtypes.iteritems():
             if str(dtype) == 'category':
                 categories = list(df[col_name].cat.categories)
@@ -284,17 +289,16 @@ class QgridWidget(widgets.DOMWidget):
                                'categories': ','.join(categories)}
                 # XXXX: work around bug in to_json for categorical types
                 # https://github.com/pydata/pandas/issues/10778
-                df[col_name] = df[col_name].astype(str)
-                column_types.append(column_type)
+                df.loc[:, col_name] = df[col_name].astype(str)
+                columns[col_name] = column_type
                 continue
             column_type = {'field': col_name}
             for type_name, type_codes in tc.items():
                 if dtype.kind in type_codes:
                     column_type['type'] = type_name
                     break
-            column_types.append(column_type)
-        self._column_types_json = json.dumps(column_types)
-
+            columns[col_name] = column_type
+        self._columns = columns
         self._df_json = df.to_json(
                 orient='records',
                 date_format='iso',
@@ -368,7 +372,38 @@ class QgridWidget(widgets.DOMWidget):
                     inplace=True
                 )
             self._update_table()
+        elif content['type'] == 'get_column_min_max':
+            col_name = content['field']
+            col_info = self._columns[col_name]
+            if col_info['type'] in ['Float', 'Complex', 'Integer', 'UnsignedInteger']:
+                col_series = self._flat_df[col_name]
+                col_info['slider_max'] = max(col_series)
+                col_info['slider_min'] = min(col_series)
+                self._columns[col_name] = col_info
+                self.send({
+                    'type': 'column_min_max_updated',
+                    'field': col_name,
+                    'col_info': col_info
+                })
+        elif content['type'] == 'filter_changed':
+            col_name = content['field']
+            col_info = self._columns[col_name]
+            col_info['filter_info'] = content['filter_info']
+            filter_query = ""
+            for key, value in self._columns.items():
+                if 'filter_info' in value:
+                    filter_info = value['filter_info']
+                    if filter_info['type'] == 'slider':
+                        if filter_info['min'] is not None:
+                            filter_query += "{0} > {1}".format(col_name, filter_info['min'])
+                        if filter_info['max'] is not None:
+                            filter_query += "{0} < {1}".format(col_name, filter_info['max'])
 
+            if filter_query == "":
+                self.df = self.unchanged_df.copy()
+            else:
+                self.df = self.unchanged_df.query(filter_query).copy()
+            self._update_table()
 
     def get_selected_rows(self):
         """Get the currently selected rows"""

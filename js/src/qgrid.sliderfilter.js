@@ -81,7 +81,7 @@ define([
           this.filter_value_max = null;
         }
 
-        $(this).trigger("filter_changed");
+        $(this).trigger("filter_changed", this.get_filter_info());
       }, this)
     });
 
@@ -95,6 +95,12 @@ define([
 
   SliderFilter.prototype.is_active = function(){
     return this.filter_value_min || this.filter_value_max;
+  }
+
+  SliderFilter.prototype.update_min_max = function(col_info){
+    this.updated_min_value = col_info['slider_min'];
+    this.updated_max_value = col_info['slider_max'];
+    $.proxy(this.base.prototype.show_filter.call(this), this);
   }
 
   // This function gets called after update_min_max has been called for every row in the grid, which means
@@ -155,8 +161,10 @@ define([
     return include_item;
   };
 
-  SliderFilter.prototype.json_model = function(item){
+  SliderFilter.prototype.get_filter_info = function(){
       return {
+        "field": this.field,
+        "type": "slider",
         "min": this.filter_value_min,
         "max": this.filter_value_max
       }
@@ -167,21 +175,21 @@ define([
   // have had an opportunity to decide whether they want to exclude a particular row (which they record in the "excluded_by"
   // hash).  This allows us to ignore rows that were excluded by filters other than this one in our calculation of the
   // min/max for this slider.
-  SliderFilter.prototype.update_min_max = function(item){
-    if (!item.excluded_by || (item.excluded_by[this.field] || item.include)){
-      if (!this.updated_min_value || item[this.field] < this.updated_min_value){
-        this.updated_min_value = item[this.field];
-      }
-      if (!this.updated_max_value || item[this.field] > this.updated_max_value){
-        this.updated_max_value = item[this.field];
-      }
-    }
-
-      // In addition to adjusting the min/max, we also want to update the flag that tells us if there are multiple values
-      // in this column.  If there's only one value, the filter button gets greyed out and we show a tooltip when it
-      // gets clicked to explain that the filter would do nothing since there's only one value in the column.
-      this.update_has_multiple_values(item);
-  };
+  //SliderFilter.prototype.update_min_max = function(item){
+  //  if (!item.excluded_by || (item.excluded_by[this.field] || item.include)){
+  //    if (!this.updated_min_value || item[this.field] < this.updated_min_value){
+  //      this.updated_min_value = item[this.field];
+  //    }
+  //    if (!this.updated_max_value || item[this.field] > this.updated_max_value){
+  //      this.updated_max_value = item[this.field];
+  //    }
+  //  }
+  //
+  //    // In addition to adjusting the min/max, we also want to update the flag that tells us if there are multiple values
+  //    // in this column.  If there's only one value, the filter button gets greyed out and we show a tooltip when it
+  //    // gets clicked to explain that the filter would do nothing since there's only one value in the column.
+  //    this.update_has_multiple_values(item);
+  //};
 
   return {'SliderFilter': SliderFilter}
 });

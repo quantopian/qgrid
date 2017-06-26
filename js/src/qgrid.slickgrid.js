@@ -22,10 +22,12 @@ define([
   var dependencies_loaded = false;
   var grids_to_initialize = [];
 
-  var QGrid = function (grid_elem_selector, data_view, column_types) {
+  var QGrid = function (grid_elem_selector, data_view, column_types, widget_model) {
     this.grid_elem_selector = grid_elem_selector;
     this.grid_elem = $(this.grid_elem_selector);
     this.data_view = data_view;
+    this.widget_model = widget_model;
+    this.widget_model.on('msg:custom', $.proxy(this.handle_msg, this), this);
 
     this.columns = [];
     this.filters = {};
@@ -41,38 +43,36 @@ define([
     };
 
     var self = this;
+    $.each(column_types, function(key, value){
+      var cur_column = value;
 
-    if (column_types.length > 0) {
-      for (var i = 0; i < column_types.length; i++){
-        var cur_column = column_types[i];
-
-        if (!cur_column.type){
-          cur_column.type = "text";
-        }else{
-          cur_column.type = this.python_types[cur_column.type];
-        }
-
-        cur_column = {
-          name: cur_column.field,
-          field: cur_column.field,
-          id: cur_column.field,
-          type: cur_column.type,
-          formatter: this["format_" + cur_column.type],
-          sortable: true,
-          resizable: true
-        };
-
-        var filter_generator = this["create_" + cur_column.type + "_filter"];
-        if (filter_generator){
-          var cur_filter = filter_generator(cur_column.field);
-          $(cur_filter).on("filter_changed", $.proxy(this.handle_filter_changed, this))
-          this.filters[cur_column.id] = cur_filter;
-          this.filter_list.push(cur_filter);
-        }
-
-        this.columns.push(cur_column);
+      if (!cur_column.type){
+        cur_column.type = "text";
+      }else{
+        cur_column.type = self.python_types[cur_column.type];
       }
-    }
+
+      cur_column = {
+        name: cur_column.field,
+        field: cur_column.field,
+        id: cur_column.field,
+        type: cur_column.type,
+        formatter: self["format_" + cur_column.type],
+        sortable: true,
+        resizable: true
+      };
+
+      var filter_generator = self["create_" + cur_column.type + "_filter"];
+      if (filter_generator){
+        var cur_filter = filter_generator(cur_column.field);
+        $(cur_filter).on("filter_changed", $.proxy(self.handle_filter_changed, self));
+        $(cur_filter).on("get_column_min_max", $.proxy(self.handle_get_min_max, self));
+        self.filters[cur_column.id] = cur_filter;
+        self.filter_list.push(cur_filter);
+      }
+
+      self.columns.push(cur_column);
+    });
 
     var row_count = 0;
     //_.each(this.data_frame, function (cur_row, key, list) {
@@ -83,6 +83,14 @@ define([
     //    cur_filter.handle_row_data(cur_row);
     //  }, this);
     //}, this);
+  };
+
+  QGrid.prototype.handle_msg = function(msg){
+    if (msg.type == 'column_min_max_updated'){
+      var column_info = msg.col_info;
+      var filter = this.filters[column_info['field']];
+      filter.update_min_max(column_info);
+    }
   };
 
   QGrid.prototype.initialize_slick_grid = function (options) {
@@ -135,31 +143,42 @@ define([
     });
   };
 
-  QGrid.prototype.handle_filter_changed = function(e, exclude_this_filter){
+  QGrid.prototype.handle_filter_changed = function(e, filter_info){
     var show_clear_filter_button = false;
-    var filter_hash = {};
 
-    //for (var i=0; i < this.filter_list.length; i++){
-    //  var cur_filter = this.filter_list[i];
-    //  var filter_button = cur_filter.column_header_elem.find(".filter-button");
-    //  if (cur_filter.is_active()){
-    //    show_clear_filter_button = true;
-    //    filter_button.addClass("filter-active");
-    //    filter_json
-    //  }
-    //  else {
-    //    filter_button.removeClass("filter-active");
-    //  }
+    for (var i=0; i < this.filter_list.length; i++){
+      var cur_filter = this.filter_list[i];
+      var filter_button = cur_filter.column_header_elem.find(".filter-button");
+      if (cur_filter.is_active()){
+        show_clear_filter_button = true;
+        filter_button.addClass("filter-active");
+      }
+      else {
+        filter_button.removeClass("filter-active");
+      }
+    }
+    //if (show_clear_filter_button){
+    //  this.tab_elem.find(".clear-filters").show();
     //}
-//    if (show_clear_filter_button){
-//      this.tab_elem.find(".clear-filters").show();
-//    }
-//    else {
-//      this.tab_elem.find(".clear-filters").hide();
-//    }
+    //else {
+    //  this.tab_elem.find(".clear-filters").hide();
+    //}
 
-    //this.apply_filters(exclude_this_filter ? e.target : null)
-  }
+    var msg = {
+      'type': 'filter_changed',
+      'field': filter_info["field"],
+      'filter_info': filter_info
+    };
+    this.widget_model.send(msg)
+  };
+
+  QGrid.prototype.handle_get_min_max = function(e, field_name) {
+    var msg = {
+        'type': 'get_column_min_max',
+        'field': field_name
+    };
+    this.widget_model.send(msg)
+  };
 
   QGrid.prototype.apply_filters = function(excluded_filter){
     for (var i=0; i < this.filter_list.length; i++){
@@ -177,26 +196,26 @@ define([
     }
   }
 
-  QGrid.prototype.include_row = function(item, args){
-    item.include = true;
-    item.excluded_by = {};
-    for (var i=0; i < this.filter_list.length; i++){
-      var cur_filter = this.filter_list[i];
-      if (!cur_filter.include_item(item)){
-        item.include = false;
-        item.excluded_by[cur_filter.field] = true;
-      }
-    }
-
-    for (var i=0; i < this.filter_list.length; i++){
-      var cur_filter = this.filter_list[i];
-      if (cur_filter instanceof slider_filter.SliderFilter){
-        cur_filter.update_min_max(item);
-      }
-    }
-
-    return item.include;
-  }
+  //QGrid.prototype.include_row = function(item, args){
+  //  item.include = true;
+  //  item.excluded_by = {};
+  //  for (var i=0; i < this.filter_list.length; i++){
+  //    var cur_filter = this.filter_list[i];
+  //    if (!cur_filter.include_item(item)){
+  //      item.include = false;
+  //      item.excluded_by[cur_filter.field] = true;
+  //    }
+  //  }
+  //
+  //  for (var i=0; i < this.filter_list.length; i++){
+  //    var cur_filter = this.filter_list[i];
+  //    if (cur_filter instanceof slider_filter.SliderFilter){
+  //      cur_filter.update_min_max(item);
+  //    }
+  //  }
+  //
+  //  return item.include;
+  //}
 
   QGrid.prototype.handle_header_cell_rendered = function(e, args){
     var cur_filter = this.filters[args.column.id];

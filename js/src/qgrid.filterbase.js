@@ -49,8 +49,15 @@ define([
   }
 
   FilterBase.prototype.handle_filter_button_clicked = function(e){
-    this.column = this.column_header_elem.data("column");
+    $(this).trigger("get_column_min_max", this.field);
+    return false;
+  }
 
+  FilterBase.prototype.update_min_max = function(column_info){
+    throw new Error("not implemented!");
+  }
+
+  FilterBase.prototype.show_filter = function(){
     if (this.has_multiple_values || this.is_active()){
       this.column_header_elem.addClass("active");
 
@@ -90,7 +97,6 @@ define([
       this.filter_btn.tooltip("show");
       this.disabled_tooltip_showing = true;
     }
-    return false;
   }
 
   FilterBase.prototype.hide_filter = function(){
@@ -137,26 +143,27 @@ define([
 
   FilterBase.prototype.handle_reset_filter_clicked = function(e){
     this.reset_filter();
+    $(this).trigger("filter_changed", this.get_filter_info());
     // The "false" parameter tells backtest_table_manager that we want to recalculate the min/max values for this filter
     // based on the rows that are still included in the grid.  This is because if this filter was already active,
     // its min/max could be out-of-date because we don't adjust the min/max on active filters (to prevent confusion).
     // This is currently the only filter_changed case where it's appropriate to have this filter's min/max recalculated,
     // because you wouldn't want to adjust a slider's min/max while the user was moving the slider, for example.
-    $(this).trigger("filter_changed", false);
-    return false
-  }
-//
-//  reset_filter: () =>
-//    throw new Error("not implemented!")
+    return false;
+  };
+
+  FilterBase.prototype.reset_filter = function(){
+    throw new Error("not implemented!");
+  };
+
+  FilterBase.prototype.get_filter_info = function(){
+    throw new Error("not implemented!");
+  };
+
 //
 //  filter_done: () =>
 //    throw new Error("not implemented!")
 //
-
-  FilterBase.prototype.filter_json = function(item){
-      return null;
-  };
-
   FilterBase.prototype.include_item = function(item){
     throw new Error("not implemented!");
   }

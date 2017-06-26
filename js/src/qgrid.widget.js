@@ -77,26 +77,28 @@ var QgridView = widgets.DOMWidgetView.extend({
 
         // create the table
         var data_view = this.create_data_view();
-        var column_types = JSON.parse(this.model.get('_column_types_json'));
+        var column_types = this.model.get('_columns');
         var options = this.model.get('grid_options');
-        grid = new qgrid.QGrid(this.tableDiv, data_view, column_types);
+        grid = new qgrid.QGrid(this.tableDiv, data_view, column_types, that.model);
         grid.initialize_slick_grid(options);
 
         // set up editing
         var sgrid = grid.slick_grid;
         var columns = sgrid.getColumns();
         for (var i = 1; i < columns.length; i++) {
-            if (column_types[i].categories) {
-                columns[i].editor = editors.SelectEditor;
-                var options = {options: column_types[i].categories};
-                columns[i].editorOptions = options;
-            } else if (columns[i].type === 'date') {
-               columns[i].editor = editors.DateEditor;
+            var column_info = column_types[columns[i]['name']];
+            var sgrid_column = columns[i];
+            if (column_info.categories) {
+                sgrid_column.editor = editors.SelectEditor;
+                var options = {options: column_info.categories};
+                sgrid_column.editorOptions = options;
+            } else if (sgrid_column.type === 'date') {
+               sgrid_column.editor = editors.DateEditor;
             } else if (column_types[i]) {
-               columns[i].editor = editors.TextEditor;
+               sgrid_column.editor = editors.TextEditor;
             }
-            if (columns[i].type === 'number') {
-               columns[i].validator = editors.validateNumber;
+            if (sgrid_column.type === 'number') {
+               sgrid_column.validator = editors.validateNumber;
             }
         }
         sgrid.setColumns(columns);
