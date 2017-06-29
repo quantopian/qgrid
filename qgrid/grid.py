@@ -31,7 +31,7 @@ def template_contents(filename):
 
 SLICK_GRID_CSS = template_contents('slickgrid.css.template')
 SLICK_GRID_JS = template_contents('slickgrid.js.template')
-REMOTE_URL = ("https://cdn.rawgit.com/quantopian/qgrid/"
+REMOTE_URL = ("https://cdn.rawgit.com/sbremer/qgrid/"
               "73eaa7adf1762f66eaf4d30ed9cbf385a7e9d9fa/qgrid/qgridjs/")
 LOCAL_URL = "/nbextensions/qgridjs"
 

@@ -27,11 +27,11 @@ define([path], function(widget) {
 
             var path_dictionary = {
                 jquery_drag: cdn_base_url + "/lib/jquery.event.drag-2.2",
-                slick_core: cdn_base_url + "/lib/slick.core.2.2",
-                slick_data_view: cdn_base_url + "/lib/slick.dataview.2.2",
+                slick_core: cdn_base_url + "/lib/slick.core",
+                slick_data_view: cdn_base_url + "/lib/slick.dataview",
                 slick_check_box_column: cdn_base_url + "/lib/slick.checkboxselectcolumn",
                 slick_row_selection_model: cdn_base_url + "/lib/slick.rowselectionmodel",
-                slick_grid: cdn_base_url + "/lib/slick.grid.2.2",
+                slick_grid: cdn_base_url + "/lib/slick.grid",
                 data_grid: cdn_base_url + "/qgrid",
                 date_filter: cdn_base_url + "/qgrid.datefilter",
                 text_filter: cdn_base_url + "/qgrid.textfilter",
