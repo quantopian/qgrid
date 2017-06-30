@@ -91,6 +91,7 @@ define([
   SliderFilter.prototype.reset_filter = function(){
     this.filter_value_min = null;
     this.filter_value_max = null;
+    this.handle_filtering_done();
   }
 
   SliderFilter.prototype.is_active = function(){
@@ -100,6 +101,7 @@ define([
   SliderFilter.prototype.update_min_max = function(col_info){
     this.updated_min_value = col_info['slider_min'];
     this.updated_max_value = col_info['slider_max'];
+    this.has_multiple_values = this.updated_min_value != this.updated_max_value;
     $.proxy(this.base.prototype.show_filter.call(this), this);
   }
 

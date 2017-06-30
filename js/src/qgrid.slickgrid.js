@@ -6,23 +6,25 @@ define([
     './qgrid.sliderfilter.js',
     './qgrid.textfilter.js',
     './qgrid.editors.js',
+    'slickgrid/slick.core.js',
     'slickgrid/lib/jquery.event.drag-2.3.0.js',
     'slickgrid/slick.core.js',
     'slickgrid/plugins/slick.rowselectionmodel.js',
     'slickgrid/plugins/slick.checkboxselectcolumn.js',
     'slickgrid/slick.dataview.js',
     'slickgrid/slick.grid.js',
+    'slickgrid/slick.editors.js',
     'style!slickgrid/slick.grid.css',
     'style!slickgrid/slick-default-theme.css',
     'style!jquery-ui/themes/base/minified/jquery-ui.min.css',
     'style!./qgrid.css',
-], function ($, _, moment, date_filter, slider_filter, text_filter) {
+], function ($, _, moment, date_filter, slider_filter, text_filter, editors) {
   "use strict";
 
   var dependencies_loaded = false;
   var grids_to_initialize = [];
 
-  var QGrid = function (grid_elem_selector, data_view, column_types, widget_model) {
+  var QGrid = function (grid_elem_selector, data_view, df_json, widget_model) {
     this.grid_elem_selector = grid_elem_selector;
     this.grid_elem = $(this.grid_elem_selector);
     this.data_view = data_view;
@@ -33,45 +35,67 @@ define([
     this.filters = {};
     this.filter_list = [];
 
-    this.python_types = {
-      Character: "text",
-      Float: "number",
-      Complex: "number",
-      Datetime: "date",
-      Integer: "number",
-      UnsignedInteger: "number"
+    var number_type_info = {
+      filter: slider_filter.SliderFilter,
+      validator: editors.validateNumber,
+      formatter: this.format_number
+    };
+
+    this.type_infos = {
+      integer: Object.assign(
+          { editor: Slick.Editors.Integer },
+          number_type_info
+      ),
+      number: Object.assign(
+          { editor: Slick.Editors.Float },
+          number_type_info
+      ),
+      string: {
+        filter: text_filter.TextFilter,
+        editor: Slick.Editors.Text,
+        formatter: this.format_string
+      },
+      datetime: {
+        filter: date_filter.DateFilter,
+        editor: Slick.Editors.Date,
+        formatter: this.format_date
+      },
+      any: {
+        filter: text_filter.TextFilter,
+        editor: editors.SelectEditor,
+        formatter: this.format_string
+      }
     };
 
     var self = this;
-    $.each(column_types, function(key, value){
-      var cur_column = value;
+    $.each(df_json.schema.fields, function(i, cur_column){
+      var type_info = self.type_infos[cur_column.type] || {};
 
-      if (!cur_column.type){
-        cur_column.type = "text";
-      }else{
-        cur_column.type = self.python_types[cur_column.type];
-      }
-
-      cur_column = {
-        name: cur_column.field,
-        field: cur_column.field,
-        id: cur_column.field,
-        type: cur_column.type,
-        formatter: self["format_" + cur_column.type],
+      var slick_column = {
+        name: cur_column.name,
+        field: cur_column.name,
+        id: cur_column.name,
         sortable: true,
         resizable: true
       };
 
-      var filter_generator = self["create_" + cur_column.type + "_filter"];
-      if (filter_generator){
-        var cur_filter = filter_generator(cur_column.field);
+      Object.assign(slick_column, type_info);
+
+      if(cur_column.type == 'any'){
+        slick_column.editorOptions = {
+          options: cur_column.constraints.enum
+        };
+      }
+
+      if (slick_column.filter){
+        var cur_filter = new slick_column.filter(slick_column.field);
         $(cur_filter).on("filter_changed", $.proxy(self.handle_filter_changed, self));
         $(cur_filter).on("get_column_min_max", $.proxy(self.handle_get_min_max, self));
-        self.filters[cur_column.id] = cur_filter;
+        self.filters[slick_column.id] = cur_filter;
         self.filter_list.push(cur_filter);
       }
 
-      self.columns.push(cur_column);
+      self.columns.push(slick_column);
     });
 
     var row_count = 0;
@@ -85,10 +109,22 @@ define([
     //}, this);
   };
 
+  QGrid.prototype.format_date = function(row, cell, value, columnDef, dataContext){
+    return moment.parseZone(value).format("YYYY-MM-DD");
+  };
+
+  QGrid.prototype.format_string = function(row, cell, value, columnDef, dataContext){
+    return value;
+  };
+
+  QGrid.prototype.format_number = function(row, cell, value, columnDef, dataContext){
+    return value;
+  };
+
   QGrid.prototype.handle_msg = function(msg){
     if (msg.type == 'column_min_max_updated'){
       var column_info = msg.col_info;
-      var filter = this.filters[column_info['field']];
+      var filter = this.filters[column_info['name']];
       filter.update_min_max(column_info);
     }
   };
@@ -224,29 +260,7 @@ define([
     }
   }
 
-  QGrid.prototype.format_date = function(row, cell, value, columnDef, dataContext){
-    return moment.parseZone(value).format("YYYY-MM-DD");
-  }
 
-  QGrid.prototype.format_string = function(row, cell, value, columnDef, dataContext){
-    return value;
-  }
-
-  QGrid.prototype.format_number = function(row, cell, value, columnDef, dataContext){
-    return value;
-  }
-
-  QGrid.prototype.create_date_filter = function(field){
-    return new date_filter.DateFilter(field);
-  }
-
-  QGrid.prototype.create_number_filter = function(field){
-    return new slider_filter.SliderFilter(field);
-  }
-
-  QGrid.prototype.create_text_filter = function(field){
-    return new text_filter.TextFilter(field);
-  }
 
 //
 //  QGrid.prototype.create_ticker_filter = function(field){

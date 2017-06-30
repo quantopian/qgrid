@@ -203,11 +203,13 @@ class QgridWidget(widgets.DOMWidget):
     value = Unicode('Hello World!').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
+    _filter_query = Unicode('', sync=True)
     _flat_df = Instance(pd.DataFrame)
     _column_types_json = Unicode('', sync=True)
     _columns = Dict({}, sync=True)
     _index_name = Unicode('')
     _initialized = Bool(False)
+    _ignore_df_changed = Bool(False)
     _dirty = Bool(False)
     _multi_index = Bool(False)
     _selected_rows = List()
@@ -234,7 +236,7 @@ class QgridWidget(widgets.DOMWidget):
         self._selected_rows = []
         if self.df is not None:
             self.unchanged_df = self.df
-            self._update_table(send_update_msg=False)
+            self._update_table(update_columns=True)
 
     def _grid_options_default(self):
         return defaults.grid_options
@@ -247,13 +249,13 @@ class QgridWidget(widgets.DOMWidget):
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
-        if not self._initialized:
+        if self._ignore_df_changed or not self._initialized:
             return
         self.unchanged_df = self.df.copy()
-        self._update_table(send_update_msg=False)
+        self._update_table(update_columns=True)
         self.send({'type': 'draw_table'})
 
-    def _update_table(self, send_update_msg=True):
+    def _update_table(self, update_columns=False):
         self._flat_df = df = self.df.copy()
 
         from_index = max(self._viewport_range[0] - self._page_size, 0)
@@ -264,48 +266,24 @@ class QgridWidget(widgets.DOMWidget):
 
         self._row_count = len(self.df.index)
 
-        if not df.index.name:
-            df.index.name = 'Index'
-
         if type(df.index) == pd.core.index.MultiIndex:
-            df.reset_index(inplace=True)
             self._multi_index = True
         else:
-            df.insert(0, df.index.name, df.index)
             self._multi_index = False
 
-        self._index_name = df.index.name or 'Index'
-
-        tc = dict(np.typecodes)
-        for key in np.typecodes.keys():
-            if "All" in key:
-                del tc[key]
-
-        columns = {}
-        for col_name, dtype in df.dtypes.iteritems():
-            if str(dtype) == 'category':
-                categories = list(df[col_name].cat.categories)
-                column_type = {'field': col_name,
-                               'categories': ','.join(categories)}
-                # XXXX: work around bug in to_json for categorical types
-                # https://github.com/pydata/pandas/issues/10778
-                df.loc[:, col_name] = df[col_name].astype(str)
-                columns[col_name] = column_type
-                continue
-            column_type = {'field': col_name}
-            for type_name, type_codes in tc.items():
-                if dtype.kind in type_codes:
-                    column_type['type'] = type_name
-                    break
-            columns[col_name] = column_type
-        self._columns = columns
         self._df_json = df.to_json(
-                orient='records',
+                orient='table',
                 date_format='iso',
                 double_precision=self.precision,
             )
-        self._dirty = False
-        if send_update_msg:
+
+        if update_columns:
+            parsed_json = json.loads(self._df_json)
+            columns = {}
+            for cur_column in parsed_json['schema']['fields']:
+                columns[cur_column['name']] = cur_column
+            self._columns = columns
+        else:
             self.send({'type': 'update_data_view'})
 
     def add_row(self, value=None):
@@ -375,7 +353,7 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'get_column_min_max':
             col_name = content['field']
             col_info = self._columns[col_name]
-            if col_info['type'] in ['Float', 'Complex', 'Integer', 'UnsignedInteger']:
+            if col_info['type'] in ['integer', 'number']:
                 col_series = self._flat_df[col_name]
                 col_info['slider_max'] = max(col_series)
                 col_info['slider_min'] = min(col_series)
@@ -387,23 +365,40 @@ class QgridWidget(widgets.DOMWidget):
                 })
         elif content['type'] == 'filter_changed':
             col_name = content['field']
-            col_info = self._columns[col_name]
+            columns = self._columns.copy()
+            col_info = columns[col_name]
             col_info['filter_info'] = content['filter_info']
+            columns[col_name] = col_info
             filter_query = ""
-            for key, value in self._columns.items():
+
+            def get_prefix(filter_query):
+                return ' & ' if len(filter_query) > 0 else ''
+
+            for key, value in columns.items():
                 if 'filter_info' in value:
                     filter_info = value['filter_info']
+                    prefix = ""
                     if filter_info['type'] == 'slider':
                         if filter_info['min'] is not None:
-                            filter_query += "{0} > {1}".format(col_name, filter_info['min'])
+                            filter_query += "{0}{1} > {2}".format(
+                                get_prefix(filter_query), key, filter_info['min']
+                            )
                         if filter_info['max'] is not None:
-                            filter_query += "{0} < {1}".format(col_name, filter_info['max'])
+                            prefix = ' & ' if len(filter_query) > 0 else ''
+                            filter_query += "{0}{1} < {2}".format(
+                                get_prefix(filter_query), key, filter_info['max']
+                            )
+            self._filter_query = filter_query
+            self._columns = columns
 
+            self._ignore_df_changed = True
             if filter_query == "":
-                self.df = self.unchanged_df.copy()
+                self.df = self.unchanged_df
             else:
-                self.df = self.unchanged_df.query(filter_query).copy()
+                self.df = self.unchanged_df.query(filter_query)
             self._update_table()
+            self._ignore_df_changed = False
+
 
     def get_selected_rows(self):
         """Get the currently selected rows"""

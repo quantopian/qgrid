@@ -1,6 +1,7 @@
 define([
-    'jquery'
-], function ($) {
+    'jquery',
+    'handlebars',
+], function ($, handlebars) {
   "use strict";
 
   var FilterBase = function(field){
@@ -25,6 +26,17 @@ define([
     this.filter_elem = $(this.filter_template(this.column));
     this.initialize_controls();
     return this.filter_elem;
+  }
+
+  FilterBase.prototype.create_error_msg = function(){
+    var error_template =  handlebars.compile(
+      "<div class='filter-error-msg dropdown-menu {{type}}-filter'>" +
+        "All values in the column are the same.  Nothing to filter." +
+      "</div>"
+    );
+    this.filter_elem = $(error_template(this.column));
+    this.initialize_controls();
+    this.disabled_tooltip_showing = true;
   }
 
   FilterBase.prototype.get_filter_template = function(item){
@@ -58,59 +70,53 @@ define([
   }
 
   FilterBase.prototype.show_filter = function(){
+    this.column_header_elem.addClass("active");
+
+    this.prev_column_separator = this.column_header_elem.prev(".slick-header-column").find(".slick-resizable-handle");
+    this.prev_column_separator.addClass("active");
+
+    this.filter_btn.addClass("active");
+
     if (this.has_multiple_values || this.is_active()){
-      this.column_header_elem.addClass("active");
-
-      this.prev_column_separator = this.column_header_elem.prev(".slick-header-column").find(".slick-resizable-handle");
-      this.prev_column_separator.addClass("active");
-
-      this.filter_btn.addClass("active");
-
-      if (!this.filter_elem){
-        this.filter_elem = this.create_filter_elem();
+      if (!this.filter_elem) {
+        this.create_filter_elem();
       }
-
-      this.filter_elem.appendTo(this.column_header_elem.closest(".q-grid-container")).show();
-
-      // position the dropdown
-      var top = this.filter_btn.offset().top + this.filter_btn.height();
-      var left = this.filter_btn.offset().left;
-
-      var filter_width = this.filter_elem.width();
-      var elem_right = left + filter_width;
-
-      var qgrid_area = this.filter_elem.closest('.q-grid-container');
-      if (elem_right > qgrid_area.offset().left + qgrid_area.width()){
-        left = (this.filter_btn.offset().left + this.filter_btn.width()) - filter_width;
-      }
-
-      this.filter_elem.offset({ top: 0, left: 0 });
-      this.filter_elem.offset({ top: top, left: left });
+    } else {
+      this.create_error_msg();
     }
-    else{
-      this.filter_btn.tooltip({
-        placement: "bottom",
-        title: "This filter is disabled because all of the values in this column are the same.",
-        trigger: "manual"
-//        container: "#" + this.context_elem.attr("id")
-      });
-      this.filter_btn.tooltip("show");
-      this.disabled_tooltip_showing = true;
+
+    this.filter_elem.appendTo(this.column_header_elem.closest(".q-grid-container")).show();
+
+    // position the dropdown
+    var top = this.filter_btn.offset().top + this.filter_btn.height();
+    var left = this.filter_btn.offset().left;
+
+    var filter_width = this.filter_elem.width();
+    var elem_right = left + filter_width;
+
+    var qgrid_area = this.filter_elem.closest('.q-grid-container');
+    if (elem_right > qgrid_area.offset().left + qgrid_area.width()){
+      left = (this.filter_btn.offset().left + this.filter_btn.width()) - filter_width;
     }
+
+    this.filter_elem.offset({ top: 0, left: 0 });
+    this.filter_elem.offset({ top: top, left: left });
   }
 
   FilterBase.prototype.hide_filter = function(){
-    if (!this.filter_elem.hasClass("hidden")){
+    if (!this.filter_elem)
+        return;
+    if (this.disabled_tooltip_showing){
+      this.filter_elem.hide();
+      this.filter_elem = null;
+      this.disabled_tooltip_showing = false;
+    } else if (!this.filter_elem.hasClass("hidden")){
       this.filter_elem.hide();
       this.filter_elem.appendTo($(".filter-dropdowns"));
-      this.filter_btn.removeClass("active");
-      this.column_header_elem.removeClass("active");
-      this.prev_column_separator.removeClass("active");
     }
-    else if (this.disabled_tooltip_showing){
-      this.filter_btn.tooltip("destroy");
-      this.disabled_tooltip_showing = false;
-    }
+    this.filter_btn.removeClass("active");
+    this.column_header_elem.removeClass("active");
+    this.prev_column_separator.removeClass("active");
   }
 
   FilterBase.prototype.handle_body_key_up = function(e){
@@ -120,7 +126,7 @@ define([
   }
 
   FilterBase.prototype.handle_body_mouse_down = function (e){
-    if (this.filter_elem[0] != e.target &&
+    if (this.filter_elem && this.filter_elem[0] != e.target &&
       !$.contains(this.filter_elem[0], e.target) &&
       $(e.target).closest(".filter-child-elem").length == 0){
         this.hide_filter();
@@ -166,33 +172,6 @@ define([
 //
   FilterBase.prototype.include_item = function(item){
     throw new Error("not implemented!");
-  }
-
-  FilterBase.prototype.update_has_multiple_values = function(item){
-    // Record the first value, and then set the this.has_multiple_values flag to true as soon as we receive a row that has
-    // a different value from that first value.  We need this info because if this column has all the same
-    // values we don't show the filter button at all (since the filter would be useless).
-    if (!this.first_value){
-      this.first_value = item[this.field];
-    }
-    if (!this.has_multiple_values && this.first_value != item[this.field]){
-      this.has_multiple_values = true;
-    }
-  }
-
-  FilterBase.prototype.handle_row_data = function(item){
-    this.update_has_multiple_values(item);
-    this.initialize_min_max(item);
-  }
-
-  FilterBase.prototype.initialize_min_max = function(item){
-    if (!this.max_value || item[this.field] > this.max_value){
-      this.max_value = item[this.field];
-    }
-
-    if (!this.min_value || item[this.field] < this.min_value){
-      this.min_value = item[this.field];
-    }
   }
 
   return {'FilterBase': FilterBase};

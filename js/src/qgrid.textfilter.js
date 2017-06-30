@@ -35,11 +35,11 @@ define([
     );
   }
 
-  TextFilter.prototype.initialize_min_max = function(item){
-    $.proxy(this.base.prototype.initialize_min_max.call(this, item), this);
-    var item_value = item[this.field];
-    this.items_hash[item_value] = {id: item_value, value: item_value}
-  }
+  //TextFilter.prototype.initialize_min_max = function(item){
+  //  $.proxy(this.base.prototype.initialize_min_max.call(this, item), this);
+  //  var item_value = item[this.field];
+  //  this.items_hash[item_value] = {id: item_value, value: item_value}
+  //}
 
   TextFilter.prototype.initialize_controls = function(){
     $.proxy(this.base.prototype.initialize_controls.call(this), this);

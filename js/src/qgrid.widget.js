@@ -2,7 +2,6 @@ var widgets = require('jupyter-js-widgets');
 var _ = require('underscore');
 var slick_grid = require('slickgrid');
 var qgrid = require('./qgrid.slickgrid.js');
-var editors = require('./qgrid.editors.js');
 
 // Custom Model. Custom widgets models must at least provide default values
 // for model attributes, including
@@ -41,8 +40,7 @@ var QgridView = widgets.DOMWidgetView.extend({
         this.drawTable();
     },
 
-    create_data_view: function() {
-        var df = JSON.parse(this.model.get('_df_json'));
+    create_data_view: function(df) {
         var df_range = this.model.get("_df_range");
         var df_length = this.model.get("_row_count");
         return {
@@ -76,32 +74,14 @@ var QgridView = widgets.DOMWidgetView.extend({
         that.tableDiv = table[0];
 
         // create the table
-        var data_view = this.create_data_view();
-        var column_types = this.model.get('_columns');
+        var df_json = JSON.parse(this.model.get('_df_json'));
+        var data_view = this.create_data_view(df_json.data);
         var options = this.model.get('grid_options');
-        grid = new qgrid.QGrid(this.tableDiv, data_view, column_types, that.model);
+        grid = new qgrid.QGrid(this.tableDiv, data_view, df_json, that.model);
         grid.initialize_slick_grid(options);
 
         // set up editing
         var sgrid = grid.slick_grid;
-        var columns = sgrid.getColumns();
-        for (var i = 1; i < columns.length; i++) {
-            var column_info = column_types[columns[i]['name']];
-            var sgrid_column = columns[i];
-            if (column_info.categories) {
-                sgrid_column.editor = editors.SelectEditor;
-                var options = {options: column_info.categories};
-                sgrid_column.editorOptions = options;
-            } else if (sgrid_column.type === 'date') {
-               sgrid_column.editor = editors.DateEditor;
-            } else if (column_types[i]) {
-               sgrid_column.editor = editors.TextEditor;
-            }
-            if (sgrid_column.type === 'number') {
-               sgrid_column.validator = editors.validateNumber;
-            }
-        }
-        sgrid.setColumns(columns);
         sgrid.setSortColumns([]);
 
         sgrid.onSort.subscribe(function (e, args){
@@ -127,7 +107,7 @@ var QgridView = widgets.DOMWidgetView.extend({
 
         // set up callbacks
         sgrid.onCellChange.subscribe(function(e, args) {
-            var column = columns[args.cell].name;
+            var column = df_json.schema.fields[args.cell].name;
             var id = args.grid.getDataItem(args.row).slick_grid_id;
             var row = Number(id.replace('row', ''));
             var msg = {'row': row, 'column': column,
@@ -179,7 +159,8 @@ var QgridView = widgets.DOMWidgetView.extend({
                 clearTimeout(that.update_timeout);
             }
             that.update_timeout = setTimeout(function(){
-                var data_view = that.create_data_view();
+                var df_json = JSON.parse(that.model.get('_df_json'));
+                var data_view = that.create_data_view(df_json.data);
                 sgrid.setData(data_view);
                 sgrid.render();
                 that.update_timeout = null;
