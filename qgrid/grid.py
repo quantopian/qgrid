@@ -204,8 +204,8 @@ class QgridWidget(widgets.DOMWidget):
 
     _df_json = Unicode('', sync=True)
     _filter_query = Unicode('', sync=True)
-    _flat_df = Instance(pd.DataFrame)
     _column_types_json = Unicode('', sync=True)
+    _primary_key = List()
     _columns = Dict({}, sync=True)
     _index_name = Unicode('')
     _initialized = Bool(False)
@@ -222,7 +222,7 @@ class QgridWidget(widgets.DOMWidget):
 
     df = Instance(pd.DataFrame)
     unchanged_df = Instance(pd.DataFrame)
-    precision = Integer(6)
+    precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
     remote_js = Bool(False)
 
@@ -235,7 +235,7 @@ class QgridWidget(widgets.DOMWidget):
         self._initialized = True
         self._selected_rows = []
         if self.df is not None:
-            self.unchanged_df = self.df
+            self.unchanged_df = self.df.copy()
             self._update_table(update_columns=True)
 
     def _grid_options_default(self):
@@ -256,7 +256,7 @@ class QgridWidget(widgets.DOMWidget):
         self.send({'type': 'draw_table'})
 
     def _update_table(self, update_columns=False):
-        self._flat_df = df = self.df.copy()
+        df = self.df.copy()
 
         from_index = max(self._viewport_range[0] - self._page_size, 0)
         to_index = max(self._viewport_range[0] + self._page_size, 0)
@@ -280,7 +280,9 @@ class QgridWidget(widgets.DOMWidget):
         if update_columns:
             parsed_json = json.loads(self._df_json)
             columns = {}
-            for cur_column in parsed_json['schema']['fields']:
+            df_schema = parsed_json['schema']
+            self._primary_key = df_schema['primaryKey']
+            for cur_column in df_schema['fields']:
                 columns[cur_column['name']] = cur_column
             self._columns = columns
         else:
@@ -337,12 +339,18 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'sort_changed':
             self._sort_field = content['sort_field']
             self._sort_ascending = content['sort_ascending']
-            if self._sort_field in self.df.index.names:
-                self.df.sort_index(
-                    level=self._sort_field,
-                    ascending=self._sort_ascending,
-                    inplace=True
-                )
+            if self._sort_field in self._primary_key:
+                if len(self._primary_key) == 1:
+                    self.df.sort_index(
+                        ascending=self._sort_ascending,
+                        inplace=True
+                    )
+                else:
+                    self.df.sort_index(
+                        level=self._sort_field,
+                        ascending=self._sort_ascending,
+                        inplace=True
+                    )
             else:
                 self.df.sort_values(
                     self._sort_field,
@@ -353,8 +361,15 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'get_column_min_max':
             col_name = content['field']
             col_info = self._columns[col_name]
+            if col_name in self._primary_key:
+                if len(self._primary_key) > 1:
+                    key_index = self._primary_key.index(col_name)
+                    col_series = self.df.index[key_index]
+                else:
+                    col_series = self.df.index
+            else:
+                col_series = self.df[col_name]
             if col_info['type'] in ['integer', 'number']:
-                col_series = self._flat_df[col_name]
                 col_info['slider_max'] = max(col_series)
                 col_info['slider_min'] = min(col_series)
                 self._columns[col_name] = col_info
@@ -380,12 +395,12 @@ class QgridWidget(widgets.DOMWidget):
                     prefix = ""
                     if filter_info['type'] == 'slider':
                         if filter_info['min'] is not None:
-                            filter_query += "{0}{1} > {2}".format(
+                            filter_query += "{0}{1} >= {2}".format(
                                 get_prefix(filter_query), key, filter_info['min']
                             )
                         if filter_info['max'] is not None:
                             prefix = ' & ' if len(filter_query) > 0 else ''
-                            filter_query += "{0}{1} < {2}".format(
+                            filter_query += "{0}{1} <= {2}".format(
                                 get_prefix(filter_query), key, filter_info['max']
                             )
             self._filter_query = filter_query
@@ -393,8 +408,10 @@ class QgridWidget(widgets.DOMWidget):
 
             self._ignore_df_changed = True
             if filter_query == "":
-                self.df = self.unchanged_df
+                self.df = self.unchanged_df.copy()
             else:
+                # FYI the following issue happens https://github.com/pandas-dev/pandas/issues/16363
+                # with a column with dtype float32.  float64 works fine though.
                 self.df = self.unchanged_df.query(filter_query)
             self._update_table()
             self._ignore_df_changed = False

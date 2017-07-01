@@ -88,7 +88,7 @@ define([
       }
 
       if (slick_column.filter){
-        var cur_filter = new slick_column.filter(slick_column.field);
+        var cur_filter = new slick_column.filter(slick_column.field, cur_column.type, self.widget_model.get('precision'));
         $(cur_filter).on("filter_changed", $.proxy(self.handle_filter_changed, self));
         $(cur_filter).on("get_column_min_max", $.proxy(self.handle_get_min_max, self));
         self.filters[slick_column.id] = cur_filter;

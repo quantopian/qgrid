@@ -7,9 +7,9 @@ define([
 ], function ($, _, handlebars, filter_base) {
   "use strict";
 
-  var TextFilter = function(field){
+  var TextFilter = function(field, column_type, precision){
     this.base = filter_base.FilterBase;
-    this.base(field);
+    this.base(field, column_type, precision);
     this.items_hash = {};
   }
   TextFilter.prototype = new filter_base.FilterBase;

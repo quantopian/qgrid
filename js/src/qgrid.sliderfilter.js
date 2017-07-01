@@ -6,9 +6,9 @@ define([
 ], function ($, handlebars, filter_base) {
   "use strict";
 
-  var SliderFilter = function(field){
+  var SliderFilter = function(field, column_type, precision){
     this.base = filter_base.FilterBase;
-    this.base(field);
+    this.base(field, column_type, precision);
   }
   SliderFilter.prototype = new filter_base.FilterBase;
 
@@ -54,24 +54,21 @@ define([
   SliderFilter.prototype.initialize_controls = function(){
     $.proxy(this.base.prototype.initialize_controls.call(this), this);
     this.slider_elem = this.filter_elem.find(".slider-range");
-    this.filter_elem.find(".min-value").html(this.min_value);
-    this.filter_elem.find(".max-value").html(this.max_value);
+    this.set_value(this.min_value, this.max_value);
 
     this.slider_min = this.min_value;
     this.slider_max = this.max_value;
 
-    var step = (this.slider_max - this.slider_min) / 200;
     this.slider_elem.slider({
       range: true,
       min: this.slider_min,
       max: this.slider_max,
       values: [this.slider_min, this.slider_max],
-      step: step,
+      step: this.get_slider_step(),
       slide: $.proxy(function(event, ui){
         this.filter_value_min = ui.values[0];
         this.filter_value_max = ui.values[1];
-        this.filter_elem.find(".min-value").html(this.filter_value_min);
-        this.filter_elem.find(".max-value").html(this.filter_value_max);
+        this.set_value(this.filter_value_min, this.filter_value_max);
 
         if (this.filter_value_min == this.slider_min){
           this.filter_value_min = null;
@@ -88,6 +85,26 @@ define([
     this.handle_filtering_done();
   }
 
+  SliderFilter.prototype.set_value = function(min_val, max_val){
+    if (this.column_type == 'integer'){
+        var min_val_rounded = min_val.toFixed(0);
+        var max_val_rounded = max_val.toFixed(0);
+      } else {
+        var min_val_rounded = min_val.toPrecision(this.precision);
+        var max_val_rounded = max_val.toPrecision(this.precision);
+      }
+      this.filter_elem.find(".min-value").html(min_val_rounded);
+      this.filter_elem.find(".max-value").html(max_val_rounded);
+  }
+
+  SliderFilter.prototype.get_slider_step = function(){
+    if (this.column_type == "integer"){
+      return 1;
+    } else {
+      return (this.slider_max - this.slider_min) / 200;
+    }
+  }
+
   SliderFilter.prototype.reset_filter = function(){
     this.filter_value_min = null;
     this.filter_value_max = null;
@@ -101,9 +118,18 @@ define([
   SliderFilter.prototype.update_min_max = function(col_info){
     this.updated_min_value = col_info['slider_min'];
     this.updated_max_value = col_info['slider_max'];
+
+    if (!this.min_value) {
+      this.min_value = this.updated_min_value;
+    }
+
+    if (!this.max_value) {
+      this.max_value = this.updated_max_value;
+    }
+
     this.has_multiple_values = this.updated_min_value != this.updated_max_value;
     $.proxy(this.base.prototype.show_filter.call(this), this);
-  }
+  };
 
   // This function gets called after update_min_max has been called for every row in the grid, which means
   // this.updated_min_value and this.updated_max_value are now up-to-date.
@@ -132,10 +158,9 @@ define([
     }
 
     if (this.slider_elem){
-      var step = (this.slider_max - this.slider_min) / 200;
+      var step = this.get_slider_step();
       this.slider_elem.slider({min: this.slider_min, max: this.slider_max, values: [min_val, max_val], step: step});
-      this.filter_elem.find(".min-value").html(min_val);
-      this.filter_elem.find(".max-value").html(max_val);
+      this.set_value(min_val, max_val)
     }
     this.update_filter_button_disabled();
   }

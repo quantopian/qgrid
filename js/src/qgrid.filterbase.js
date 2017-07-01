@@ -4,8 +4,10 @@ define([
 ], function ($, handlebars) {
   "use strict";
 
-  var FilterBase = function(field){
+  var FilterBase = function(field, column_type, precision){
     this.field = field;
+    this.column_type = column_type;
+    this.precision = precision;
     this.has_multiple_values = true;
   }
 

@@ -6,9 +6,9 @@ define([
 ], function ($, handlebars, filter_base) {
   "use strict";
 
-  var DateFilter = function(field){
+  var DateFilter = function(field, column_type, precision){
     this.base = filter_base.FilterBase;
-    this.base(field);
+    this.base(field, column_type, precision);
   }
   DateFilter.prototype = new filter_base.FilterBase;
 
