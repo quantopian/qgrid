@@ -198,15 +198,14 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('^0.1.0').tag(sync=True)
-    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    _view_module_version = Unicode('^2.0.0-alpha.0').tag(sync=True)
+    _model_module_version = Unicode('^2.0.0-alpha.0').tag(sync=True)
     value = Unicode('Hello World!').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
-    _filter_query = Unicode('', sync=True)
-    _column_types_json = Unicode('', sync=True)
     _primary_key = List()
     _columns = Dict({}, sync=True)
+    _interval_columns = List([], sync=True)
     _index_name = Unicode('')
     _initialized = Bool(False)
     _ignore_df_changed = Bool(False)
@@ -271,22 +270,40 @@ class QgridWidget(widgets.DOMWidget):
         else:
             self._multi_index = False
 
-        self._df_json = df.to_json(
+        df_json = df.to_json(
+            orient='table',
+            date_format='iso',
+            double_precision=self.precision,
+        )
+
+        if update_columns:
+            self._interval_columns = []
+            parsed_json = json.loads(df_json)
+            df_schema = parsed_json['schema']
+            columns = {}
+            for cur_column in df_schema['fields']:
+                if 'constraints' in cur_column and isinstance(cur_column['constraints']['enum'][0], dict):
+                    cur_column['type'] = 'interval'
+                    self._interval_columns.append(cur_column['name'])
+                columns[cur_column['name']] = cur_column
+
+            self._primary_key = df_schema['primaryKey']
+            self._columns = columns
+
+        if len(self._interval_columns) > 0:
+            df_for_display = df.copy()
+            for col_name in self._interval_columns:
+                df_for_display[col_name] = df[col_name].values.map(lambda x: str(x))
+            df_json = df_for_display.to_json(
                 orient='table',
                 date_format='iso',
                 double_precision=self.precision,
             )
 
-        if update_columns:
-            parsed_json = json.loads(self._df_json)
-            columns = {}
-            df_schema = parsed_json['schema']
-            self._primary_key = df_schema['primaryKey']
-            for cur_column in df_schema['fields']:
-                columns[cur_column['name']] = cur_column
-            self._columns = columns
-        else:
-            self.send({'type': 'update_data_view'})
+        self._df_json = df_json
+
+        if not update_columns:
+            self.send({'type': 'update_data_view', 'columns': self._columns})
 
     def add_row(self, value=None):
         """Append a row at the end of the dataframe."""
@@ -336,6 +353,10 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'viewport_changed':
             self._viewport_range = (content['top'], content['bottom'])
             self._update_table()
+        # elif content['type'] == 'viewport_changed_filter':
+        #     field_name = content['field']
+        #     self._filter_tables[field_name] = (content['top'], content['bottom'])
+        #     self._update_filter_table(content)
         elif content['type'] == 'sort_changed':
             self._sort_field = content['sort_field']
             self._sort_ascending = content['sort_ascending']
@@ -364,7 +385,7 @@ class QgridWidget(widgets.DOMWidget):
             if col_name in self._primary_key:
                 if len(self._primary_key) > 1:
                     key_index = self._primary_key.index(col_name)
-                    col_series = self.df.index[key_index]
+                    col_series = self.df.index.levels[key_index]
                 else:
                     col_series = self.df.index
             else:
@@ -378,41 +399,74 @@ class QgridWidget(widgets.DOMWidget):
                     'field': col_name,
                     'col_info': col_info
                 })
+            elif col_info['type'] in ['any', 'interval']:
+                self.send({
+                    'type': 'column_min_max_updated',
+                    'field': col_name,
+                    'col_info': col_info
+                })
+            else:
+                unique = col_series.sort_values().unique()
+                length = len(unique)
+                max_items = self._page_size * 2
+                range_max = length
+                if length > max_items:
+                    unique = unique[:max_items]
+                    range_max = max_items
+
+                unique_array = []
+                for unique_val in unique:
+                    unique_array.append(unique_val)
+                col_info['values'] = unique_array
+                col_info['length'] = length
+                col_info['value_range'] = (0, range_max)
+                self._columns[col_name] = col_info
+                self.send({
+                    'type': 'column_min_max_updated',
+                    'field': col_name,
+                    'col_info': col_info
+                })
         elif content['type'] == 'filter_changed':
             col_name = content['field']
             columns = self._columns.copy()
             col_info = columns[col_name]
             col_info['filter_info'] = content['filter_info']
             columns[col_name] = col_info
-            filter_query = ""
 
-            def get_prefix(filter_query):
-                return ' & ' if len(filter_query) > 0 else ''
-
+            conditions = []
             for key, value in columns.items():
                 if 'filter_info' in value:
+                    if key in self._primary_key:
+                        if len(self._primary_key) > 1:
+                            key_index = self._primary_key.index(key)
+                            get_value_from_df = lambda df: df.index.get_level_values(level=key_index)
+                        else:
+                            get_value_from_df = lambda df: df.index
+                    else:
+                        get_value_from_df = lambda df: df[key]
+
                     filter_info = value['filter_info']
-                    prefix = ""
                     if filter_info['type'] == 'slider':
                         if filter_info['min'] is not None:
-                            filter_query += "{0}{1} >= {2}".format(
-                                get_prefix(filter_query), key, filter_info['min']
-                            )
+                            conditions.append(get_value_from_df(self.unchanged_df) >= filter_info['min'])
                         if filter_info['max'] is not None:
-                            prefix = ' & ' if len(filter_query) > 0 else ''
-                            filter_query += "{0}{1} <= {2}".format(
-                                get_prefix(filter_query), key, filter_info['max']
-                            )
-            self._filter_query = filter_query
+                            conditions.append(get_value_from_df(self.unchanged_df) <= filter_info['max'])
+                    elif filter_info['type'] == 'text':
+                        selected_values = filter_info['selected']
+                        if len(selected_values) > 0:
+                            conditions.append(get_value_from_df(self.unchanged_df).isin(selected_values))
+
             self._columns = columns
 
             self._ignore_df_changed = True
-            if filter_query == "":
+            if len(conditions) == 0:
                 self.df = self.unchanged_df.copy()
             else:
-                # FYI the following issue happens https://github.com/pandas-dev/pandas/issues/16363
-                # with a column with dtype float32.  float64 works fine though.
-                self.df = self.unchanged_df.query(filter_query)
+                combined_condition = conditions[0]
+                for c in conditions[1:]:
+                    combined_condition = combined_condition & c
+
+                self.df = self.unchanged_df[combined_condition].copy()
             self._update_table()
             self._ignore_df_changed = False
 

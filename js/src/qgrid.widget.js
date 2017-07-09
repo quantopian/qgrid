@@ -19,7 +19,7 @@ var qgrid = require('./qgrid.slickgrid.js');
 // When serialiazing the entire widget state for embedding, only values that
 // differ from the defaults will be specified.
 var QgridModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend(_.result(this, 'widgets.DOMWidgetModel.prototype.defaults'), {
+    defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
         _model_name : 'QgridModel',
         _view_name : 'QgridView',
         _model_module : 'qgrid',
@@ -27,7 +27,6 @@ var QgridModel = widgets.DOMWidgetModel.extend({
         _model_module_version : '0.1.0',
         _view_module_version : '0.1.0',
         _df_json: '',
-
     })
 });
 
@@ -75,9 +74,10 @@ var QgridView = widgets.DOMWidgetView.extend({
 
         // create the table
         var df_json = JSON.parse(this.model.get('_df_json'));
+        var columns = this.model.get('_columns');
         var data_view = this.create_data_view(df_json.data);
         var options = this.model.get('grid_options');
-        grid = new qgrid.QGrid(this.tableDiv, data_view, df_json, that.model);
+        grid = new qgrid.QGrid(this.tableDiv, data_view, columns, that.model);
         grid.initialize_slick_grid(options);
 
         // set up editing

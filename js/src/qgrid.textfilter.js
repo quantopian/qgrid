@@ -41,17 +41,45 @@ define([
   //  this.items_hash[item_value] = {id: item_value, value: item_value}
   //}
 
+  TextFilter.prototype.update_min_max = function(col_info){
+    if (col_info['type'] == 'any'){
+      this.values = col_info.constraints.enum;
+      this.length = this.values.length;
+      this.value_range = [0, this.length];
+    } else {
+      this.values = col_info['values'];
+      this.length = col_info['length'];
+      this.value_range = col_info['value_range'];
+    }
+
+    $.proxy(this.base.prototype.show_filter.call(this), this);
+  };
+
   TextFilter.prototype.initialize_controls = function(){
     $.proxy(this.base.prototype.initialize_controls.call(this), this);
     this.filter_grid_elem = this.filter_elem.find(".text-filter-grid");
     this.search_string = "";
 
-    this.grid_items = _.values(this.items_hash);
-
-    this.data_view = new Slick.Data.DataView({
-      inlineFilters: false,
-      enableTextSelectionOnCells: true
+    this.grid_items = this.values.map(function(value, index){
+      return {
+        id: value,
+        value: value
+      }
     });
+
+    var self = this;
+    this.data_view = {
+      getLength: function() {
+        return self.length;
+      },
+      getItem: function(i) {
+        if (i >= self.value_range[0] && i < self.value_range[1]){
+          return self.grid_items[i];
+        } else {
+          return { id: "row" + i };
+        }
+      }
+    };
 
     this.sort_comparer = function(x, y){
       var x_value = x.value;
@@ -73,12 +101,6 @@ define([
       }
       return true;
     }
-
-    this.data_view.beginUpdate();
-    this.data_view.setItems(this.grid_items);
-    this.data_view.setFilter($.proxy(text_filter, this));
-    this.data_view.sort($.proxy(this.sort_comparer, this), true);
-    this.data_view.endUpdate();
 
     var row_formatter = function(row, cell, value, columnDef, dataContext){
       return "<span class='text-filter-value'>" + dataContext.value + "</span>";
@@ -127,24 +149,14 @@ define([
     this.filter_grid_elem.height(grid_height);
 
     this.filter_grid = new Slick.Grid(this.filter_grid_elem, this.data_view,  columns, options);
+    window.filter_grid = this.filter_grid;
     this.filter_grid.registerPlugin(checkboxSelector);
 
     this.row_selection_model = new Slick.RowSelectionModel({selectActiveRow: false});
     this.row_selection_model.onSelectedRangesChanged.subscribe($.proxy(this.handle_selection_changed, this));
 
     this.filter_grid.setSelectionModel(this.row_selection_model);
-    this.data_view.syncGridSelection(this.filter_grid, true, true);
     this.filter_grid.render();
-
-    this.data_view.onRowCountChanged.subscribe($.proxy(function(e, args){
-      this.filter_grid.updateRowCount();
-      this.filter_grid.render();
-    }, this));
-
-    this.data_view.onRowsChanged.subscribe($.proxy(function(e, args){
-      this.filter_grid.invalidateRows(args.rows);
-      this.filter_grid.render();
-    }, this));
 
     this.security_search = this.filter_elem.find(".search-input");
     this.security_search.keyup($.proxy(this.handle_text_input_key_up, this));
@@ -156,14 +168,20 @@ define([
     this.filter_elem.find("a.select-all-link").click($.proxy(function(e){
       this.reset_filter();
       var all_row_indices = [];
-      var all_rows = this.data_view.getItems();
-      for (var i=0; i< all_rows.length; i++){
+      for (var i=0; i< this.length; i++){
         all_row_indices.push(i)
       }
       this.row_selection_model.setSelectedRows(all_row_indices);
       $(this).trigger("filter_changed");
       return false;
     }, this));
+
+    var self =  this;
+    setTimeout(function(){
+      self.filter_grid.setColumns(self.filter_grid.getColumns());
+      self.filter_grid.resizeCanvas();
+    }, 10);
+
   }
 
   TextFilter.prototype.toggle_row_selected = function(row_index){
@@ -248,60 +266,66 @@ define([
   }
 
   TextFilter.prototype.handle_selection_changed = function(e, args){
-    var all_rows = this.data_view.getItems();
-
-    // Set selected to false for all visible rows (non visible rows
-    // aren't included in the getSelectedRows, so we should leave the
-    // state of those untouched)
-    for (var row_index=0; row_index < all_rows.length; row_index++){
-      var cur_row = all_rows[row_index];
-      if (this.data_view.getRowById(cur_row.id) !== undefined){
-        cur_row.selected = false;
-      }
-    }
-    // Set selected to true for all selected rows
+    //// Set selected to false for all visible rows (non visible rows
+    //// aren't included in the getSelectedRows, so we should leave the
+    //// state of those untouched)
+    //for (var row_index=0; row_index < all_rows.length; row_index++){
+    //  var cur_row = all_rows[row_index];
+    //  if (this.data_view.getRowById(cur_row.id) !== undefined){
+    //    cur_row.selected = false;
+    //  }
+    //}
+    //// Set selected to true for all selected rows
     var rows = this.row_selection_model.getSelectedRows();
-    if (rows.length > 0){
-      for (var row_index=0; row_index < rows.length; row_index++){
-        var data_row_index = rows[row_index];
-        var row = this.data_view.getItem(data_row_index);
-        row.selected = true;
-      }
-    }
-    // Regenerate the filter_sid_list by looping through all rows
-    // (visible and filtered out) and adding them to the list if selected is true.
-    this.filter_list = {};
-    var something_selected = false
-    for (var row_index=0; row_index < all_rows.length; row_index++){
-      var row = all_rows[row_index];
-      if (row.selected){
-        something_selected = true;
-        this.filter_list[row.value] = row.value;
-      }
-    }
-    // If nothing is selected, then indicate that the grid should be unfiltered by setting
-    // the filter_sid_list to null.
-    if (!something_selected){
-      this.filter_list = null;
-    }
+    var self = this;
+    var selected_values = rows.map(function(table_index){
+      return self.grid_items[table_index].value;
+    });
+    //if (rows.length > 0){
+    //  for (var row_index=0; row_index < rows.length; row_index++){
+    //    var data_row_index = rows[row_index];
+    //    var row = this.data_view.getItem(data_row_index);
+    //    row.selected = true;
+    //  }
+    //}
+    //// Regenerate the filter_sid_list by looping through all rows
+    //// (visible and filtered out) and adding them to the list if selected is true.
+    //this.filter_list = {};
+    //var something_selected = false
+    //for (var row_index=0; row_index < all_rows.length; row_index++){
+    //  var row = all_rows[row_index];
+    //  if (row.selected){
+    //    something_selected = true;
+    //    this.filter_list[row.value] = row.value;
+    //  }
+    //}
+    //// If nothing is selected, then indicate that the grid should be unfiltered by setting
+    //// the filter_sid_list to null.
+    //if (!something_selected){
+    //  this.filter_list = null;
+    //}
+    //
+    //// We want to resort the grid, but not immediately when a row is checked, because
+    //// it's jarring to have the row that the user just checked jump to the top of the grid.
+    //// Instead, we just set this flag so that we know to resort the grid the next time the filter
+    //// changes or the filter dropdown gets re-opened.
+    //this.sort_needed = true;
 
-    // We want to resort the grid, but not immediately when a row is checked, because
-    // it's jarring to have the row that the user just checked jump to the top of the grid.
-    // Instead, we just set this flag so that we know to resort the grid the next time the filter
-    // changes or the filter dropdown gets re-opened.
-    this.sort_needed = true;
+    $(this).trigger("filter_changed", {
+      "field": this.field,
+      "type": "text",
+      "selected": selected_values
+    });
+  };
 
-    $(this).trigger("filter_changed");
-  }
-
-  TextFilter.prototype.handle_filter_button_clicked = function(e){
-    $.proxy(this.base.prototype.handle_filter_button_clicked.call(this, e), this);
-    this.filter_grid.setColumns(this.filter_grid.getColumns());
-    this.filter_grid.resizeCanvas();
-    this.sort_if_needed();
-    this.focus_on_search_box();
-    return false;
-  }
+  //TextFilter.prototype.handle_filter_button_clicked = function(e){
+  //  $.proxy(this.base.prototype.handle_filter_button_clicked.call(this, e), this);
+  //  this.filter_grid.setColumns(this.filter_grid.getColumns());
+  //  this.filter_grid.resizeCanvas();
+  //  this.sort_if_needed();
+  //  this.focus_on_search_box();
+  //  return false;
+  //}
 
   TextFilter.prototype.is_active = function(){
     return this.filter_list != null;

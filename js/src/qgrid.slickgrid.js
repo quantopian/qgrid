@@ -24,7 +24,7 @@ define([
   var dependencies_loaded = false;
   var grids_to_initialize = [];
 
-  var QGrid = function (grid_elem_selector, data_view, df_json, widget_model) {
+  var QGrid = function (grid_elem_selector, data_view, columns, widget_model) {
     this.grid_elem_selector = grid_elem_selector;
     this.grid_elem = $(this.grid_elem_selector);
     this.data_view = data_view;
@@ -64,11 +64,14 @@ define([
         filter: text_filter.TextFilter,
         editor: editors.SelectEditor,
         formatter: this.format_string
+      },
+      interval: {
+        formatter: this.format_string
       }
     };
 
     var self = this;
-    $.each(df_json.schema.fields, function(i, cur_column){
+    $.each(columns, function(i, cur_column){
       var type_info = self.type_infos[cur_column.type] || {};
 
       var slick_column = {

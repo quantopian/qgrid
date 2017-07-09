@@ -80,9 +80,7 @@ define([
     this.filter_btn.addClass("active");
 
     if (this.has_multiple_values || this.is_active()){
-      if (!this.filter_elem) {
-        this.create_filter_elem();
-      }
+      this.create_filter_elem();
     } else {
       this.create_error_msg();
     }
