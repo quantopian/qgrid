@@ -414,10 +414,18 @@ class QgridWidget(widgets.DOMWidget):
                     unique = unique[:max_items]
                     range_max = max_items
 
-                unique_array = []
-                for unique_val in unique:
-                    unique_array.append(unique_val)
-                col_info['values'] = unique_array
+                unique_list = unique.tolist()
+                if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
+                    selected_vals = col_info['filter_info']['selected'] or []
+                    col_info['selected_length'] = len(selected_vals)
+                    for unique_val in unique_list:
+                        if unique_val not in selected_vals:
+                            selected_vals.append(unique_val)
+                    col_info['values'] = selected_vals
+                else:
+                    col_info['selected_length'] = 0
+                    col_info['values'] = unique_list
+
                 col_info['length'] = length
                 col_info['value_range'] = (0, range_max)
                 self._columns[col_name] = col_info

@@ -50,6 +50,10 @@ define([
       this.values = col_info['values'];
       this.length = col_info['length'];
       this.value_range = col_info['value_range'];
+      this.selected_rows = [];
+      for (var i=0; i < col_info['selected_length']; i++){
+        this.selected_rows.push(i);
+      }
     }
 
     $.proxy(this.base.prototype.show_filter.call(this), this);
@@ -156,6 +160,7 @@ define([
     this.row_selection_model.onSelectedRangesChanged.subscribe($.proxy(this.handle_selection_changed, this));
 
     this.filter_grid.setSelectionModel(this.row_selection_model);
+    this.row_selection_model.setSelectedRows(this.selected_rows);
     this.filter_grid.render();
 
     this.security_search = this.filter_elem.find(".search-input");
