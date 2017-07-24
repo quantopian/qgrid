@@ -35,28 +35,55 @@ define([
     );
   }
 
-  //TextFilter.prototype.initialize_min_max = function(item){
-  //  $.proxy(this.base.prototype.initialize_min_max.call(this, item), this);
-  //  var item_value = item[this.field];
-  //  this.items_hash[item_value] = {id: item_value, value: item_value}
-  //}
-
   TextFilter.prototype.update_min_max = function(col_info){
-    if (col_info['type'] == 'any'){
-      this.values = col_info.constraints.enum;
-      this.length = this.values.length;
-      this.value_range = [0, this.length];
-    } else {
-      this.values = col_info['values'];
-      this.length = col_info['length'];
-      this.value_range = col_info['value_range'];
-      this.selected_rows = [];
-      for (var i=0; i < col_info['selected_length']; i++){
-        this.selected_rows.push(i);
-      }
+    this.values = col_info['values'];
+    this.length = col_info['length'];
+    this.value_range = col_info['value_range'];
+    this.selected_rows = [];
+    for (var i=0; i < col_info['selected_length']; i++){
+      this.selected_rows.push(i);
     }
-
     $.proxy(this.base.prototype.show_filter.call(this), this);
+  };
+
+  TextFilter.prototype.update_data_view = function(col_info) {
+    if (this.update_timeout){
+        clearTimeout(this.update_timeout);
+    }
+    var that = this;
+    this.update_timeout = setTimeout(function() {
+      that.values = col_info['values'];
+      that.value_range = col_info['value_range'];
+      that.update_slick_grid_data();
+      that.filter_grid.setData(that.data_view);
+      that.filter_grid.render();
+    }, 100);
+  };
+
+  TextFilter.prototype.update_slick_grid_data = function() {
+    this.grid_items = this.values.map(function(value, index){
+      return {
+        id: value,
+        value: value
+      }
+    });
+    var self = this;
+    this.data_view = {
+      getLength: function() {
+        return self.length;
+      },
+      getItem: function(i) {
+        var default_row = {
+          id: 'row' + i,
+          value: ''
+        };
+        if (i >= self.value_range[0] && i < self.value_range[1]){
+          return self.grid_items[i - self.value_range[0]] || default_row;
+        } else {
+          return default_row;
+        }
+      }
+    };
   };
 
   TextFilter.prototype.initialize_controls = function(){
@@ -64,26 +91,7 @@ define([
     this.filter_grid_elem = this.filter_elem.find(".text-filter-grid");
     this.search_string = "";
 
-    this.grid_items = this.values.map(function(value, index){
-      return {
-        id: value,
-        value: value
-      }
-    });
-
-    var self = this;
-    this.data_view = {
-      getLength: function() {
-        return self.length;
-      },
-      getItem: function(i) {
-        if (i >= self.value_range[0] && i < self.value_range[1]){
-          return self.grid_items[i];
-        } else {
-          return { id: "row" + i };
-        }
-      }
-    };
+    this.update_slick_grid_data();
 
     this.sort_comparer = function(x, y){
       var x_value = x.value;
@@ -161,6 +169,28 @@ define([
 
     this.filter_grid.setSelectionModel(this.row_selection_model);
     this.row_selection_model.setSelectedRows(this.selected_rows);
+
+    var that = this;
+
+    if (this.column_type != 'any') {
+      this.filter_grid.onViewportChanged.subscribe(function (e, args) {
+        if (that.viewport_timeout) {
+          clearTimeout(that.viewport_timeout);
+        }
+        that.viewport_timeout = setTimeout(function () {
+          var vp = args.grid.getViewport();
+          var msg = {
+            'type': 'viewport_changed_filter',
+            'field': that.field,
+            'top': vp.top,
+            'bottom': vp.bottom
+          };
+          $(that).trigger('viewport_changed', msg);
+          that.viewport_timeout = null;
+        }, 100);
+      });
+    }
+
     this.filter_grid.render();
 
     this.security_search = this.filter_elem.find(".search-input");
@@ -171,13 +201,16 @@ define([
     this.filter_grid.onKeyDown.subscribe($.proxy(this.handle_grid_key_down, this));
 
     this.filter_elem.find("a.select-all-link").click($.proxy(function(e){
+      this.ignore_selection_changed = true;
       this.reset_filter();
+      this.filter_list = "all";
       var all_row_indices = [];
       for (var i=0; i< this.length; i++){
         all_row_indices.push(i)
       }
       this.row_selection_model.setSelectedRows(all_row_indices);
-      $(this).trigger("filter_changed");
+      this.ignore_selection_changed = false;
+      $(this).trigger("filter_changed", this.get_filter_info());
       return false;
     }, this));
 
@@ -200,7 +233,7 @@ define([
       selected_rows.push(row_index);
     }
     this.row_selection_model.setSelectedRows(selected_rows);
-  }
+  };
 
   TextFilter.prototype.handle_grid_clicked = function(e, args){
     this.toggle_row_selected(args.row);
@@ -208,7 +241,7 @@ define([
     if (!active_cell){
       e.stopImmediatePropagation();
     }
-  }
+  };
 
   TextFilter.prototype.handle_grid_key_down = function(e, args){
     var active_cell = this.filter_grid.getActiveCell();
@@ -271,66 +304,30 @@ define([
   }
 
   TextFilter.prototype.handle_selection_changed = function(e, args){
-    //// Set selected to false for all visible rows (non visible rows
-    //// aren't included in the getSelectedRows, so we should leave the
-    //// state of those untouched)
-    //for (var row_index=0; row_index < all_rows.length; row_index++){
-    //  var cur_row = all_rows[row_index];
-    //  if (this.data_view.getRowById(cur_row.id) !== undefined){
-    //    cur_row.selected = false;
-    //  }
-    //}
-    //// Set selected to true for all selected rows
+    if (this.ignore_selection_changed){
+      return false;
+    }
+
     var rows = this.row_selection_model.getSelectedRows();
+    rows = _.sortBy(rows, function(i){ return i; });
+    this.excluded_rows = [];
     var self = this;
-    var selected_values = rows.map(function(table_index){
-      return self.grid_items[table_index].value;
-    });
-    //if (rows.length > 0){
-    //  for (var row_index=0; row_index < rows.length; row_index++){
-    //    var data_row_index = rows[row_index];
-    //    var row = this.data_view.getItem(data_row_index);
-    //    row.selected = true;
-    //  }
-    //}
-    //// Regenerate the filter_sid_list by looping through all rows
-    //// (visible and filtered out) and adding them to the list if selected is true.
-    //this.filter_list = {};
-    //var something_selected = false
-    //for (var row_index=0; row_index < all_rows.length; row_index++){
-    //  var row = all_rows[row_index];
-    //  if (row.selected){
-    //    something_selected = true;
-    //    this.filter_list[row.value] = row.value;
-    //  }
-    //}
-    //// If nothing is selected, then indicate that the grid should be unfiltered by setting
-    //// the filter_sid_list to null.
-    //if (!something_selected){
-    //  this.filter_list = null;
-    //}
-    //
-    //// We want to resort the grid, but not immediately when a row is checked, because
-    //// it's jarring to have the row that the user just checked jump to the top of the grid.
-    //// Instead, we just set this flag so that we know to resort the grid the next time the filter
-    //// changes or the filter dropdown gets re-opened.
-    //this.sort_needed = true;
+    if (this.filter_list == 'all'){
+      var j = 0;
+      for(var i = 0; i < self.data_view.getLength(); i++){
+        if (rows[j] == i){
+          j += 1;
+          continue;
+        } else {
+          this.excluded_rows.push(i);
+        }
+      }
+    } else {
+      this.filter_list = rows.length > 0 ? rows : null
+    }
 
-    $(this).trigger("filter_changed", {
-      "field": this.field,
-      "type": "text",
-      "selected": selected_values
-    });
+    $(this).trigger("filter_changed", this.get_filter_info());
   };
-
-  //TextFilter.prototype.handle_filter_button_clicked = function(e){
-  //  $.proxy(this.base.prototype.handle_filter_button_clicked.call(this, e), this);
-  //  this.filter_grid.setColumns(this.filter_grid.getColumns());
-  //  this.filter_grid.resizeCanvas();
-  //  this.sort_if_needed();
-  //  this.focus_on_search_box();
-  //  return false;
-  //}
 
   TextFilter.prototype.is_active = function(){
     return this.filter_list != null;
@@ -338,11 +335,20 @@ define([
 
   TextFilter.prototype.reset_filter = function(){
     this.search_string = "";
+    this.excluded_rows = null;
     this.security_search.val("");
-    this.data_view.refresh();
     this.row_selection_model.setSelectedRows([]);
     this.filter_list = null;
-  }
+  };
+
+  TextFilter.prototype.get_filter_info = function(){
+      return {
+        "field": this.field,
+        "type": "text",
+        "selected": this.filter_list,
+        "excluded": this.excluded_rows
+      };
+  };
 
   TextFilter.prototype.include_item = function(item){
     if (this.filter_list && !this.filter_list[item[this.field]]){

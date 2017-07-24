@@ -93,6 +93,7 @@ define([
       if (slick_column.filter){
         var cur_filter = new slick_column.filter(slick_column.field, cur_column.type, self.widget_model.get('precision'));
         $(cur_filter).on("filter_changed", $.proxy(self.handle_filter_changed, self));
+        $(cur_filter).on("viewport_changed", $.proxy(self.handle_filter_viewport_changed, self));
         $(cur_filter).on("get_column_min_max", $.proxy(self.handle_get_min_max, self));
         self.filters[slick_column.id] = cur_filter;
         self.filter_list.push(cur_filter);
@@ -129,6 +130,10 @@ define([
       var column_info = msg.col_info;
       var filter = this.filters[column_info['name']];
       filter.update_min_max(column_info);
+    } else if (msg.type == 'update_data_view_filter'){
+      var column_info = msg.col_info;
+      var filter = this.filters[column_info['name']];
+      filter.update_data_view(column_info);
     }
   };
 
@@ -208,6 +213,10 @@ define([
       'field': filter_info["field"],
       'filter_info': filter_info
     };
+    this.widget_model.send(msg)
+  };
+
+  QGrid.prototype.handle_filter_viewport_changed = function(e, msg){
     this.widget_model.send(msg)
   };
 
