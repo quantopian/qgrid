@@ -66,19 +66,25 @@ define([
       values: [this.filter_value_min, this.filter_value_max],
       step: this.get_slider_step(),
       slide: $.proxy(function(event, ui){
-        this.filter_value_min = ui.values[0];
-        this.filter_value_max = ui.values[1];
-        this.set_value(this.filter_value_min, this.filter_value_max);
-
-        if (this.filter_value_min == this.slider_min){
-          this.filter_value_min = null;
+        if (this.slide_timeout){
+          clearTimeout(this.slide_timeout);
         }
+        this.slide_timeout = setTimeout($.proxy(function(){
+          this.filter_value_min = ui.values[0];
+          this.filter_value_max = ui.values[1];
+          this.set_value(this.filter_value_min, this.filter_value_max);
 
-        if (this.filter_value_max == this.slider_max){
-          this.filter_value_max = null;
-        }
+          if (this.filter_value_min == this.slider_min){
+            this.filter_value_min = null;
+          }
 
-        $(this).trigger("filter_changed", this.get_filter_info());
+          if (this.filter_value_max == this.slider_max){
+            this.filter_value_max = null;
+          }
+
+          $(this).trigger("filter_changed", this.get_filter_info());
+          this.slide_timeout = null;
+        }, this), 100);
       }, this)
     });
   }

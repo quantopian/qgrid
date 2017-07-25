@@ -402,6 +402,7 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'sort_changed':
             self._sort_field = content['sort_field']
             self._sort_ascending = content['sort_ascending']
+            self._sorted_column_cache = {}
             self._update_sort()
             self._update_table()
         elif content['type'] == 'get_column_min_max':
