@@ -1,6 +1,6 @@
 {
   "name": "qgrid",
-  "version": "1.0.0-dev.12",
+  "version": "1.0.0-alpha.5",
   "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook",
   "author": "Quantopian Inc.",
   "main": "src/index.js",
@@ -32,6 +32,7 @@
     "jquery": "^3.2.1",
     "json-loader": "^0.5.4",
     "moment": "^2.18.1",
-    "slickgrid": "^2.3.3"
+    "slickgrid": "^2.3.3",
+    "expose-loader": "^0.7.3"
   }
 }

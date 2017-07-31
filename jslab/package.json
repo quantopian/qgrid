@@ -1,6 +1,6 @@
 {
   "name": "qgrid-jupyterlab",
-  "version": "1.0.0-dev.12",
+  "version": "1.0.0-alpha.5",
   "description": "A JupyterLab extension exposing qgrid",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@jupyter-widgets/jupyterlab-manager": "^0.24.3",
-    "qgrid": "1.0.0-dev.12",
+    "qgrid": "1.0.0-alpha.5",
     "slickgrid": "^2.3.3"
   },
   "jupyterlab": {

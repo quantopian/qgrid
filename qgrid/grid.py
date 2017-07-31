@@ -203,8 +203,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('^1.0.0-alpha.1').tag(sync=True)
-    _model_module_version = Unicode('^1.0.0-alpha.1').tag(sync=True)
+    _view_module_version = Unicode('^1.0.0-alpha.5').tag(sync=True)
+    _model_module_version = Unicode('^1.0.0-alpha.5').tag(sync=True)
     value = Unicode('Hello World!').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
@@ -583,4 +583,5 @@ class QgridWidget(widgets.DOMWidget):
         """Get the currently selected rows"""
         return self._selected_rows
 
-
+# Alias for legacy support, since we changed the capitalization
+QGridWidget = QgridWidget

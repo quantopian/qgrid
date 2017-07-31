@@ -7,13 +7,16 @@ from subprocess import check_call
 import os
 import sys
 import platform
+from os.path import (
+    join, dirname, abspath, exists
+)
 
-here = os.path.dirname(os.path.abspath(__file__))
-node_root = os.path.join(here, 'js')
-is_repo = os.path.exists(os.path.join(here, '.git'))
+here = dirname(abspath(__file__))
+node_root = join(here, 'js')
+is_repo = exists(join(here, '.git'))
 
 npm_path = os.pathsep.join([
-    os.path.join(node_root, 'node_modules', '.bin'),
+    join(node_root, 'node_modules', '.bin'),
                 os.environ.get('PATH', os.defpath),
 ])
 
@@ -29,7 +32,7 @@ def js_prerelease(command, strict=False):
     class DecoratedCommand(command):
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
-            if not is_repo and all(os.path.exists(t) for t in jsdeps.targets):
+            if not is_repo and all(exists(t) for t in jsdeps.targets):
                 # sdist, nothing to do
                 command.run(self)
                 return
@@ -37,7 +40,7 @@ def js_prerelease(command, strict=False):
             try:
                 self.distribution.run_command('jsdeps')
             except Exception as e:
-                missing = [t for t in jsdeps.targets if not os.path.exists(t)]
+                missing = [t for t in jsdeps.targets if not exists(t)]
                 if strict or missing:
                     log.warn('rebuilding js and css failed')
                     if missing:
@@ -63,11 +66,11 @@ class NPM(Command):
 
     user_options = []
 
-    node_modules = os.path.join(node_root, 'node_modules')
+    node_modules = join(node_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'qgrid', 'static', 'extension.js'),
-        os.path.join(here, 'qgrid', 'static', 'index.js')
+        join(here, 'qgrid', 'static', 'extension.js'),
+        join(here, 'qgrid', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -84,8 +87,8 @@ class NPM(Command):
             return False
 
     def should_run_npm_install(self):
-        package_json = os.path.join(node_root, 'package.json')
-        node_modules_exists = os.path.exists(self.node_modules)
+        package_json = join(node_root, 'package.json')
+        node_modules_exists = exists(self.node_modules)
         return self.has_npm()
 
     def run(self):
@@ -102,7 +105,7 @@ class NPM(Command):
             os.utime(self.node_modules, None)
 
         for t in self.targets:
-            if not os.path.exists(t):
+            if not exists(t):
                 msg = 'Missing file: %s' % t
                 if not has_npm:
                     msg += '\nnpm is required to build a development version of widgetsnbextension'
@@ -112,8 +115,15 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 version_ns = {}
-with open(os.path.join(here, 'qgrid', '_version.py')) as f:
+with open(join(here, 'qgrid', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
+
+def read_requirements(basename):
+    reqs_file = join(dirname(abspath(__file__)), basename)
+    with open(reqs_file) as f:
+        return [req.strip() for req in f.readlines()]
+
+reqs = read_requirements('requirements.txt')
 
 setup_args = {
     'name': 'qgrid',
@@ -128,9 +138,7 @@ setup_args = {
             'qgrid/static/index.js.map',
         ]),
     ],
-    'install_requires': [
-        'ipywidgets>=6.0.0',
-    ],
+    'install_requires': reqs,
     'packages': find_packages(),
     'zip_safe': False,
     'cmdclass': {

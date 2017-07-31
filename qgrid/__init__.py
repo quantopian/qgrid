@@ -1,6 +1,12 @@
 from ._version import version_info, __version__
 
-from .grid import *
+from .grid import (
+    set_defaults,
+    set_grid_option,
+    show_grid,
+    QgridWidget,
+    QGridWidget
+)
 
 def _jupyter_nbextension_paths():
     return [{
@@ -10,4 +16,10 @@ def _jupyter_nbextension_paths():
         'require': 'qgrid/extension'
     }]
 
-__all__ = ['set_defaults', 'set_grid_option', 'show_grid', 'QGridWidget']
+__all__ = [
+    'set_defaults',
+    'set_grid_option',
+    'show_grid',
+    'QgridWidget',
+    'QGridWidget'
+]

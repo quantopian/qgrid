@@ -1,4 +1,5 @@
 notebook>=4.0.0
-pandas>=0.18.1
-pandas-datareader==0.4.0
-ipywidgets>=4.0.0
+pandas>=0.17.0
+pandas-datareader>=0.4.0
+ipywidgets>=7.0.0b3
+semver>=2.0.0
