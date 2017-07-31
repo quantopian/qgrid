@@ -21,7 +21,7 @@ being initially released on github in the `summer of 2014
 Quantopian engineers, other than for the purposes of fixing critical bugs or reviewing PRs from the community.
 
 That's changed a bit this summer, as we currently have a major refactoring project underway.  See the
-`*new* Try the alpha preview of qgrid 1.0.0 *new*`_ section below for more details.
+`\*\*\* Try the alpha preview of qgrid 1.0.0 \*\*\*`_ section below for more details.
 
 Demo
 ----
@@ -96,8 +96,8 @@ want.  To run the latest code that is on master, install qgrid from GitHub inste
 
     pip install git+https://github.com/quantopian/qgrid
 
-*new* Try the alpha preview of qgrid 1.0.0 *new*
-------------------------------------------------
+\*\*\* Try the alpha preview of qgrid 1.0.0 \*\*\*
+--------------------------------------------------
 As of this summer (2017) a new project is underway to refactor qgrid to be able to handle displaying much larger
 DataFrames. By only sending the rows of the DataFrame that are currently in view and requesting more rows from the
 notebook server as the user scrolls, qgrid is able to display any DataFrame that can be held in memory by your
