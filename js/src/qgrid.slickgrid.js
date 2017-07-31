@@ -14,10 +14,10 @@ define([
     'slickgrid/slick.dataview.js',
     'slickgrid/slick.grid.js',
     'slickgrid/slick.editors.js',
-    'style!slickgrid/slick.grid.css',
-    'style!slickgrid/slick-default-theme.css',
-    'style!jquery-ui/themes/base/minified/jquery-ui.min.css',
-    'style!./qgrid.css',
+    'style-loader!slickgrid/slick.grid.css',
+    'style-loader!slickgrid/slick-default-theme.css',
+    'style-loader!jquery-ui/themes/base/minified/jquery-ui.min.css',
+    'style-loader!./qgrid.css',
 ], function ($, _, moment, date_filter, slider_filter, text_filter, editors) {
   "use strict";
 

@@ -1,6 +1,6 @@
 {
   "name": "qgrid",
-  "version": "2.0.0-alpha.0",
+  "version": "1.0.0-dev.12",
   "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook",
   "author": "Quantopian Inc.",
   "main": "src/index.js",
@@ -19,18 +19,19 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "css-loader": "^0.28.4",
-    "file-loader": "^0.11.2",
-    "handlebars": "^4.0.10",
-    "jquery-ui": "1.10.4",
-    "json-loader": "^0.5.4",
-    "moment": "^2.18.1",
-    "slickgrid": "^2.3.3",
-    "style-loader": "^0.18.2",
     "webpack": "^1.12.14"
   },
   "dependencies": {
     "jupyter-js-widgets": "^2.1.4",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "css-loader": "^0.28.4",
+    "file-loader": "^0.11.2",
+    "style-loader": "^0.18.2",
+    "handlebars": "^4.0.10",
+    "jquery-ui": "1.10.4",
+    "jquery": "^3.2.1",
+    "json-loader": "^0.5.4",
+    "moment": "^2.18.1",
+    "slickgrid": "^2.3.3"
   }
 }

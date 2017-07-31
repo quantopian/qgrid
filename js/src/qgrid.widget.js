@@ -1,5 +1,6 @@
 var widgets = require('jupyter-js-widgets');
 var _ = require('underscore');
+window.jQuery = require('jquery');
 var slick_grid = require('slickgrid');
 var qgrid = require('./qgrid.slickgrid.js');
 

@@ -6,6 +6,11 @@ import json
 from math import floor
 from numbers import Integral
 from traitlets import Unicode, Instance, Bool, Integer, Dict, List, Tuple
+import semver
+if semver.compare(pd.__version__, '0.20.0') > 0:
+    import pandas.io.json as pd_json
+else:
+    from . import pd_json
 
 class _DefaultSettings(object):
 
@@ -198,8 +203,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('^2.0.0-alpha.0').tag(sync=True)
-    _model_module_version = Unicode('^2.0.0-alpha.0').tag(sync=True)
+    _view_module_version = Unicode('^1.0.0-alpha.1').tag(sync=True)
+    _model_module_version = Unicode('^1.0.0-alpha.1').tag(sync=True)
     value = Unicode('Hello World!').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
@@ -272,11 +277,10 @@ class QgridWidget(widgets.DOMWidget):
         else:
             self._multi_index = False
 
-        df_json = df.to_json(
-            orient='table',
-            date_format='iso',
-            double_precision=self.precision,
-        )
+        df_json = pd_json.to_json(None, df,
+                            orient='table',
+                            date_format='iso',
+                            double_precision=self.precision)
 
         if update_columns:
             self._interval_columns = []
@@ -296,10 +300,10 @@ class QgridWidget(widgets.DOMWidget):
             df_for_display = df.copy()
             for col_name in self._interval_columns:
                 df_for_display[col_name] = df[col_name].values.map(lambda x: str(x))
-            df_json = df_for_display.to_json(
+            df_json = pd_json.to_json(None, df_for_display,
                 orient='table',
                 date_format='iso',
-                double_precision=self.precision,
+                double_precision=self.precision
             )
 
         self._df_json = df_json

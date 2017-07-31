@@ -1,13 +1,22 @@
 var version = require('./package.json').version;
+var webpack = require('webpack');
 
 // Custom webpack loaders are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
 var loaders = [
     { test: /\.json$/, loader: 'json-loader' },
     { test: /\.css$/, loader: 'style-loader!css-loader' },
-    { test: /\.(jpe?g|png|gif|svg)$/i, loader: 'file-loader'}
+    { test: /\.(jpe?g|png|gif|svg)$/i, loader: 'file-loader'},
+    { test: require.resolve("jquery"), loader: "expose-loader?$!expose-loader?jQuery" }
 ];
 
+var plugins = [
+    new webpack.ProvidePlugin({
+       $: "jquery",
+       jQuery: "jquery",
+       jquery: "jquery"
+   })
+];
 
 module.exports = [
     {// Notebook extension
@@ -29,7 +38,8 @@ module.exports = [
             filename: 'extension.js',
             path: '../qgrid/static',
             libraryTarget: 'amd'
-        }
+        },
+        plugins: plugins
     },
     {// Bundle for the notebook containing the custom widget views and models
      //
@@ -53,7 +63,8 @@ module.exports = [
                 'handlebars' : 'handlebars/dist/handlebars.js'
             }
         },
-        externals: ['jupyter-js-widgets']
+        externals: ['jupyter-js-widgets'],
+        plugins: plugins
     },
     {// Embeddable qgrid bundle
      //
@@ -86,7 +97,8 @@ module.exports = [
                 'handlebars' : 'handlebars/dist/handlebars.js'
             }
         },
-        externals: ['jupyter-js-widgets']
+        externals: ['jupyter-js-widgets'],
+        plugins: plugins
     }
 ];
 
