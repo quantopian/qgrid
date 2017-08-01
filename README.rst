@@ -16,7 +16,7 @@ We originally developed qgrid for use in `Quantopian's hosted research environme
 on the backburner for a while so we could focus on higher priority projects (like developing the research environment
 in which qgrid would be deployed, and adding the ability to share notebooks from that environment to the
 `Quantopian forums <https://www.quantopian.com?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_).  So after
-being initially released on github in the `summer of 2014
+being initially released on github in `October of 2014
 <https://twitter.com/Tim_Shawver/status/521092342162681857>`_, this project has not gotten significant attention by
 Quantopian engineers, other than for the purposes of fixing critical bugs or reviewing PRs from the community.
 
@@ -98,7 +98,7 @@ want.  To run the latest code that is on master, install qgrid from GitHub inste
 
 \*\*\* Try the alpha preview of qgrid 1.0.0 \*\*\*
 --------------------------------------------------
-As of this summer (2017) a new project is underway to refactor qgrid to be able to handle displaying much larger
+As of July 2017 a new project is underway to refactor qgrid to be able to handle displaying much larger
 DataFrames. By only sending the rows of the DataFrame that are currently in view and requesting more rows from the
 notebook server as the user scrolls, qgrid is able to display any DataFrame that can be held in memory by your
 notebook server.  In our testing this means that instead of crashing at around 50K rows as it previously would, qgrid
@@ -125,9 +125,24 @@ If you haven't enabled the ipywidgets nbextension yet, you'll need to also run t
 
 At this point you should be able to run a notebook and use qgrid as you normally would.  The only change in the API is
 that the **nbinstall function no longer exists, and is now unnecessary**.  Also there are a couple of features that
-are currently broken: searching for a string in the text filter dropdown doesn't work yet, and neither does the date
-filter.  Everything else should be working though so feel free to log issues for any other problems you find in the
-alpha.
+are currently broken:
+
+- Searching for a string in the text filter dropdown is broken
+- Date filter is broken
+- Slider filter can't reopen after setting a filter on a numpy int64 column.
+- Exporting to html appears to be broken.  This was working at one point.
+
+Other than those issues, everything else should be working though so feel free to log issues for any other problems
+you find in the alpha.
+
+To try qgrid out on Jupyterlab, run the following commands::
+
+  pip install jupyterlab==0.25.2
+  jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.24.3
+  jupyter labextension enable @jupyter-widgets/jupyterlab-manager
+  jupyter labextension install qgrid-jupyterlab@1.0.0-dev.12
+  jupyter labextension enable qgrid-jupyterlab
+  jupyter lab
 
 Running the demo notebook locally
 ---------------------------------

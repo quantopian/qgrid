@@ -196,15 +196,15 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
     else:
         return grid
 
-@widgets.register('qgrid.QgridWidget')
+@widgets.register
 class QgridWidget(widgets.DOMWidget):
     """"""
     _view_name = Unicode('QgridView').tag(sync=True)
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('^1.0.0-alpha.5').tag(sync=True)
-    _model_module_version = Unicode('^1.0.0-alpha.5').tag(sync=True)
+    _view_module_version = Unicode('^1.0.0-alpha.6').tag(sync=True)
+    _model_module_version = Unicode('^1.0.0-alpha.6').tag(sync=True)
     value = Unicode('Hello World!').tag(sync=True)
 
     _df_json = Unicode('', sync=True)

@@ -7,8 +7,7 @@ if (window.require) {
     window.require.config({
         map: {
             "*" : {
-                "qgrid": "nbextensions/qgrid/index",
-                "jupyter-js-widgets": "nbextensions/jupyter-js-widgets/extension"
+                "qgrid": "nbextensions/qgrid/index"
             }
         }
     });

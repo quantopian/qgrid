@@ -1,4 +1,4 @@
-var widgets = require('jupyter-js-widgets');
+var widgets = require('@jupyter-widgets/base');
 var _ = require('underscore');
 window.jQuery = require('jquery');
 var slick_grid = require('slickgrid');
@@ -20,13 +20,13 @@ var qgrid = require('./qgrid.slickgrid.js');
 // When serialiazing the entire widget state for embedding, only values that
 // differ from the defaults will be specified.
 var QgridModel = widgets.DOMWidgetModel.extend({
-    defaults: _.extend({}, widgets.DOMWidgetModel.prototype.defaults, {
+    defaults: _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
         _model_name : 'QgridModel',
         _view_name : 'QgridView',
         _model_module : 'qgrid',
         _view_module : 'qgrid',
-        _model_module_version : '0.1.0',
-        _view_module_version : '0.1.0',
+        _model_module_version : '^1.0.0-alpha.6',
+        _view_module_version : '^1.0.0-alpha.6',
         _df_json: '',
     })
 });

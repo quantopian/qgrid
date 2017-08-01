@@ -63,7 +63,7 @@ module.exports = [
                 'handlebars' : 'handlebars/dist/handlebars.js'
             }
         },
-        externals: ['jupyter-js-widgets'],
+        externals: ['@jupyter-widgets/base'],
         plugins: plugins
     },
     {// Embeddable qgrid bundle
@@ -97,7 +97,7 @@ module.exports = [
                 'handlebars' : 'handlebars/dist/handlebars.js'
             }
         },
-        externals: ['jupyter-js-widgets'],
+        externals: ['@jupyter-widgets/base'],
         plugins: plugins
     }
 ];
