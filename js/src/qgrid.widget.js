@@ -28,6 +28,7 @@ var QgridModel = widgets.DOMWidgetModel.extend({
         _model_module_version : '^1.0.0-alpha.6',
         _view_module_version : '^1.0.0-alpha.6',
         _df_json: '',
+        _columns: {}
     })
 });
 

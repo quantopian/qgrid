@@ -196,16 +196,25 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
     else:
         return grid
 
-@widgets.register
+@widgets.register('qgrid.QgridWidget')
 class QgridWidget(widgets.DOMWidget):
-    """"""
+    """
+    The widget class which is instantiated by the 'show_grid' method, and
+    can algo be constructed directly.
+
+    :ivar df: The DataFrame that is displayed in the cell output via qgrid,
+              which will reflect any sorting/filtering/editing changes that
+              are made.
+    :ivar unchanged_df: An unchanged backup copy of the original DataFrame
+                        that was displayed with qgrid.
+    """
+
     _view_name = Unicode('QgridView').tag(sync=True)
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('^1.0.0-alpha.6').tag(sync=True)
-    _model_module_version = Unicode('^1.0.0-alpha.6').tag(sync=True)
-    value = Unicode('Hello World!').tag(sync=True)
+    _view_module_version = Unicode('1.0.0-alpha.6').tag(sync=True)
+    _model_module_version = Unicode('1.0.0-alpha.6').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
     _primary_key = List()
@@ -311,7 +320,7 @@ class QgridWidget(widgets.DOMWidget):
         if not update_columns:
             self.send({'type': 'update_data_view', 'columns': self._columns})
 
-    def add_row(self, value=None):
+    def add_row(self):
         """Append a row at the end of the dataframe."""
         df = self.df
         if not df.index.is_integer():
@@ -331,7 +340,7 @@ class QgridWidget(widgets.DOMWidget):
         self._dirty = True
         self.send(msg)
 
-    def remove_row(self, value=None):
+    def remove_row(self):
         """Remove the current row from the table"""
         if self._multi_index:
             msg = "Cannot remove a row from a table with a multi index"
