@@ -163,8 +163,9 @@ var QgridView = widgets.DOMWidgetView.extend({
             that.update_timeout = setTimeout(function(){
                 var df_json = JSON.parse(that.model.get('_df_json'));
                 var data_view = that.create_data_view(df_json.data);
-                sgrid.setData(data_view);
+                grid.set_data_view(data_view);
                 sgrid.render();
+                that.updateSize();
                 that.update_timeout = null;
             }, 100);
         }
@@ -177,7 +178,7 @@ var QgridView = widgets.DOMWidgetView.extend({
         var rowHeight = 28;
         var max_height = rowHeight * 20;
         var grid_height = max_height;
-        var total_row_height = (grid.row_data.length + 1) * rowHeight + 1;
+        var total_row_height = (grid.data_view.getLength() + 1) * rowHeight + 1;
         if (total_row_height <= max_height){
             grid_height = total_row_height;
             grid.grid_elem.addClass('hide-scrollbar');

@@ -145,7 +145,7 @@ define([
         this.columns,
         options
     );
-    window.slick_grid = this.slick_grid;
+
     setTimeout(function(){
       self.slick_grid.init();
       var max_height = options.height || options.rowHeight * 20;
@@ -185,6 +185,11 @@ define([
     $(window).resize(function(){
       self.slick_grid.resizeCanvas();
     });
+  };
+
+  QGrid.prototype.set_data_view = function(data_view){
+    this.data_view = data_view;
+    this.slick_grid.setData(data_view);
   };
 
   QGrid.prototype.handle_filter_changed = function(e, filter_info){

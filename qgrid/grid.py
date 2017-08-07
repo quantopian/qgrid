@@ -320,7 +320,7 @@ class QgridWidget(widgets.DOMWidget):
         if not update_columns:
             self.send({'type': 'update_data_view', 'columns': self._columns})
 
-    def add_row(self):
+    def add_row(self, value=None):
         """Append a row at the end of the dataframe."""
         df = self.df
         if not df.index.is_integer():
@@ -330,17 +330,9 @@ class QgridWidget(widgets.DOMWidget):
         last = df.iloc[-1]
         last.name += 1
         df.loc[last.name] = last.values
-        precision = pd.get_option('display.precision') - 1
-        row_data = last.to_json(date_format='iso',
-                                double_precision=precision)
-        msg = json.loads(row_data)
-        msg[self._index_name] = str(last.name)
-        msg['slick_grid_id'] = str(last.name)
-        msg['type'] = 'add_row'
-        self._dirty = True
-        self.send(msg)
+        self._update_table()
 
-    def remove_row(self):
+    def remove_row(self, value=None):
         """Remove the current row from the table"""
         if self._multi_index:
             msg = "Cannot remove a row from a table with a multi index"
