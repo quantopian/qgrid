@@ -7,20 +7,47 @@
 
 .q-grid-container {
   position: relative;
-  margin: 3px 0;
   overflow-x: auto;
-}
-
-.q-grid {
   width: auto;
   min-width: 600px;
-  height: 571px;
-  border: 1px solid #d3d3d3;
+  height: auto;
   border-radius: 4px;
 }
 
+.q-grid {
+  position: relative;
+  border: 1px solid #d3d3d3;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  box-sizing: border-box;
+}
+
+.q-grid.force-fit-columns .slick-viewport {
+  overflow-x: hidden !important;
+}
+
+.q-grid-toolbar {
+  margin: 4px 0
+}
+
+.q-grid-toolbar .btn {
+  background-color: #EEEEEE;
+  border-color: #E0E0E0;
+  margin-right: 6px;
+  padding: 4px 40px;
+}
+
+.q-grid-toolbar .btn:hover {
+  background-color: #DDDDDD;
+  border-color: #CCCCCC;
+}
+
 .output_scroll .q-grid {
-  height: 320px !important;
+  height: 315px !important;
+}
+
+.output_scroll .show-toolbar .q-grid {
+  height: 284px !important;
 }
 
 .q-grid.hide-scrollbar > .slick-header {

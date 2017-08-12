@@ -108,7 +108,7 @@ def set_grid_option(optname, optvalue):
     defaults.grid_options[optname] = optvalue
 
 
-def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, grid_options=None, export_mode=None):
+def show_grid(data_frame, show_toolbar=None, precision=None, grid_options=None, export_mode=None):
     """
     Main entry point for rendering DataFrames as SlickGrids.
 
@@ -117,12 +117,6 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
     grid_options : dict
         Options to use when creating javascript SlickGrid instances.  See the Notes section below for
         more information on the available options, as well as the default options that qgrid uses.
-    remote_js : bool
-        Whether to load slickgrid.js from a local filesystem or from a
-        remote CDN.  Loading from the local filesystem means that SlickGrid
-        will function even when not connected to the internet, but grid
-        cells created with local filesystem loading will not render
-        correctly on external sharing services like NBViewer.
     precision : integer
         The number of digits of precision to display for floating-point
         values.  If unset, we use the value of
@@ -163,8 +157,6 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
 
     if show_toolbar is None:
         show_toolbar = defaults.show_toolbar
-    if remote_js is None:
-        remote_js = defaults.remote_js
     if precision is None:
         precision = defaults.precision
     if not isinstance(precision, Integral):
@@ -181,20 +173,9 @@ def show_grid(data_frame, show_toolbar=None, remote_js=None, precision=None, gri
         )
 
     # create a visualization for the dataframe
-    grid = QgridWidget(df=data_frame, precision=precision,
+    return QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
-                       remote_js=remote_js)
-
-    if show_toolbar:
-        add_row = widgets.Button(description="Add Row")
-        add_row.on_click(grid.add_row)
-
-        rem_row = widgets.Button(description="Remove Row")
-        rem_row.on_click(grid.remove_row)
-
-        return widgets.VBox([widgets.HBox([add_row, rem_row]), grid])
-    else:
-        return grid
+                       show_toolbar=show_toolbar)
 
 @widgets.register('qgrid.QgridWidget')
 class QgridWidget(widgets.DOMWidget):
@@ -227,7 +208,8 @@ class QgridWidget(widgets.DOMWidget):
     _ignore_df_changed = Bool(False)
     _dirty = Bool(False)
     _multi_index = Bool(False)
-    _selected_rows = List()
+    _edited = Bool(False)
+    _selected_rows = List([])
     _page_size = Integer(100)
     _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
@@ -236,10 +218,11 @@ class QgridWidget(widgets.DOMWidget):
     _sort_ascending = Bool(True, sync=True)
 
     df = Instance(pd.DataFrame)
+    unfiltered_df = Instance(pd.DataFrame)
     unchanged_df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
-    remote_js = Bool(False)
+    show_toolbar = Bool(False, sync=True)
 
     def __init__(self, *args, **kwargs):
         """Initialize all variables before building the table."""
@@ -248,29 +231,28 @@ class QgridWidget(widgets.DOMWidget):
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
         self._initialized = True
-        self._selected_rows = []
         if self.df is not None:
-            self.unchanged_df = self.df.copy()
-            self._update_table(update_columns=True)
+            self._update_df()
 
     def _grid_options_default(self):
         return defaults.grid_options
 
-    def _remote_js_default(self):
-        return defaults.remote_js
-
     def _precision_default(self):
         return defaults.precision
+
+    def _update_df(self):
+        self.unfiltered_df = self.df.copy()
+        self.unchanged_df = self.unfiltered_df
+        self._update_table(update_columns=True)
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
         if self._ignore_df_changed or not self._initialized:
             return
-        self.unchanged_df = self.df.copy()
-        self._update_table(update_columns=True)
+        self._update_df()
         self.send({'type': 'draw_table'})
 
-    def _update_table(self, update_columns=False):
+    def _update_table(self, update_columns=False, triggered_by=None):
         df = self.df.copy()
 
         from_index = max(self._viewport_range[0] - self._page_size, 0)
@@ -318,27 +300,45 @@ class QgridWidget(widgets.DOMWidget):
         self._df_json = df_json
 
         if not update_columns:
-            self.send({'type': 'update_data_view', 'columns': self._columns})
+            self.send({
+                'type': 'update_data_view',
+                'columns': self._columns,
+                'triggered_by': triggered_by
+            })
 
-    def add_row(self, value=None):
+    def _initialize_df_backup(self):
+        if self.unchanged_df is self.unfiltered_df:
+            self.unchanged_df = self.unfiltered_df.copy()
+
+    def add_row(self):
         """Append a row at the end of the dataframe."""
         df = self.df
+
         if not df.index.is_integer():
             msg = "Cannot add a row to a table with a non-integer index"
             # display(Javascript('alert("%s")' % msg))
             return
+        self._initialize_df_backup()
         last = df.iloc[-1]
         last.name += 1
         df.loc[last.name] = last.values
-        self._update_table()
+        self.unfiltered_df.loc[last.name] = last.values
+        self._update_table(triggered_by='add_row')
 
-    def remove_row(self, value=None):
+    def remove_row(self):
         """Remove the current row from the table"""
         if self._multi_index:
             msg = "Cannot remove a row from a table with a multi index"
             # display(Javascript('alert("%s")' % msg))
             return
-        self.send({'type': 'remove_row'})
+        self.log.info(self._selected_rows)
+        self._initialize_df_backup()
+        selected_names = \
+            map(lambda x: self.df.iloc[x].name, self._selected_rows)
+        self.df.drop(selected_names, inplace=True)
+        self.unfiltered_df.drop(selected_names, inplace=True)
+        self._selected_rows = []
+        self._update_table(triggered_by='remove_row')
 
     def _update_sort(self):
         if self._sort_field == '':
@@ -372,11 +372,8 @@ class QgridWidget(widgets.DOMWidget):
         """Handle incoming messages from the QGridView"""
         if 'type' not in content:
             return
-        if content['type'] == 'remove_row':
-            self.df.drop(content['row'], inplace=True)
-            self._dirty = True
 
-        elif content['type'] == 'cell_change':
+        if content['type'] == 'cell_change':
             try:
                 self.df.set_value(self.df.index[content['row']],
                                   content['column'], content['value'])
@@ -388,6 +385,10 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'viewport_changed':
             self._viewport_range = (content['top'], content['bottom'])
             self._update_table()
+        elif content['type'] == 'add_row':
+            self.add_row()
+        elif content['type'] == 'remove_row':
+            self.remove_row()
         elif content['type'] == 'viewport_changed_filter':
             col_name = content['field']
             col_info = self._columns[col_name]
@@ -540,9 +541,9 @@ class QgridWidget(widgets.DOMWidget):
                     self.log.info(json.dumps(filter_info))
                     if filter_info['type'] == 'slider':
                         if filter_info['min'] is not None:
-                            conditions.append(get_value_from_df(self.unchanged_df) >= filter_info['min'])
+                            conditions.append(get_value_from_df(self.unfiltered_df) >= filter_info['min'])
                         if filter_info['max'] is not None:
-                            conditions.append(get_value_from_df(self.unchanged_df) <= filter_info['max'])
+                            conditions.append(get_value_from_df(self.unfiltered_df) <= filter_info['max'])
                     elif filter_info['type'] == 'text':
                         if key not in self._filter_tables:
                             continue
@@ -555,23 +556,23 @@ class QgridWidget(widgets.DOMWidget):
                             if excluded_indices is not None and len(excluded_indices) > 0:
                                 excluded_values = list(map(get_value_from_filter_table, excluded_indices))
                                 self.log.info("excluded: {0}".format(json.dumps(excluded_values)))
-                                conditions.append(~get_value_from_df(self.unchanged_df).isin(excluded_values))
+                                conditions.append(~get_value_from_df(self.unfiltered_df).isin(excluded_values))
                         elif selected_indices is not None and len(selected_indices) > 0:
                             selected_values = list(map(get_value_from_filter_table, selected_indices))
                             self.log.info("selected: {0}".format(json.dumps(selected_values)))
-                            conditions.append(get_value_from_df(self.unchanged_df).isin(selected_values))
+                            conditions.append(get_value_from_df(self.unfiltered_df).isin(selected_values))
 
             self._columns = columns
 
             self._ignore_df_changed = True
             if len(conditions) == 0:
-                self.df = self.unchanged_df.copy()
+                self.df = self.unfiltered_df.copy()
             else:
                 combined_condition = conditions[0]
                 for c in conditions[1:]:
                     combined_condition = combined_condition & c
 
-                self.df = self.unchanged_df[combined_condition].copy()
+                self.df = self.unfiltered_df[combined_condition].copy()
 
             self._sorted_column_cache = {}
             self._update_sort()
