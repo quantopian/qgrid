@@ -6,9 +6,9 @@ define([
 ], function ($, handlebars, filter_base) {
   "use strict";
 
-  var SliderFilter = function(field, column_type, precision){
+  var SliderFilter = function(field, column_type, widget_model){
     this.base = filter_base.FilterBase;
-    this.base(field, column_type, precision);
+    this.base(field, column_type, widget_model);
   }
   SliderFilter.prototype = new filter_base.FilterBase;
 

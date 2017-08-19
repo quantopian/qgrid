@@ -217,7 +217,10 @@ class QgridView extends widgets.DOMWidgetView {
 
                 this.grid.set_data_view(data_view);
                 sgrid.render();
-                this.updateSize();
+
+                if (msg.triggered_by !== 'filter_changed') {
+                    this.updateSize();
+                }
                 this.update_timeout = null;
                 if (this.in_progress_btn){
                     this.in_progress_btn.removeClass('disabled');

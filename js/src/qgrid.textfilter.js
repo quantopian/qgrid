@@ -7,10 +7,9 @@ define([
 ], function ($, _, handlebars, filter_base) {
   "use strict";
 
-  var TextFilter = function(field, column_type, precision){
+  var TextFilter = function(field, column_type, widget_model){
     this.base = filter_base.FilterBase;
-    this.base(field, column_type, precision);
-    this.items_hash = {};
+    this.base(field, column_type, widget_model);
   }
   TextFilter.prototype = new filter_base.FilterBase;
 
@@ -26,6 +25,7 @@ define([
             "<input class='search-input' type='text'/>" +
           "</div>" +
           "<div class='text-filter-grid'/>" +
+          "<div class='no-results hidden'>No results found.</div>" +
         "</div>" +
         "<div class='dropdown-footer'>" +
           "<a class='select-all-link' href='#'>Select All</a>"+
@@ -43,20 +43,39 @@ define([
     for (var i=0; i < col_info['selected_length']; i++){
       this.selected_rows.push(i);
     }
+    this.ignore_selection_changed = true;
     $.proxy(this.base.prototype.show_filter.call(this), this);
+    this.ignore_selection_changed = false;
   };
 
   TextFilter.prototype.update_data_view = function(col_info) {
     if (this.update_timeout){
         clearTimeout(this.update_timeout);
     }
-    var that = this;
-    this.update_timeout = setTimeout(function() {
-      that.values = col_info['values'];
-      that.value_range = col_info['value_range'];
-      that.update_slick_grid_data();
-      that.filter_grid.setData(that.data_view);
-      that.filter_grid.render();
+
+    this.update_timeout = setTimeout(() => {
+      this.values = col_info['values'];
+      this.length = col_info['length'];
+      this.value_range = col_info['value_range'];
+
+      if (this.length === 0) {
+        this.filter_elem.find('.no-results').removeClass('hidden');
+        this.filter_grid_elem.addClass('hidden');
+        return;
+      }
+
+      this.filter_elem.find('.no-results').addClass('hidden');
+      this.filter_grid_elem.removeClass('hidden');
+      this.ignore_selection_changed = true;
+      this.update_slick_grid_data();
+      this.filter_grid.setData(this.data_view);
+      this.selected_rows = [];
+      for (var i=0; i < col_info['selected_length']; i++){
+        this.selected_rows.push(i);
+        this.row_selection_model.setSelectedRows(this.selected_rows);
+      }
+      this.filter_grid.render();
+      this.ignore_selection_changed = false;
     }, 100);
   };
 
@@ -266,13 +285,6 @@ define([
     }
   }
 
-  TextFilter.prototype.sort_if_needed = function(force){
-    if (force || this.sort_needed){
-      this.data_view.sort(this.sort_comparer, true);
-      this.sort_needed = false;
-    }
-  }
-
   TextFilter.prototype.focus_on_search_box = function(){
     this.security_search.focus().val(this.search_string);
     this.filter_grid.resetActiveCell();
@@ -294,14 +306,18 @@ define([
 
     this.search_string = this.security_search.val();
     if (old_search_string != this.search_string){
-      this.data_view.refresh();
-      this.sort_if_needed();
+      var msg = {
+        'type': 'get_column_min_max',
+        'field': this.field,
+        'search_val': this.search_string
+      };
+      this.widget_model.send(msg)
     }
-  }
+  };
 
   TextFilter.prototype.handle_text_input_click = function(e){
     this.filter_grid.resetActiveCell();
-  }
+  };
 
   TextFilter.prototype.handle_selection_changed = function(e, args){
     if (this.ignore_selection_changed){

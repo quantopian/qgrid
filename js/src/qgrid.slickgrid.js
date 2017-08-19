@@ -91,7 +91,7 @@ define([
       }
 
       if (slick_column.filter){
-        var cur_filter = new slick_column.filter(slick_column.field, cur_column.type, self.widget_model.get('precision'));
+        var cur_filter = new slick_column.filter(slick_column.field, cur_column.type, self.widget_model);
         $(cur_filter).on("filter_changed", $.proxy(self.handle_filter_changed, self));
         $(cur_filter).on("viewport_changed", $.proxy(self.handle_filter_viewport_changed, self));
         $(cur_filter).on("get_column_min_max", $.proxy(self.handle_get_min_max, self));
@@ -145,6 +145,8 @@ define([
         this.columns,
         options
     );
+
+    window.slick_grid = this.slick_grid;
 
     setTimeout(function(){
       self.slick_grid.init();
@@ -225,10 +227,11 @@ define([
     this.widget_model.send(msg)
   };
 
-  QGrid.prototype.handle_get_min_max = function(e, field_name) {
+  QGrid.prototype.handle_get_min_max = function(e, event_info) {
     var msg = {
         'type': 'get_column_min_max',
-        'field': field_name
+        'field': event_info.field,
+        'search_val': event_info.search_val
     };
     this.widget_model.send(msg)
   };

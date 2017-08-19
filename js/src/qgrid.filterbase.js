@@ -4,10 +4,13 @@ define([
 ], function ($, handlebars) {
   "use strict";
 
-  var FilterBase = function(field, column_type, precision){
+  var FilterBase = function(field, column_type, widget_model){
     this.field = field;
     this.column_type = column_type;
-    this.precision = precision;
+    this.widget_model = widget_model;
+    if (this.widget_model) {
+      this.precision = this.widget_model.get('precision');
+    }
     this.has_multiple_values = true;
   }
 
@@ -63,7 +66,10 @@ define([
   }
 
   FilterBase.prototype.handle_filter_button_clicked = function(e){
-    $(this).trigger("get_column_min_max", this.field);
+    $(this).trigger("get_column_min_max", {
+      field: this.field,
+      search_val: null
+    });
     return false;
   }
 
@@ -101,7 +107,7 @@ define([
 
     this.filter_elem.offset({ top: 0, left: 0 });
     this.filter_elem.offset({ top: top, left: left });
-  }
+  };
 
   FilterBase.prototype.hide_filter = function(){
     if (!this.filter_elem)

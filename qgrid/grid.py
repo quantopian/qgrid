@@ -367,6 +367,7 @@ class QgridWidget(widgets.DOMWidget):
             self._handle_qgrid_msg_helper(widget, content, buffers=buffers)
         except Exception as e:
             self.log.error(e)
+            self.log.exception("Unhandled exception while handling msg")
 
     def _handle_qgrid_msg_helper(self, widget, content, buffers=None):
         """Handle incoming messages from the QGridView"""
@@ -395,7 +396,7 @@ class QgridWidget(widgets.DOMWidget):
             col_filter_table = self._filter_tables[col_name]
 
             from_index = max(content['top'] - self._page_size, 0)
-            to_index = max(content['bottom'] + self._page_size, 0)
+            to_index = max(content['top'] + self._page_size, 0)
 
             col_info['values'] = col_filter_table[from_index:to_index]
             col_info['value_range'] = (from_index, to_index)
@@ -414,22 +415,28 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'get_column_min_max':
             col_name = content['field']
             col_info = self._columns[col_name]
+            if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
+                df_for_unique = self.unfiltered_df
+            else:
+                df_for_unique = self.df
+
+
             if col_name in self._primary_key:
                 if len(self._primary_key) > 1:
                     key_index = self._primary_key.index(col_name)
-                    # col_series = self.df.index.levels[key_index]
+                    # col_series = df_for_unique.index.levels[key_index]
                     get_val_from_level_index = \
-                        lambda k: self.df.index.levels[key_index][k]
-                    level_indices = self.df.index.labels[key_index]
+                        lambda k: df_for_unique.index.levels[key_index][k]
+                    level_indices = df_for_unique.index.labels[key_index]
                     level_series = pd.Series(level_indices)
                     col_series = level_series.apply(get_val_from_level_index)
                 else:
-                    col_series = self.df.index
+                    col_series = df_for_unique.index
             else:
-                col_series = self.df[col_name]
+                col_series = df_for_unique[col_name]
+            self.log.info("col_info: {0}".format(json.dumps(col_info)))
+            self.log.info("is datetime: {0}".format(col_info['type'] == 'datetime'))
             if col_info['type'] in ['integer', 'number']:
-                if 'filter_info' in col_info:
-                    self.log.info(json.dumps(col_info))
                 if 'filter_info' not in col_info or \
                         (col_info['filter_info']['min'] is None and
                         col_info['filter_info']['max'] is None):
@@ -441,11 +448,23 @@ class QgridWidget(widgets.DOMWidget):
                     'field': col_name,
                     'col_info': col_info
                 })
+            elif col_info['type'] == 'datetime':
+                self.log.info('is datetime')
+                if 'filter_info' not in col_info or \
+                        (col_info['filter_info']['min'] is None and
+                        col_info['filter_info']['max'] is None):
+                    col_info['filter_max'] = max(col_series)
+                    col_info['filter_min'] = min(col_series)
+                    self._columns[col_name] = col_info
+                self.send({
+                    'type': 'column_min_max_updated',
+                    'field': col_name,
+                    'col_info': col_info
+                })
             else:
                 if col_info['type'] == 'any':
                     unique_list = col_info['constraints']['enum']
                 else:
-                    self.log.info("col_series count:{0}".format(len(col_series)))
                     if col_name in self._sorted_column_cache:
                         unique_list = self._sorted_column_cache[col_name]
                     else:
@@ -454,9 +473,12 @@ class QgridWidget(widgets.DOMWidget):
                             unique.sort()
                         unique_list = unique.tolist()
                         self._sorted_column_cache[col_name] = unique_list
-                    self.log.info("col_series unique finished:{0}".format(len(unique_list)))
 
-                self.log.info(json.dumps(col_info))
+                if content['search_val'] is not None:
+                    unique_list = [
+                        k for k in unique_list if content['search_val'].lower() in k.lower()
+                    ]
+
                 if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
                     col_filter_info = col_info['filter_info']
                     col_filter_table = self._filter_tables[col_name]
@@ -477,27 +499,28 @@ class QgridWidget(widgets.DOMWidget):
                         col_info['selected_length'] = 0
                         col_info['values'] = unique_list
                     else:
-                        self.log.info(json.dumps(selected_indices))
                         selected_vals = list(map(get_value_from_filter_table, selected_indices))
                         col_info['selected_length'] = len(selected_vals)
-                        self.log.info("selected_vals: {0}".format(selected_vals))
 
                         in_selected = set(selected_vals)
                         in_unique = set(unique_list)
 
-                        in_unique_but_not_selected = in_unique - in_selected
-                        selected_vals.extend(list(in_unique_but_not_selected))
+                        in_unique_but_not_selected = list(in_unique - in_selected)
+                        in_unique_but_not_selected.sort()
+                        selected_vals.extend(in_unique_but_not_selected)
 
                         col_info['values'] = selected_vals
-                        self.log.info(json.dumps(col_info['values']))
                 else:
                     col_info['selected_length'] = 0
                     col_info['values'] = unique_list
 
-                self.log.info("FINISHED 0")
 
                 length = len(col_info['values'])
-                self._filter_tables[col_name] = list(col_info['values'])
+
+                # only cache unique filter values if the
+                # values are not filtered by a search string
+                if content['search_val'] is None:
+                    self._filter_tables[col_name] = list(col_info['values'])
 
                 if col_info['type'] == 'any':
                     col_info['value_range'] = (0, length)
@@ -512,13 +535,20 @@ class QgridWidget(widgets.DOMWidget):
                 col_info['length'] = length
 
                 self._columns[col_name] = col_info
-                self.send({
-                    'type': 'column_min_max_updated',
-                    'field': col_name,
-                    'col_info': col_info
-                })
+
+                if content['search_val'] is not None:
+                    self.send({
+                        'type': 'update_data_view_filter',
+                        'field': col_name,
+                        'col_info': col_info
+                    })
+                else:
+                    self.send({
+                        'type': 'column_min_max_updated',
+                        'field': col_name,
+                        'col_info': col_info
+                    })
         elif content['type'] == 'filter_changed':
-            self.log.info("filter changed started")
             col_name = content['field']
             columns = self._columns.copy()
             col_info = columns[col_name]
@@ -538,28 +568,29 @@ class QgridWidget(widgets.DOMWidget):
                         get_value_from_df = lambda df: df[key]
 
                     filter_info = value['filter_info']
-                    self.log.info(json.dumps(filter_info))
                     if filter_info['type'] == 'slider':
                         if filter_info['min'] is not None:
                             conditions.append(get_value_from_df(self.unfiltered_df) >= filter_info['min'])
                         if filter_info['max'] is not None:
                             conditions.append(get_value_from_df(self.unfiltered_df) <= filter_info['max'])
+                    elif filter_info['type'] == 'date':
+                        if filter_info['min'] is not None:
+                            conditions.append(get_value_from_df(self.unfiltered_df) >= pd.to_datetime(filter_info['min'], unit='ms'))
+                        if filter_info['max'] is not None:
+                            conditions.append(get_value_from_df(self.unfiltered_df) <= pd.to_datetime(filter_info['max'], unit='ms'))
                     elif filter_info['type'] == 'text':
                         if key not in self._filter_tables:
                             continue
                         col_filter_table = self._filter_tables[key]
-                        self.log.info(len(col_filter_table))
                         selected_indices = filter_info['selected']
                         excluded_indices = filter_info['excluded']
                         get_value_from_filter_table = lambda i: col_filter_table[i]
                         if selected_indices == "all":
                             if excluded_indices is not None and len(excluded_indices) > 0:
                                 excluded_values = list(map(get_value_from_filter_table, excluded_indices))
-                                self.log.info("excluded: {0}".format(json.dumps(excluded_values)))
                                 conditions.append(~get_value_from_df(self.unfiltered_df).isin(excluded_values))
                         elif selected_indices is not None and len(selected_indices) > 0:
                             selected_values = list(map(get_value_from_filter_table, selected_indices))
-                            self.log.info("selected: {0}".format(json.dumps(selected_values)))
                             conditions.append(get_value_from_df(self.unfiltered_df).isin(selected_values))
 
             self._columns = columns
@@ -576,7 +607,7 @@ class QgridWidget(widgets.DOMWidget):
 
             self._sorted_column_cache = {}
             self._update_sort()
-            self._update_table()
+            self._update_table(triggered_by='filter_changed')
             self._ignore_df_changed = False
             self.log.info("filter changed finished")
 
