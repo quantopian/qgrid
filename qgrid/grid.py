@@ -217,7 +217,7 @@ class QgridWidget(widgets.DOMWidget):
     _sort_field = Unicode('', sync=True)
     _sort_ascending = Bool(True, sync=True)
 
-    df = Instance(pd.DataFrame)
+    df = Instance(pd.DataFrame, args=(), kwargs={})
     unfiltered_df = Instance(pd.DataFrame)
     unchanged_df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
