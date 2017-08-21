@@ -1,6 +1,8 @@
 from ._version import version_info, __version__
 
 from .grid import (
+    enable,
+    disable,
     set_defaults,
     set_grid_option,
     show_grid,
@@ -17,6 +19,8 @@ def _jupyter_nbextension_paths():
     }]
 
 __all__ = [
+    'enable',
+    'disable',
     'set_defaults',
     'set_grid_option',
     'show_grid',
