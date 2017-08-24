@@ -202,6 +202,12 @@ class QgridView extends widgets.DOMWidgetView {
             this.send(msg);
         } else if (msg.type === 'draw_table') {
             this.drawTable();
+        } else if (msg.type == 'show_error') {
+            alert(msg.error_msg);
+            if (msg.triggered_by == 'add_row' ||
+                msg.triggered_by == 'remove_row'){
+                this.reset_in_progress_button();
+            }
         } else if (msg.type == 'update_data_view') {
             if (this.update_timeout){
                 clearTimeout(this.update_timeout);
@@ -222,13 +228,7 @@ class QgridView extends widgets.DOMWidgetView {
                     this.updateSize();
                 }
                 this.update_timeout = null;
-                if (this.in_progress_btn){
-                    this.in_progress_btn.removeClass('disabled');
-                    this.in_progress_btn.text(
-                        this.in_progress_btn.attr('data-btn-text')
-                    );
-                    this.in_progress_btn = null;
-                }
+                this.reset_in_progress_button();
                 if (top_row) {
                     sgrid.scrollRowIntoView(top_row);
                 } else if (msg.triggered_by === 'add_row') {
@@ -245,6 +245,16 @@ class QgridView extends widgets.DOMWidgetView {
                     'type': 'selection_change'
                 });
             }, 100);
+        }
+    }
+
+    reset_in_progress_button() {
+        if (this.in_progress_btn){
+            this.in_progress_btn.removeClass('disabled');
+            this.in_progress_btn.text(
+                this.in_progress_btn.attr('data-btn-text')
+            );
+            this.in_progress_btn = null;
         }
     }
 
