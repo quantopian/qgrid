@@ -200,6 +200,11 @@
 
 /* Filter dropdowns */
 
+.filter-error-msg {
+  padding: 8px 14px;
+  width: 160px;
+}
+
 .q-grid-container .grid-filter {
   z-index: 1000;
   position: absolute;

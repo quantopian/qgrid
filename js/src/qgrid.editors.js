@@ -1,248 +1,252 @@
-  /**
-   * Input handlers
-   *
-   * Adapted from https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
-   * MIT License, Copyright (c) 2010 Michael Leibman
-   */
-  define([
-    'jquery',
-    'jquery-ui'
-], function ($) {
-  "use strict";
+/**
+ * Input handlers
+ *
+ * Adapted from https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
+ * MIT License, Copyright (c) 2010 Michael Leibman
+ */
+var $ = require('jquery');
+var jquery_ui = require('jquery-ui');
 
-  var DateEditor = function(args) {
-      var $input;
-      var defaultValue;
-      var scope = this;
-      var calendarOpen = false;
-      this.init = function () {
-        $input = $("<INPUT type=text class='editor-text' />");
-        $input.appendTo(args.container);
-        $input.focus().select();
-        $input.datepicker({
-          showOn: "button",
-          buttonImageOnly: true,
-          beforeShow: function () {
-            calendarOpen = true
-          },
-          onClose: function () {
-            calendarOpen = false
-          }
-        });
-
-        $input.width($input.width() - 18);
-      };
-
-      this.destroy = function () {
-        $.datepicker.dpDiv.stop(true, true);
-        $input.datepicker("hide");
-        $input.datepicker("destroy");
-        $input.remove();
-      };
-
-      this.show = function () {
-        if (calendarOpen) {
-          $.datepicker.dpDiv.stop(true, true).show();
+class DateEditor {
+  constructor(args) {
+    var $input;
+    var defaultValue;
+    var scope = this;
+    var calendarOpen = false;
+    this.init = () => {
+      $input = $("<input type=text class='editor-text' />");
+      $input.appendTo(args.container);
+      $input.focus().select();
+      $input.datepicker({
+        showOn: "button",
+        buttonImageOnly: true,
+        beforeShow: () => {
+          calendarOpen = true;
+        },
+        onClose: () => {
+          calendarOpen = false;
         }
-      };
+      });
 
-      this.hide = function () {
-        if (calendarOpen) {
-          $.datepicker.dpDiv.stop(true, true).hide();
-        }
-      };
+      $input.width($input.width() - 18);
+    };
 
-      this.position = function (position) {
-        if (!calendarOpen) {
-          return;
-        }
-        $.datepicker.dpDiv
-            .css("top", position.top + 30)
-            .css("left", position.left);
-      };
+    this.destroy = () => {
+      $.datepicker.dpDiv.stop(true, true);
+      $input.datepicker("hide");
+      $input.datepicker("destroy");
+      $input.remove();
+    };
 
-      this.focus = function () {
-        $input.focus();
-      };
+    this.show = () => {
+      if (calendarOpen) {
+        $.datepicker.dpDiv.stop(true, true).show();
+      }
+    };
 
-      this.loadValue = function (item) {
-        defaultValue = item[args.column.field];
-        $input.val(defaultValue);
-        $input[0].defaultValue = defaultValue;
-        $input.select();
-      };
+    this.hide = () => {
+      if (calendarOpen) {
+        $.datepicker.dpDiv.stop(true, true).hide();
+      }
+    };
 
-      this.serializeValue = function () {
-        return $input.val();
-      };
+    this.position = (position) => {
+      if (!calendarOpen) {
+        return;
+      }
+      $.datepicker.dpDiv
+          .css("top", position.top + 30)
+          .css("left", position.left);
+    };
 
-      this.applyValue = function (item, state) {
-        item[args.column.field] = state;
-      };
+    this.focus = () => {
+      $input.focus();
+    };
 
-      this.isValueChanged = function () {
-        return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
-      };
+    this.loadValue = (item) => {
+      defaultValue = item[args.column.field];
+      $input.val(defaultValue);
+      $input[0].defaultValue = defaultValue;
+      $input.select();
+    };
 
-      this.validate = function () {
-        return {
-          valid: true,
-          msg: null
-        };
-      };
+    this.serializeValue = () => {
+      return $input.val();
+    };
 
-      this.init();
+    this.applyValue = (item, state) => {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = () => {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = () => {
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
   }
+}
 
-  var TextEditor = function(args) {
-      var $input;
-      var defaultValue;
-      var scope = this;
+class TextEditor {
+  constructor(args) {
+    var $input;
+    var defaultValue;
+    var scope = this;
 
-      this.init = function () {
-        $input = $("<INPUT type=text class='editor-text' />")
-            .appendTo(args.container)
-            .bind("keydown.nav", function (e) {
-              if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
-                e.stopImmediatePropagation();
-              }
-            })
-            .focus()
-            .select();
-      };
+    this.init = () => {
+      $input = $("<input type=text class='editor-text' />")
+          .appendTo(args.container)
+          .bind("keydown.nav", (e) => {
+            if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+              e.stopImmediatePropagation();
+            }
+          })
+          .focus()
+          .select();
+    };
 
-      this.destroy = function () {
-        $input.remove();
-      };
+    this.destroy = () => {
+      $input.remove();
+    };
 
-      this.focus = function () {
-        $input.focus();
-      };
+    this.focus = () => {
+      $input.focus();
+    };
 
-      this.getValue = function () {
-        return $input.val();
-      };
+    this.getValue = () => {
+      return $input.val();
+    };
 
-      this.setValue = function (val) {
-        $input.val(val);
-      };
+    this.setValue = (val) => {
+      $input.val(val);
+    };
 
-      this.loadValue = function (item) {
-        defaultValue = item[args.column.field] || "";
-        $input.val(defaultValue);
-        $input[0].defaultValue = defaultValue;
-        $input.select();
-      };
+    this.loadValue = (item) => {
+      defaultValue = item[args.column.field] || "";
+      $input.val(defaultValue);
+      $input[0].defaultValue = defaultValue;
+      $input.select();
+    };
 
-      this.serializeValue = function () {
-        return $input.val();
-      };
+    this.serializeValue = () => {
+      return $input.val();
+    };
 
-      this.applyValue = function (item, state) {
-        item[args.column.field] = state;
-      };
+    this.applyValue = (item, state) => {
+      item[args.column.field] = state;
+    };
 
-      this.isValueChanged = function () {
-        return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
-      };
+    this.isValueChanged = () => {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
 
-      this.validate = function () {
-        if (args.column.validator) {
-          var validationResults = args.column.validator($input.val());
-          if (!validationResults.valid) {
-            return validationResults;
-          }
+    this.validate = () => {
+      if (args.column.validator) {
+        var validationResults = args.column.validator($input.val());
+        if (!validationResults.valid) {
+          return validationResults;
         }
+      }
 
-        return {
-          valid: true,
-          msg: null
-        };
+      return {
+        valid: true,
+        msg: null
       };
+    };
 
-      this.init();
+    this.init();
   }
+}
 
-  //  http://stackoverflow.com/a/22118349
-  function SelectEditor(args) {
+//  http://stackoverflow.com/a/22118349
+class SelectEditor {
+  constructor(args) {
     var $select;
     var defaultValue;
     var scope = this;
-    var options = []
+    var options = [];
 
-    this.init = function() {
-
-        if (args.column.editorOptions.options){
-            options = args.column.editorOptions.options.split(',');
-        } else {
-            options ="yes,no".split(',');
-        }
-        var option_str = "";
-        for (var i in options) {
-            var opt = $.trim( options[i] ); // remove any white space including spaces after comma
-            option_str += "<OPTION value='" + opt + "'>" + opt + "</OPTION>";
-        }
-        $select = $("<SELECT tabIndex='0' class='editor-select'>"+ option_str +"</SELECT>");
-        $select.appendTo(args.container);
-        $select.focus();
+    this.init = () => {
+      if (args.column.editorOptions.options) {
+        options = args.column.editorOptions.options.split(',');
+      } else {
+        options = "yes,no".split(',');
+      }
+      var option_str = "";
+      for (var i in options) {
+        var opt = $.trim(options[i]); // remove any white space including spaces after comma
+        option_str += "<OPTION value='" + opt + "'>" + opt + "</OPTION>";
+      }
+      $select = $("<SELECT tabIndex='0' class='editor-select'>" + option_str + "</SELECT>");
+      $select.appendTo(args.container);
+      $select.focus();
     };
 
-    this.destroy = function() {
-        $select.remove();
+    this.destroy = () => {
+      $select.remove();
     };
 
-    this.focus = function() {
-        $select.focus();
+    this.focus = () => {
+      $select.focus();
     };
 
-    this.loadValue = function(item) {
+    this.loadValue = (item) => {
       defaultValue = item[args.column.field];
       $select.val(defaultValue);
     };
 
-    this.serializeValue = function() {
-        if (args.column.editorOptions.options) {
-            return $select.val();
-        } else {
-            return ($select.val() == "yes");
-        }
+    this.serializeValue = () => {
+      if (args.column.editorOptions.options) {
+        return $select.val();
+      } else {
+        return ($select.val() == "yes");
+      }
     };
 
-    this.applyValue = function(item,state) {
-        item[args.column.field] = state;
+    this.applyValue = (item, state) => {
+      item[args.column.field] = state;
     };
 
-    this.isValueChanged = function() {
-        return ($select.val() != defaultValue);
+    this.isValueChanged = () => {
+      return ($select.val() != defaultValue);
     };
 
-    this.validate = function() {
-        return {
-            valid: true,
-            msg: null
-        };
+    this.validate = () => {
+      return {
+        valid: true,
+        msg: null
+      };
     };
 
     this.init();
+  }
 }
-  
-  /**
-   * Validator for numeric cells.
-   */
-  var validateNumber = function(value) {
-    if (isNaN(value)) {
-      return {
-        valid: false,
-        msg: "Please enter a valid integer"
-      };
-    }
-    return {
-      valid: true,
-      msg: null
-    };
-    }
 
-    return {'DateEditor': DateEditor, 'TextEditor': TextEditor,
-            'validateNumber': validateNumber,
-            'SelectEditor': SelectEditor};
-});
+/**
+ * Validator for numeric cells.
+ */
+var validateNumber = (value) => {
+  if (isNaN(value)) {
+    return {
+      valid: false,
+      msg: "Please enter a valid integer"
+    };
+  }
+  return {
+    valid: true,
+    msg: null
+  };
+};
+
+module.exports = {
+  'DateEditor': DateEditor,
+  'TextEditor': TextEditor,
+  'validateNumber': validateNumber,
+  'SelectEditor': SelectEditor
+};

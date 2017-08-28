@@ -1,177 +1,142 @@
-define([
-    'jquery',
-    'handlebars',
-    './qgrid.filterbase.js',
-    'jquery-ui'
-], function ($, handlebars, filter_base) {
-  "use strict";
+var $ = require('jquery');
+var handlebars = require('handlebars');
+var filter_base = require('./qgrid.filterbase.js');
+var jquery_ui = require('jquery-ui');
 
-  var SliderFilter = function(field, column_type, widget_model){
-    this.base = filter_base.FilterBase;
-    this.base(field, column_type, widget_model);
-  }
-  SliderFilter.prototype = new filter_base.FilterBase;
+class SliderFilter extends filter_base.FilterBase {
 
-  SliderFilter.prototype.get_filter_template = function(){
+  get_filter_template() {
     return handlebars.compile(
-      "<div class='numerical-filter grid-filter dropdown-menu {{type}}-filter'>" +
+        "<div class='numerical-filter grid-filter dropdown-menu {{type}}-filter'>" +
         "<h3 class='popover-title'>" +
-          "<div class='dropdown-title'>Filter by {{name}}</div>" +
-          "<i class='fa fa-times icon-remove close-button'/>" +
+        "<div class='dropdown-title'>Filter by {{name}}</div>" +
+        "<i class='fa fa-times icon-remove close-button'/>" +
         "</h3>" +
         "<div class='dropdown-body'>" +
-          "<div class='slider-range'/>" +
-          "<span class='slider-label'>" +
-            "<span class='min-value'>0</span>" +
-            "<span class='range-separator'>-</span>" +
-            "<span class='max-value'>100</span>" +
-          "</span>" +
+        "<div class='slider-range'/>" +
+        "<span class='slider-label'>" +
+        "<span class='min-value'>0</span>" +
+        "<span class='range-separator'>-</span>" +
+        "<span class='max-value'>100</span>" +
+        "</span>" +
         "</div>" +
         "<div class='dropdown-footer'>" +
-          "<a class='reset-link' href='#'>Reset</a>"+
+        "<a class='reset-link' href='#'>Reset</a>" +
         "</div>" +
-      "</div>"
+        "</div>"
     );
   }
 
-  SliderFilter.prototype.include_item = function(item){
-    var include_item = true;
-    if (this.filter_value_min){
-      if (!item[this.field] || item[this.field] < this.filter_value_min){
-        include_item = false;
-      }
-    }
-
-    if (this.filter_value_max){
-      if (!item[this.field] || item[this.field] > this.filter_value_max){
-        include_item = false;
-      }
-    }
-
-    return include_item;
-  }
-
-  SliderFilter.prototype.initialize_controls = function(){
-    $.proxy(this.base.prototype.initialize_controls.call(this), this);
+  initialize_controls() {
+    super.initialize_controls();
     this.slider_elem = this.filter_elem.find(".slider-range");
-    this.set_value(this.min_value, this.max_value);
 
-    this.slider_min = this.min_value;
-    this.slider_max = this.max_value;
+    var values_to_set = [
+      this.filter_value_min || this.min_value,
+      this.filter_value_max || this.max_value
+    ];
+
+    this.set_value(values_to_set[0], values_to_set[1]);
 
     this.slider_elem.slider({
       range: true,
-      min: this.slider_min,
-      max: this.slider_max,
-      values: [this.filter_value_min, this.filter_value_max],
+      min: this.min_value,
+      max: this.max_value,
+      values: values_to_set,
       step: this.get_slider_step(),
-      slide: $.proxy(function(event, ui){
-        if (this.slide_timeout){
+      slide: (event, ui) => {
+        if (this.slide_timeout) {
           clearTimeout(this.slide_timeout);
         }
-        this.slide_timeout = setTimeout($.proxy(function(){
+        this.slide_timeout = setTimeout(() => {
           this.filter_value_min = ui.values[0];
           this.filter_value_max = ui.values[1];
           this.set_value(this.filter_value_min, this.filter_value_max);
 
-          if (this.filter_value_min == this.slider_min){
+          if (this.filter_value_min == this.min_value) {
             this.filter_value_min = null;
           }
 
-          if (this.filter_value_max == this.slider_max){
+          if (this.filter_value_max == this.max_value) {
             this.filter_value_max = null;
           }
 
-          $(this).trigger("filter_changed", this.get_filter_info());
+          this.send_filter_changed();
           this.slide_timeout = null;
-        }, this), 100);
-      }, this)
+        }, 100);
+      }
     });
   }
 
-  SliderFilter.prototype.set_value = function(min_val, max_val){
-    if (this.column_type == 'integer'){
-        var min_val_rounded = min_val.toFixed(0);
-        var max_val_rounded = max_val.toFixed(0);
-      } else {
-        var min_val_rounded = min_val.toPrecision(this.precision);
-        var max_val_rounded = max_val.toPrecision(this.precision);
-      }
-      this.filter_elem.find(".min-value").html(min_val_rounded);
-      this.filter_elem.find(".max-value").html(max_val_rounded);
+  set_value(min_val, max_val) {
+    var min_val_rounded, max_val_rounded;
+    if (this.column_type == 'integer') {
+      min_val_rounded = min_val.toFixed(0);
+      max_val_rounded = max_val.toFixed(0);
+    } else {
+      min_val_rounded = min_val.toFixed(this.precision);
+      max_val_rounded = max_val.toFixed(this.precision);
+    }
+    this.filter_elem.find(".min-value").html(min_val_rounded);
+    this.filter_elem.find(".max-value").html(max_val_rounded);
   }
 
-  SliderFilter.prototype.get_slider_step = function(){
-    if (this.column_type == "integer"){
+  get_slider_step() {
+    if (this.column_type == "integer") {
       return 1;
     } else {
       return (this.max_value - this.min_value) / 200;
     }
   }
 
-  SliderFilter.prototype.reset_filter = function(){
+  reset_filter() {
     this.filter_value_min = null;
     this.filter_value_max = null;
-    if (this.slider_elem){
+    if (this.slider_elem) {
       var step = this.get_slider_step();
-      this.slider_elem.slider({min: this.min_value, max: this.max_value, values: [this.min_value, this.max_value], step: step});
-      this.set_value(this.min_value, this.max_value)
+      this.slider_elem.slider({
+        min: this.min_value,
+        max: this.max_value,
+        values: [this.min_value, this.max_value],
+        step: step
+      });
+      this.set_value(this.min_value, this.max_value);
     }
-    this.update_filter_button_disabled();
   }
 
-  SliderFilter.prototype.is_active = function(){
-    return this.filter_value_min || this.filter_value_max;
+  is_active() {
+    return this.filter_value_min != null || this.filter_value_max != null;
   }
 
-  SliderFilter.prototype.update_min_max = function(col_info){
-    this.min_value = col_info['slider_min'];
-    this.max_value = col_info['slider_max'];
+  update_min_max(col_info, has_active_filter) {
+    this.min_value = col_info.slider_min;
+    this.max_value = col_info.slider_max;
 
-    var filter_info = col_info['filter_info'];
-    if (filter_info){
-      this.filter_value_min = filter_info['min'] || this.min_value;
-      this.filter_value_max = filter_info['max'] || this.max_value;
+    var filter_info = col_info.filter_info;
+    if (filter_info) {
+      this.filter_value_min = filter_info.min || this.min_value;
+      this.filter_value_max = filter_info.max || this.max_value;
     } else {
-      this.filter_value_min = this.min_value;
-      this.filter_value_max = this.max_value;
+      this.filter_value_min = null;
+      this.filter_value_max = null;
     }
-
     this.has_multiple_values = this.min_value != this.max_value;
-    $.proxy(this.base.prototype.show_filter.call(this), this);
-  };
 
-  SliderFilter.prototype.reset_min_max = function(){
-    this.updated_max_value = null;
-    this.updated_min_value = null;
-    this.first_value = null;
-    this.has_multiple_values = false;
+    this.show_filter();
+
+    if (!has_active_filter) {
+      this.update_filter_button_disabled();
+    }
   }
 
-  SliderFilter.prototype.include_item = function(item){
-    var include_item = true;
-    if (this.filter_value_min){
-      if (!item[this.field] || item[this.field] < this.filter_value_min){
-        include_item = false;
-      }
-    }
-    if (this.filter_value_max){
-      if (!item[this.field] || item[this.field] > this.filter_value_max){
-        include_item = false;
-      }
-    }
+  get_filter_info() {
+    return {
+      "field": this.field,
+      "type": "slider",
+      "min": this.filter_value_min,
+      "max": this.filter_value_max
+    };
+  }
+}
 
-    return include_item;
-  };
-
-  SliderFilter.prototype.get_filter_info = function(){
-      return {
-        "field": this.field,
-        "type": "slider",
-        "min": this.filter_value_min,
-        "max": this.filter_value_max
-      }
-  };
-
-  return {'SliderFilter': SliderFilter}
-});
+module.exports = {'SliderFilter': SliderFilter};
