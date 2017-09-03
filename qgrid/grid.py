@@ -488,6 +488,7 @@ class QgridWidget(widgets.DOMWidget):
                 'field': col_name,
                 'col_info': col_info
             })
+            return
         elif col_info['type'] == 'datetime':
             if 'filter_info' not in col_info or \
                     (col_info['filter_info']['min'] is None and
@@ -500,6 +501,23 @@ class QgridWidget(widgets.DOMWidget):
                 'field': col_name,
                 'col_info': col_info
             })
+            return
+        elif col_info['type'] == 'boolean':
+            self.log.info('handling boolean type')
+            if 'filter_info' not in col_info:
+                values = []
+                for possible_val in [True, False]:
+                    if possible_val in col_series:
+                        values.append(possible_val)
+                col_info['values'] = values
+                self._columns[col_name] = col_info
+            self.send({
+                'type': 'column_min_max_updated',
+                'field': col_name,
+                'col_info': col_info
+            })
+            self.log.info('handled boolean type')
+            return
         else:
             if col_info['type'] == 'any':
                 unique_list = col_info['constraints']['enum']
@@ -618,6 +636,9 @@ class QgridWidget(widgets.DOMWidget):
                         conditions.append(get_value_from_df(self._unfiltered_df) >= pd.to_datetime(filter_info['min'], unit='ms'))
                     if filter_info['max'] is not None:
                         conditions.append(get_value_from_df(self._unfiltered_df) <= pd.to_datetime(filter_info['max'], unit='ms'))
+                elif filter_info['type'] == 'boolean':
+                    if filter_info['selected'] is not None:
+                        conditions.append(get_value_from_df(self._unfiltered_df) == filter_info['selected'])
                 elif filter_info['type'] == 'text':
                     if key not in self._filter_tables:
                         continue

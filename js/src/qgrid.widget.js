@@ -5,7 +5,10 @@ window.jQuery = require('jquery');
 var date_filter = require('./qgrid.datefilter.js');
 var slider_filter = require('./qgrid.sliderfilter.js');
 var text_filter = require('./qgrid.textfilter.js');
+var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
+var calendar_icon = require('../lib/calendar.gif');
+var checkmark_icon = require('../lib/tick.png');
 
 require('slickgrid/slick.core.js');
 require('slickgrid/lib/jquery.event.drag-2.3.0.js');
@@ -162,8 +165,17 @@ class QgridView extends widgets.DOMWidgetView {
       },
       interval: {
         formatter: this.format_string
+      },
+      boolean: {
+        filter: boolean_filter.BooleanFilter,
+        editor: Slick.Editors.Checkbox,
+        formatter: (row, cell, value, columngDef, dataContext) => {
+          return value ? `<img src='${checkmark_icon}'>` : "";
+        }
       }
     };
+
+    $.datepicker.setDefaults({buttonImage: calendar_icon});
 
     $.each(columns, (i, cur_column) => {
       var type_info = this.type_infos[cur_column.type] || {};
@@ -173,7 +185,8 @@ class QgridView extends widgets.DOMWidgetView {
         field: cur_column.name,
         id: cur_column.name,
         sortable: true,
-        resizable: true
+        resizable: true,
+        cssClass: cur_column.type
       };
 
       Object.assign(slick_column, type_info);

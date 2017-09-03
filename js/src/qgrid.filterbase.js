@@ -36,8 +36,7 @@ class FilterBase {
   }
 
   create_filter_elem() {
-    this.filter_template = this.get_filter_template();
-    this.filter_elem = $(this.filter_template(this.column));
+    this.filter_elem = $(this.get_filter_html());
     this.initialize_controls();
     return this.filter_elem;
   }
@@ -53,7 +52,7 @@ class FilterBase {
     this.disabled_tooltip_showing = true;
   }
 
-  get_filter_template(item) {
+  get_filter_html() {
     throw new Error("not implemented!");
   }
 

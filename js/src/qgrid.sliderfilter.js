@@ -1,30 +1,29 @@
 var $ = require('jquery');
-var handlebars = require('handlebars');
 var filter_base = require('./qgrid.filterbase.js');
 var jquery_ui = require('jquery-ui');
 
 class SliderFilter extends filter_base.FilterBase {
 
-  get_filter_template() {
-    return handlebars.compile(
-        "<div class='numerical-filter grid-filter dropdown-menu {{type}}-filter'>" +
-        "<h3 class='popover-title'>" +
-        "<div class='dropdown-title'>Filter by {{name}}</div>" +
-        "<i class='fa fa-times icon-remove close-button'/>" +
-        "</h3>" +
-        "<div class='dropdown-body'>" +
-        "<div class='slider-range'/>" +
-        "<span class='slider-label'>" +
-        "<span class='min-value'>0</span>" +
-        "<span class='range-separator'>-</span>" +
-        "<span class='max-value'>100</span>" +
-        "</span>" +
-        "</div>" +
-        "<div class='dropdown-footer'>" +
-        "<a class='reset-link' href='#'>Reset</a>" +
-        "</div>" +
-        "</div>"
-    );
+  get_filter_html() {
+    return `
+      <div class='numerical-filter grid-filter dropdown-menu'>
+        <h3 class='popover-title'>
+          <div class='dropdown-title'>Filter by ${this.field}</div>
+          <i class='fa fa-times icon-remove close-button'/>
+        </h3>
+        <div class='dropdown-body'>
+          <div class='slider-range'/>
+          <span class='slider-label'>
+            <span class='min-value'>0</span>
+            <span class='range-separator'>-</span>
+            <span class='max-value'>100</span>
+          </span>
+        </div>
+        <div class='dropdown-footer'>
+          <a class='reset-link' href='#'>Reset</a>
+        </div>
+      </div>
+    `;
   }
 
   initialize_controls() {

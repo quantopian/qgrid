@@ -1,30 +1,29 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var handlebars = require('handlebars');
 var filter_base = require('./qgrid.filterbase.js');
 
 class TextFilter extends filter_base.FilterBase {
 
-  get_filter_template() {
-    return handlebars.compile(
-      "<div class='text-filter grid-filter dropdown-menu {{type}}-filter'>" +
-      "<h3 class='popover-title'>" +
-      "<div class='dropdown-title'>Filter by {{name}}</div>" +
-      "<i class='fa fa-times icon-remove close-button'/>" +
-      "</h3>" +
-      "<div class='dropdown-body'>" +
-      "<div class='input-area'>" +
-      "<input class='search-input' type='text'/>" +
-      "</div>" +
-      "<div class='text-filter-grid'/>" +
-      "<div class='no-results hidden'>No results found.</div>" +
-      "</div>" +
-      "<div class='dropdown-footer'>" +
-      "<a class='select-all-link' href='#'>Select All</a>" +
-      "<a class='reset-link' href='#'>Reset</a>" +
-      "</div>" +
-      "</div>"
-    );
+  get_filter_html() {
+    return `
+      <div class='text-filter grid-filter dropdown-menu'>
+        <h3 class='popover-title'>
+          <div class='dropdown-title'>Filter by ${this.field}</div>
+          <i class='fa fa-times icon-remove close-button'/>
+        </h3>
+        <div class='dropdown-body'>
+          <div class='input-area'>
+            <input class='search-input' type='text'/>
+          </div>
+          <div class='text-filter-grid'/>
+          <div class='no-results hidden'>No results found.</div>
+        </div>
+        <div class='dropdown-footer'>
+          <a class='select-all-link' href='#'>Select All</a>
+          <a class='reset-link' href='#'>Reset</a>
+        </div>
+      </div>
+    `;
   }
 
   handle_msg(msg) {

@@ -1,27 +1,25 @@
 var $ = require('jquery');
-var handlebars = require('handlebars');
 var filter_base = require('./qgrid.filterbase.js');
-var jquery_ui = require('jquery-ui');
 
 class DateFilter extends filter_base.FilterBase {
 
-  get_filter_template() {
-    return handlebars.compile(
-        "<div class='date-range-filter grid-filter dropdown-menu {{type}}-filter'>" +
-        "<h3 class='popover-title'>" +
-        "<div class='dropdown-title'>Filter by {{name}}</div>" +
-        "<i class='fa fa-times icon-remove close-button'/>" +
-        "</h3>" +
-        "<div class='dropdown-body'>" +
-        "<input class='datepicker ignore start-date'/>" +
-        "<span class='to'>to</span>" +
-        "<input class='datepicker ignore end-date'/>" +
-        "</div>" +
-        "<div class='dropdown-footer'>" +
-        "<a class='reset-link' href='#'>Reset</a>" +
-        "</div>" +
-        "</div>"
-    );
+  get_filter_html() {
+    return `
+      <div class='date-range-filter grid-filter dropdown-menu'>
+        <h3 class='popover-title'>
+          <div class='dropdown-title'>Filter by ${this.field}</div>
+          <i class='fa fa-times icon-remove close-button'/>
+        </h3>
+        <div class='dropdown-body'>
+          <input class='datepicker ignore start-date'/>
+          <span class='to'>to</span>
+          <input class='datepicker ignore end-date'/>
+        </div>
+        <div class='dropdown-footer'>
+          <a class='reset-link' href='#'>Reset</a>
+        </div>
+      </div>
+    `;
   }
 
   update_min_max(col_info, has_active_filter) {
