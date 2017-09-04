@@ -386,7 +386,7 @@
 
 /* jquery-ui overrides */
 
-.ui-widget {
+.ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
 }
@@ -424,6 +424,8 @@ input.editor-text {
   margin-top: 2px;
   padding: 0;
   vertical-align: top;
+  left: 4px;
+  position: relative;
 }
 
 .slick-cell.boolean {
@@ -447,6 +449,25 @@ input.editor-text {
 
 input.bool-filter-radio {
   margin-left: -23px;
+}
+
+.slick-cell.editable {
+  background-color: rgb(255, 247, 141) !important;
+  border: 1px solid rgba(0, 0, 0, 0.26) !important;
+}
+
+.slick-cell {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none;
+}
+
+.slick-row .slick-cell:not(:first-child) {
+  margin-left: -4px;
+  padding-left: 4px;
 }
 
 /*.ui-datepicker .ui-corner-all, &.ui-corner-all
