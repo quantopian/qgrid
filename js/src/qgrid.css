@@ -454,6 +454,13 @@ input.bool-filter-radio {
 .slick-cell.editable {
   background-color: rgb(255, 247, 141) !important;
   border: 1px solid rgba(0, 0, 0, 0.26) !important;
+  margin-top: -1px;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.slick-cell.editable:not(:last-child) {
+  margin-right: 3px;
 }
 
 .slick-cell {

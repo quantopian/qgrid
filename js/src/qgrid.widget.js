@@ -132,12 +132,15 @@ class QgridView extends widgets.DOMWidgetView {
     this.columns = [];
     this.filters = {};
     this.filter_list = [];
+    this.date_formats = {};
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
       validator: editors.validateNumber,
       formatter: this.format_number
     };
+
+    var self = this;
 
     this.type_infos = {
       integer: Object.assign(
@@ -155,8 +158,37 @@ class QgridView extends widgets.DOMWidgetView {
       },
       datetime: {
         filter: date_filter.DateFilter,
-        editor: Slick.Editors.Date,
-        formatter: this.format_date
+        editor: class DateEditor extends Slick.Editors.Date {
+          constructor(args) {
+            super(args);
+
+            this.loadValue = (item) => {
+              var date_value = item[args.column.field];
+              var formatted_val = self.format_date(
+                  date_value, args.column.field
+              );
+              this.input = $(args.container).find('.editor-text');
+              this.input.val(formatted_val);
+              this.input[0].defaultValue = formatted_val;
+              this.input.select();
+              this.input.on("keydown.nav", function (e) {
+                if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+                  e.stopImmediatePropagation();
+                }
+              });
+            };
+
+            this.serializeValue = () => {
+              var parsed_date = moment.parseZone(
+                  this.input.val(), "YYYY-MM-DD HH:mm:ss.SSS"
+              );
+              return parsed_date.format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+            };
+          }
+        },
+        formatter: (row, cell, value, columnDef, dataContext) => {
+          return this.format_date(value, columnDef.name)
+        }
       },
       any: {
         filter: text_filter.TextFilter,
@@ -175,7 +207,12 @@ class QgridView extends widgets.DOMWidgetView {
       }
     };
 
-    $.datepicker.setDefaults({buttonImage: calendar_icon});
+    $.datepicker.setDefaults({
+      gotoCurrent: true,
+      dateFormat: $.datepicker.ISO_8601,
+      buttonImage: calendar_icon,
+      constrainInput: false
+    });
 
     $.each(columns, (i, cur_column) => {
       var type_info = this.type_infos[cur_column.type] || {};
@@ -338,8 +375,35 @@ class QgridView extends widgets.DOMWidgetView {
     this.slick_grid.setData(data_view);
   }
 
-  format_date(row, cell, value, columnDef, dataContext) {
-    return moment.parseZone(value).format("YYYY-MM-DD");
+  format_date(date_string, col_name) {
+    var parsed_date = moment.parseZone(date_string, "YYYY-MM-DDTHH:mm:ss.SSSZ");
+    var date_format = null;
+    if (parsed_date.millisecond() != 0){
+       date_format = `YYYY-MM-DD HH:mm:ss.SSS`;
+    } else if (parsed_date.second() != 0){
+      date_format = "YYYY-MM-DD HH:mm:ss";
+    } else if (parsed_date.hour() != 0 || parsed_date.minute() != 0) {
+      date_format = "YYYY-MM-DD HH:mm";
+    } else {
+      date_format = "YYYY-MM-DD";
+    }
+
+    if (col_name in this.date_formats){
+      var old_format = this.date_formats[col_name];
+      if (date_format.length > old_format.length){
+        this.date_formats[col_name] = date_format;
+        setTimeout(() => {
+          this.slick_grid.invalidateAllRows();
+          this.slick_grid.render();
+        }, 1);
+      } else {
+        date_format = this.date_formats[col_name]
+      }
+    } else {
+      this.date_formats[col_name] = date_format;
+    }
+
+    return parsed_date.format(date_format);
   }
 
   format_string(row, cell, value, columnDef, dataContext) {
