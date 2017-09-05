@@ -144,6 +144,13 @@ To try qgrid out on Jupyterlab, run the following commands::
   jupyter labextension enable qgrid-jupyterlab
   jupyter lab
 
+I don't have exporting to static html working in ipywidgets 7 yet but the
+following combination of packages should work:
+
+  notebook==5.0.0
+  ipywidgets==6.0.0
+  qgrid==1.0.0a0
+
 Running the demo notebook locally
 ---------------------------------
 
@@ -225,3 +232,11 @@ to do this.
    `nb_install <http://qgrid.readthedocs.org/en/latest/#qgrid.nbinstall>`_ function from within the notebook to copy
    your latest changes to the "nbextensions" folder (i.e. where widgets must put their javascript for it to be found
    by the notebook).
+
+Building sphinx docs
+--------------------
+
+pip install
+pip install sphinx_rtd_theme
+cd docs
+make html
