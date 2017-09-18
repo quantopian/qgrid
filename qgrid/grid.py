@@ -211,7 +211,7 @@ def show_grid(data_frame, show_toolbar=None,
                        grid_options=grid_options,
                        show_toolbar=show_toolbar)
 
-@widgets.register('qgrid.QgridWidget')
+@widgets.register()
 class QgridWidget(widgets.DOMWidget):
     """
     The widget class which is instantiated by the 'show_grid' method, and
@@ -292,8 +292,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.0-alpha.6').tag(sync=True)
-    _model_module_version = Unicode('1.0.0-alpha.6').tag(sync=True)
+    _view_module_version = Unicode('1.0.0-alpha.23').tag(sync=True)
+    _model_module_version = Unicode('1.0.0-alpha.23').tag(sync=True)
 
     _df_json = Unicode('', sync=True)
     _primary_key = List()

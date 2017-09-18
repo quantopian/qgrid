@@ -126,11 +126,11 @@
 }
 
 .q-grid .slick-sort-indicator-desc {
-  background: url(../lib/sort_desc.png) no-repeat -6px -10px !important;
+  background: url(./img/sort_desc.png) no-repeat -6px -10px !important;
 }
 
 .q-grid .slick-sort-indicator-asc {
-  background: url(../lib/sort_asc.png) no-repeat -6px -3px !important;
+  background: url(./img/sort_asc.png) no-repeat -6px -3px !important;
 }
 
 .q-grid .slick-column-name {

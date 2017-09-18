@@ -108,7 +108,7 @@ class NPM(Command):
             if not exists(t):
                 msg = 'Missing file: %s' % t
                 if not has_npm:
-                    msg += '\nnpm is required to build a development version of widgetsnbextension'
+                    msg += '\nnpm is required to build a development version of a widget extension'
                 raise ValueError(msg)
 
         # update package data in case this created new files
@@ -125,6 +125,15 @@ def read_requirements(basename):
 
 reqs = read_requirements('requirements.txt')
 
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join(path, filename))
+    return paths
+
+data_files = package_files('qgrid/static')
+
 setup_args = {
     'name': 'qgrid',
     'version': version_ns['__version__'],
@@ -132,11 +141,7 @@ setup_args = {
     'long_description': LONG_DESCRIPTION,
     'include_package_data': True,
     'data_files': [
-        ('share/jupyter/nbextensions/qgrid', [
-            'qgrid/static/extension.js',
-            'qgrid/static/index.js',
-            'qgrid/static/index.js.map',
-        ]),
+        ('share/jupyter/nbextensions/qgrid', data_files),
     ],
     'install_requires': reqs,
     'packages': find_packages(),

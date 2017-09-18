@@ -1,14 +1,14 @@
 var widgets = require('@jupyter-widgets/base');
 var _ = require('underscore');
 var moment = require('moment');
-window.jQuery = require('jquery');
+window.$ = window.jQuery = require('jquery');
 var date_filter = require('./qgrid.datefilter.js');
 var slider_filter = require('./qgrid.sliderfilter.js');
 var text_filter = require('./qgrid.textfilter.js');
 var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
-var calendar_icon = require('../lib/calendar.gif');
-var checkmark_icon = require('../lib/tick.png');
+var calendar_icon = require('./img/calendar.gif');
+var checkmark_icon = require('./img/tick.png');
 
 require('slickgrid/slick.core.js');
 require('slickgrid/lib/jquery.event.drag-2.3.0.js');
@@ -30,8 +30,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.0-alpha.6',
-      _view_module_version : '^1.0.0-alpha.6',
+      _model_module_version : '^1.0.0-alpha.23',
+      _view_module_version : '^1.0.0-alpha.23',
       _df_json: '',
       _columns: {}
     });

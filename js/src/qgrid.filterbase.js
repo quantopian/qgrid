@@ -1,5 +1,4 @@
 var $ = require('jquery');
-var handlebars = require('handlebars');
 
 class FilterBase {
   constructor(field, column_type, qgrid) {
@@ -42,12 +41,12 @@ class FilterBase {
   }
 
   create_error_msg() {
-    var error_template = handlebars.compile(
-        "<div class='filter-error-msg dropdown-menu {{type}}-filter'>" +
-        "All values in the column are the same.  Nothing to filter." +
-        "</div>"
-    );
-    this.filter_elem = $(error_template(this.column));
+    var error_html = `
+      <div class='filter-error-msg dropdown-menu ${this.column}-filter'>
+        All values in the column are the same.  Nothing to filter.
+      </div>
+    `;
+    this.filter_elem = $(error_html);
     this.initialize_controls();
     this.disabled_tooltip_showing = true;
   }

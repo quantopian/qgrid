@@ -1,13 +1,22 @@
+var path = require('path');
 var version = require('./package.json').version;
 var webpack = require('webpack');
 
 // Custom webpack loaders are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
-var loaders = [
-    { test: /\.json$/, loader: 'json-loader' },
-    { test: /\.css$/, loader: 'style-loader!css-loader' },
-    { test: /\.(jpe?g|png|gif|svg)$/i, loader: 'file-loader'},
-    { test: require.resolve("jquery"), loader: "expose-loader?$!expose-loader?jQuery" }
+var rules = [
+    { test: /\.css$/, use: ['style-loader', 'css-loader']},
+    { test: /\.(jpe?g|png|gif|svg)$/i, use: ['file-loader']},
+    {
+        test: require.resolve('jquery'),
+        use: [{
+            loader: 'expose-loader',
+            options: 'jQuery'
+        },{
+            loader: 'expose-loader',
+            options: '$'
+        }]
+    }
 ];
 
 var plugins = [
@@ -28,15 +37,9 @@ module.exports = [
      // extension.
      //
         entry: './src/extension.js',
-        resolve:
-        {
-            alias: {
-                'handlebars' : 'handlebars/dist/handlebars.js'
-            }
-        },
         output: {
             filename: 'extension.js',
-            path: '../qgrid/static',
+            path: path.resolve(__dirname, '..', 'qgrid', 'static'),
             libraryTarget: 'amd'
         },
         plugins: plugins
@@ -50,20 +53,14 @@ module.exports = [
         entry: './src/index.js',
         output: {
             filename: 'index.js',
-            path: '../qgrid/static',
+            path: path.resolve(__dirname, '..', 'qgrid', 'static'),
             libraryTarget: 'amd'
         },
         devtool: 'source-map',
         module: {
-            loaders: loaders
+            rules: rules
         },
-        resolve:
-        {
-            alias: {
-                'handlebars' : 'handlebars/dist/handlebars.js'
-            }
-        },
-        externals: ['@jupyter-widgets/base'],
+        externals: ['@jupyter-widgets/base', '@jupyter-widgets/controls'],
         plugins: plugins
     },
     {// Embeddable qgrid bundle
@@ -83,27 +80,15 @@ module.exports = [
         entry: './src/embed.js',
         output: {
             filename: 'index.js',
-            path: './dist/',
+            path: path.resolve(__dirname, './dist/'),
             libraryTarget: 'amd',
             publicPath: 'https://unpkg.com/qgrid@' + version + '/dist/'
         },
         devtool: 'source-map',
         module: {
-            loaders: loaders
+            rules: rules
         },
-        resolve:
-        {
-            alias: {
-                'handlebars' : 'handlebars/dist/handlebars.js'
-            }
-        },
-        externals: ['@jupyter-widgets/base'],
+        externals: ['@jupyter-widgets/base', '@jupyter-widgets/controls'],
         plugins: plugins
     }
 ];
-
-var resolve = {
-    alias: {
-        'handlebars' : 'handlebars/dist/handlebars.js'
-    }
-};
