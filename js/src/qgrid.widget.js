@@ -9,16 +9,17 @@ var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
 var calendar_icon = require('./img/calendar.gif');
 var checkmark_icon = require('./img/tick.png');
+var bs = require('bootstrap');
 
-require('slickgrid/slick.core.js');
-require('slickgrid/lib/jquery.event.drag-2.3.0.js');
-require('slickgrid/plugins/slick.rowselectionmodel.js');
-require('slickgrid/plugins/slick.checkboxselectcolumn.js');
-require('slickgrid/slick.dataview.js');
-require('slickgrid/slick.grid.js');
-require('slickgrid/slick.editors.js');
-require('style-loader!slickgrid/slick.grid.css');
-require('style-loader!slickgrid/slick-default-theme.css');
+require('slickgrid-qgrid/slick.core.js');
+require('slickgrid-qgrid/lib/jquery.event.drag-2.3.0.js');
+require('slickgrid-qgrid/plugins/slick.rowselectionmodel.js');
+require('slickgrid-qgrid/plugins/slick.checkboxselectcolumn.js');
+require('slickgrid-qgrid/slick.dataview.js');
+require('slickgrid-qgrid/slick.grid.js');
+require('slickgrid-qgrid/slick.editors.js');
+require('style-loader!slickgrid-qgrid/slick.grid.css');
+require('style-loader!slickgrid-qgrid/slick-default-theme.css');
 require('style-loader!jquery-ui/themes/base/minified/jquery-ui.min.css');
 require('style-loader!./qgrid.css');
 
@@ -30,8 +31,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.0-alpha.23',
-      _view_module_version : '^1.0.0-alpha.23',
+      _model_module_version : '^1.0.0-beta.0',
+      _view_module_version : '^1.0.0-beta.0',
       _df_json: '',
       _columns: {}
     });
@@ -62,13 +63,24 @@ class QgridView extends widgets.DOMWidgetView {
     }
 
     this.initialize_slick_grid();
-    //this.grid = new qgrid.QGrid(this.tableDiv, data_view, columns, this.model);
-    //this.grid.initialize_slick_grid(options);
   }
 
   initialize_toolbar() {
     this.$el.addClass('show-toolbar');
     this.toolbar = $("<div class='q-grid-toolbar'>").appendTo(this.$el);
+
+    this.full_screen_modal = $('body').find('.qgrid-modal');
+    if (this.full_screen_modal.length == 0){
+      this.full_screen_modal = $(`
+        <div class="modal qgrid-modal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body"></div>
+            </div>
+          </div>
+        </div>
+      `).appendTo($('body'));
+    }
 
     let append_btn = (btn_info) => {
       return $(`
@@ -113,6 +125,35 @@ class QgridView extends widgets.DOMWidgetView {
       clicked.addClass('disabled');
       this.send({'type': clicked.attr('data-event-type')});
     });
+
+    this.full_screen_btn = $(`
+      <button
+        class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
+    `).appendTo(this.toolbar).click((e) => {
+      this.$el_wrapper = this.$el.parent();
+      this.$el_wrapper.height(this.$el_wrapper.height());
+      this.$el.detach();
+      this.full_screen_modal.find('.modal-body').append(this.$el);
+
+      this.full_screen_modal.on('shown.bs.modal', (e) => {
+        this.slick_grid.resizeCanvas();
+      });
+
+      this.full_screen_modal.on('hidden.bs.modal', (e) => {
+        this.$el.detach();
+        this.$el_wrapper.height('auto');
+        this.$el_wrapper.append(this.$el);
+        this.update_size();
+      });
+
+      this.full_screen_modal.modal();
+    });
+
+    this.close_modal_btn = $(`
+      <button
+        class='btn btn-default fa fa-times close-modal-btn'
+        data-dismiss="modal"/>
+    `).appendTo(this.toolbar)
   }
 
   /**
@@ -128,11 +169,16 @@ class QgridView extends widgets.DOMWidgetView {
     var columns = this.model.get('_columns');
     this.data_view = this.create_data_view(df_json.data);
     var options = this.model.get('grid_options');
+    this.index_col_name = this.model.get("_index_col_name");
 
     this.columns = [];
+    this.index_columns = [];
     this.filters = {};
     this.filter_list = [];
     this.date_formats = {};
+    this.last_vp = null;
+    this.sort_in_progress = false;
+    this.sort_indicator = null;
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
@@ -202,7 +248,7 @@ class QgridView extends widgets.DOMWidgetView {
         filter: boolean_filter.BooleanFilter,
         editor: Slick.Editors.Checkbox,
         formatter: (row, cell, value, columngDef, dataContext) => {
-          return value ? `<img src='${checkmark_icon}'>` : "";
+          return value ? `<span class="fa fa-check"/>` : "";
         }
       }
     };
@@ -210,11 +256,14 @@ class QgridView extends widgets.DOMWidgetView {
     $.datepicker.setDefaults({
       gotoCurrent: true,
       dateFormat: $.datepicker.ISO_8601,
-      buttonImage: calendar_icon,
       constrainInput: false
     });
 
     $.each(columns, (i, cur_column) => {
+      if (cur_column.name == this.index_col_name){
+        return;
+      }
+
       var type_info = this.type_infos[cur_column.type] || {};
 
       var slick_column = {
@@ -228,31 +277,40 @@ class QgridView extends widgets.DOMWidgetView {
 
       Object.assign(slick_column, type_info);
 
-      if(cur_column.type == 'any'){
+      if (cur_column.type == 'any'){
         slick_column.editorOptions = {
           options: cur_column.constraints.enum
         };
       }
 
-      if (slick_column.filter){
+      if (slick_column.filter) {
         var cur_filter = new slick_column.filter(
             slick_column.field,
             cur_column.type,
             this
         );
-        $(cur_filter).on("filter_changed", this.handle_filter_changed);
-        $(cur_filter).on("viewport_changed", this.handle_filter_viewport_changed);
-        $(cur_filter).on("get_column_min_max", this.handle_get_min_max);
         this.filters[slick_column.id] = cur_filter;
         this.filter_list.push(cur_filter);
       }
 
+      // don't allow editing index columns
+      if (cur_column.is_index) {
+        delete slick_column.editor;
+        slick_column.cssClass += ' idx-col';
+        this.index_columns.push(slick_column);
+        return;
+      }
       this.columns.push(slick_column);
     });
 
+    if (this.index_columns.length > 0) {
+      this.columns = this.index_columns.concat(this.columns);
+    }
+
     var row_count = 0;
 
-    this.slick_grid = new Slick.Grid(
+    // set window.slick_grid for easy troubleshooting in the js console
+    window.slick_grid = this.slick_grid = new Slick.Grid(
       this.grid_elem,
       this.data_view,
       this.columns,
@@ -301,6 +359,18 @@ class QgridView extends widgets.DOMWidgetView {
     this.slick_grid.setSortColumns([]);
 
     this.slick_grid.onSort.subscribe((e, args) => {
+      if (this.sort_in_progress){
+        return;
+      }
+      this.sort_in_progress = true;
+      this.grid_elem.find('.slick-sort-indicator').removeClass(
+          'fa-sort-asc fa-sort-desc fa fa-spin fa-spinner'
+      );
+      this.sort_indicator = $(e.target).find('.slick-sort-indicator');
+      this.sort_indicator.removeClass(
+          'slick-sort-indicator-desc slick-sort-indicator-asc'
+      );
+      this.sort_indicator.addClass(`fa fa-spinner fa-spin`);
       var msg = {
         'type': 'sort_changed',
         'sort_field': args.sortCol.field,
@@ -314,8 +384,12 @@ class QgridView extends widgets.DOMWidgetView {
         clearTimeout(this.viewport_timeout);
       }
       this.viewport_timeout = setTimeout(() => {
-        var vp = this.slick_grid.getViewport();
-        var msg = {'type': 'viewport_changed', 'top': vp.top, 'bottom': vp.bottom};
+        this.last_vp = this.slick_grid.getViewport();
+        var msg = {
+          'type': 'viewport_changed',
+          'top': this.last_vp.top,
+          'bottom': this.last_vp.bottom
+        };
         this.send(msg);
         this.viewport_timeout = null;
       }, 100);
@@ -323,10 +397,10 @@ class QgridView extends widgets.DOMWidgetView {
 
     // set up callbacks
     this.slick_grid.onCellChange.subscribe((e, args) => {
-      var column = df_json.schema.fields[args.cell].name;
-      var id = this.slick_grid.getDataItem(args.row).slick_grid_id;
-      var row = Number(id.replace('row', ''));
-      var msg = {'row': row, 'column': column,
+      var column = this.columns[args.cell].name;
+      var data_item = this.slick_grid.getDataItem(args.row);
+      var msg = {'row_index': data_item.row_index, 'column': column,
+                 'unfiltered_index': data_item[this.index_col_name],
                  'value': args.item[column], 'type': 'cell_change'};
       this.send(msg);
     });
@@ -361,10 +435,10 @@ class QgridView extends widgets.DOMWidgetView {
       getItem: (i) => {
         if (i >= df_range[0] && i < df_range[1]){
           var row = df[i - df_range[0]] || {};
-          row.slick_grid_id = "row" + i;
+          row.row_index = i;
           return row;
         } else {
-          return { slick_grid_id: "row" + i };
+          return { row_index: i };
         }
       }
     };
@@ -376,6 +450,9 @@ class QgridView extends widgets.DOMWidgetView {
   }
 
   format_date(date_string, col_name) {
+    if (!date_string) {
+      return "";
+    }
     var parsed_date = moment.parseZone(date_string, "YYYY-MM-DDTHH:mm:ss.SSSZ");
     var date_format = null;
     if (parsed_date.millisecond() != 0){
@@ -414,35 +491,12 @@ class QgridView extends widgets.DOMWidgetView {
     return value;
   }
 
-  handle_filter_viewport_changed(e, msg) {
-    this.widget_model.send(msg);
-  }
-
   /**
    * Handle messages from the QGridWidget.
    */
   handle_msg(msg) {
-    if (msg.type === 'remove_row') {
-      var cell = this.slick_grid.getActiveCell();
-      if (!cell) {
-          console.log('no cell');
-          return;
-      }
-      var data = this.slick_grid.getData().getItem(cell.row);
-      this.grid.data_view.deleteItem(data.slick_grid_id);
-      var row = Number(data.slick_grid_id.replace('row', ''));
-      msg = {'type': 'remove_row', 'row': row, 'id': data.id};
-      this.updateSize();
-      this.send(msg);
-
-    } else if (msg.type === 'add_row') {
-      var dd = this.slick_grid.getData();
-      dd.addItem(msg);
-      dd.refresh();
-      this.updateSize();
-      this.send(msg);
-    } else if (msg.type === 'draw_table') {
-      this.drawTable();
+    if (msg.type === 'draw_table') {
+      this.initialize_qgrid();
     } else if (msg.type == 'show_error') {
       alert(msg.error_msg);
       if (msg.triggered_by == 'add_row' ||
@@ -450,12 +504,35 @@ class QgridView extends widgets.DOMWidgetView {
         this.reset_in_progress_button();
       }
     } else if (msg.type == 'update_data_view') {
+      if (this.buttons) {
+        if (this.has_active_filter()) {
+          this.buttons.addClass('disabled');
+          this.buttons.tooltip({
+            title: 'Not available while there is an active filter',
+            trigger: 'hover', container: 'body', placement: 'bottom',
+            delay: {"show": 200, "hide": 100}
+          });
+        } else {
+          this.buttons.removeClass('disabled');
+          this.buttons.tooltip('destroy');
+        }
+      }
       if (this.update_timeout){
         clearTimeout(this.update_timeout);
       }
       this.update_timeout = setTimeout(() => {
         var df_json = JSON.parse(this.model.get('_df_json'));
         var data_view = this.create_data_view(df_json.data);
+
+        if (msg.triggered_by == 'sort_changed' && this.sort_indicator){
+          var asc = this.model.get('_sort_ascending');
+          this.sort_indicator.removeClass(
+              'fa-spinner fa-spin fa-sort-asc fa-sort-desc'
+          );
+          var fa_class = asc ? 'fa-sort-asc' : 'fa-sort-desc';
+          this.sort_indicator.addClass(fa_class);
+          this.sort_in_progress = false;
+        }
 
         let top_row = null;
         if (msg.triggered_by === 'remove_row'){
@@ -465,8 +542,9 @@ class QgridView extends widgets.DOMWidgetView {
         this.set_data_view(data_view);
         this.slick_grid.render();
 
-        if (msg.triggered_by !== 'filter_changed') {
-          this.updateSize();
+        if ((msg.triggered_by == 'add_row' ||
+          msg.triggered_by == 'remove_row') && !this.has_active_filter()) {
+          this.update_size();
         }
         this.update_timeout = null;
         this.reset_in_progress_button();
@@ -476,6 +554,9 @@ class QgridView extends widgets.DOMWidgetView {
           let data_length = data_view.getLength();
           this.slick_grid.scrollRowIntoView(data_length);
           this.slick_grid.setSelectedRows([data_length - 1]);
+        } else if (msg.triggered_by === 'viewport_changed' &&
+            this.last_vp.bottom >= this.df_length) {
+          this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
         }
 
         var selected_rows = this.slick_grid.getSelectedRows().filter((row) => {
@@ -505,13 +586,13 @@ class QgridView extends widgets.DOMWidgetView {
   /**
    * Update the size of the dataframe.
    */
-  updateSize() {
-    var rowHeight = 28;
-    var min_height = rowHeight * 8;
-    var max_height = rowHeight * 20;
+  update_size() {
+    var row_height = 28;
+    var min_height = row_height * 8;
+    var max_height = row_height * 12;
     var grid_height = max_height;
     var total_row_height =
-      (this.data_view.getLength() + 1) * rowHeight + 1;
+      (this.data_view.getLength() + 1) * row_height + 1;
     if (total_row_height <= max_height){
       grid_height = Math.max(min_height, total_row_height);
       this.grid_elem.addClass('hide-scrollbar');

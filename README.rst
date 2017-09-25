@@ -7,9 +7,9 @@
 =====
 qgrid
 =====
-Qgrid is an IPython widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas DataFrames
-within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
-filtering controls, **as well as edit your DataFrames by double clicking a cell (new in v0.3.0)**.
+Qgrid is an Jupyter notebook widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas
+DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
+filtering controls, as well as edit your DataFrames by double clicking a cell.
 
 We originally developed qgrid for use in `Quantopian's hosted research environment
 <https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_, but had to put it
@@ -20,8 +20,10 @@ being initially released on github in `October of 2014
 <https://twitter.com/Tim_Shawver/status/521092342162681857>`_, this project has not gotten significant attention by
 Quantopian engineers, other than for the purposes of fixing critical bugs or reviewing PRs from the community.
 
-That's changed a bit this summer, as we currently have a major refactoring project underway.  See the
-`\*\*\* Try the alpha preview of qgrid 1.0.0 \*\*\*`_ section below for more details.
+That changed a bit in summer 2017, when we started a major refactoring project to allow qgrid to take advantage
+of the latest advances in ipywidgets (specifically, ipywidget 7.x).  As a part of this refactoring we also moved
+qgrid's sorting, and filtering logic from the client (javascript) to the server (python). This new version is called
+qgrid 1.0, and the instructions that follow are for this new version.
 
 Demo
 ----
@@ -35,7 +37,7 @@ API documentation is hosted on `readthedocs <http://qgrid.readthedocs.org/en/lat
 Installation
 ------------
 
-**Python Dependencies:**
+Run the following to install and enable qgrid::
 
 Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
@@ -75,81 +77,19 @@ and will be automatically installed (if necessary) when qgrid is installed via p
  0.3.3             5.x                          6.x
  1.0.0a3           5.x                          6.x
 =================  ===========================  ==============================
-
-**Installing from PyPI:**
-
-Qgrid is on `PyPI <https://pypi.python.org/pypi>`_ and can be installed like this::
-
-    pip install qgrid
-
-If you need to install a specific version of qgrid, pip allows you to specify it like this::
-
-    pip install qgrid==0.2.0
-
-See the `Releases <https://github.com/quantopian/qgrid/releases>`_ page for more details about the versions that
-are available.
-
-**Installing from GitHub:**
-
-The latest release on PyPI is often out of date, and might not contain the latest bug fixes and features that you
-want.  To run the latest code that is on master, install qgrid from GitHub instead of PyPI::
-
-    pip install git+https://github.com/quantopian/qgrid
-
-\*\*\* Try the alpha preview of qgrid 1.0.0 \*\*\*
---------------------------------------------------
-As of July 2017 a new project is underway to refactor qgrid to be able to handle displaying much larger
-DataFrames. By only sending the rows of the DataFrame that are currently in view and requesting more rows from the
-notebook server as the user scrolls, qgrid is able to display any DataFrame that can be held in memory by your
-notebook server.  In our testing this means that instead of crashing at around 50K rows as it previously would, qgrid
-can handle well over a million rows without any noticeable effects on performance.
-
-To achieve the "virtual scrolling" described above while still allowing the user to sort and filter qgrid, the sorting
-and filtering logic had to be moved to the server (since that's the only place where we have a copy of the entire
-DataFrame). This change had the nice side effect of enabling us to keep the DataFrame that was passed in to qgrid in
-sync with the sorting and filtering settings in the UI.
-
-Also contained in this project is a bunch of work to reorganize the qgrid repository to match the latest best practices
-for widget deployment and distribution (as outlined by the `widget-cookiecutter <https://github.com/jupyter-widgets/widget-cookiecutter>`_
-template project).  This work also simplifies qgrid's installation steps, and enables it to be used in more contexts such
-as jupyterhub and jupyterlab.
-
-To try out the latest alpha, run the following to install and enable qgrid::
-
-  pip install qgrid --pre
+  pip install qgrid==1.0.0b0
   jupyter nbextension enable --py --sys-prefix qgrid
+
+  OR
+
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b0
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
   jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
 At this point you should be able to run a notebook and use qgrid as you normally would.  The only change in the API is
-that the **nbinstall function no longer exists, and is now unnecessary**.  Also there are a couple of features that
-are currently broken:
-
-- Searching for a string in the text filter dropdown is broken
-- Date filter is broken
-- Slider filter can't reopen after setting a filter on a numpy int64 column.
-- Exporting to html appears to be broken.  This was working at one point.
-
-Other than those issues, everything else should be working though so feel free to log issues for any other problems
-you find in the alpha.
-
-To try qgrid out on Jupyterlab, run the following commands::
-
-  pip install jupyterlab==0.25.2
-  jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.24.3
-  jupyter labextension enable @jupyter-widgets/jupyterlab-manager
-  jupyter labextension install qgrid-jupyterlab@1.0.0-dev.12
-  jupyter labextension enable qgrid-jupyterlab
-  jupyter lab
-
-I don't have exporting to static html working in ipywidgets 7 yet but the
-following combination of packages should work:
-
-  notebook==5.0.0
-  ipywidgets==6.0.0
-  qgrid==1.0.0a0
+that the **nbinstall function no longer exists, and is now unnecessary**.
 
 Running the demo notebook locally
 ---------------------------------
@@ -160,9 +100,9 @@ to clone the qgrid repository to get it.  Here are the steps to clone the reposi
 
 #. Clone the repository from GitHub::
 
-    git clone https://github.com/quantopian/qgrid.git
+    git clone https://github.com/quantopian/qgrid-notebooks.git
 
-#. Go to the top-level directory of the qgrid repository and run the notebook::
+#. Go to the top-level directory of the qgrid-notebooks repository and run the notebook::
 
     cd qgrid
     jupyter notebook
@@ -215,28 +155,38 @@ to do this.
 
     pip install -e .
 
-   This will install the packages that qgrid depends on in the normal way, but will do something special for the
-   qgrid package itself.  Instead of copying the qgrid directory to the site-packages directory of the environment where
-   it was installed (like a virualenv), pip will create a symbolic link which links to the directory you passed in to
-   the ``pip install -e``.  The result is changes that you make to the source code will be reflected as soon as you restart
-   the notebook.
+#. Install the node packages that qgrid depends on and build qgrid's javascript using webpack::
+
+    cd js && npm install .
+
+#. Install and enable qgrid's javascript in your local jupyter notebook environment::
+
+    jupyter nbextension install --py --symlink --sys-prefix qgrid && jupyter nbextension enable --py --sys-prefix qgrid
 
 #. Run the notebook as you normally would with the following command::
 
     jupyter notebook
 
-   Now when you make changes to qgrid's Python code,
-   those changes will take effect as soon as you restart the Jupyter notebook server.
+#. If the code you need to change is in qgrid's python code, then restart the kernel of the notebook you're in and
+   rerun any qgrid cells to see your changes take effect.
 
-#. If the code you need to change is in qgrid's javascript, then call the
-   `nb_install <http://qgrid.readthedocs.org/en/latest/#qgrid.nbinstall>`_ function from within the notebook to copy
-   your latest changes to the "nbextensions" folder (i.e. where widgets must put their javascript for it to be found
-   by the notebook).
+#. If the code you need to change is in qgrid's javascript code, repeat step 3 to rebuild qgrid's javascript, then
+   refresh the browser tab where you're viewing your notebook to see your changes take effect.
 
-Building sphinx docs
---------------------
+Continuing to use qgrid 0.3.3
+-----------------------------
+If you're looking for the installation and usage instructions for qgrid 0.3.3 and the sample notebook that goes
+along with it, please see the `qgrid 0.3.3 tag <https://github.com/quantopian/qgrid/tree/v0.3.3>`_ in this
+repository. The installation steps will be the same except when you run "pip install" you'll have to explicitly
+specify that you want to install version 0.3.3, like this::
 
-pip install
-pip install sphinx_rtd_theme
-cd docs
-make html
+  pip install qgrid==0.3.3
+
+If you're looking for the API docs, you can find them on the
+`readthedocs page for qgrid 0.3.3 <http://qgrid.readthedocs.io/en/v0.3.3/>`_.
+
+If you're looking for the demo notebook for 0.3.3, it's still availabe `in nbviewer
+<http://nbviewer.jupyter.org/gist/TimShawver/8fcef51dd3c222ed25306c002ab89b60>`_.
+
+Qgrid 0.3.3 is not compatible with ipywidgets 7, so if you need support for ipywidgets 7, you'll need to use
+qgrid 1.0.

@@ -29,7 +29,12 @@ class FilterBase {
 
     this.column_header_elem = column_header_elem;
     this.slick_grid = slick_grid;
-    this.filter_btn = $("<div class='fa fa-filter icon-filter filter-button'>");
+    this.filter_btn = $(`
+      <div class='filter-button'>
+        <div class='fa fa-filter filter-icon'/>
+      </div>
+    `);
+    this.filter_icon = this.filter_btn.find('.filter-icon');
     this.filter_btn.appendTo(this.column_header_elem);
     this.filter_btn.click((e) => this.handle_filter_button_clicked(e));
   }
@@ -69,10 +74,20 @@ class FilterBase {
   }
 
   is_active() {
-    return false;
+    throw new Error("not implemented!");
   }
 
   handle_filter_button_clicked(e) {
+    if (this.filter_btn.hasClass('active')){
+      this.hide_filter();
+      e.stopPropagation();
+      return false;
+    }
+
+    this.filter_icon.removeClass('fa-filter');
+    this.filter_icon.addClass('fa-spinner fa-spin');
+    this.filter_btn.addClass('disabled');
+
     var msg = {
         'type': 'get_column_min_max',
         'field': this.field,
@@ -88,7 +103,11 @@ class FilterBase {
     this.prev_column_separator = this.column_header_elem.prev(".slick-header-column").find(".slick-resizable-handle");
     this.prev_column_separator.addClass("active");
 
+    this.filter_btn.removeClass('disabled');
     this.filter_btn.addClass("active");
+
+    this.filter_icon.removeClass('fa-spinner fa-spin');
+    this.filter_icon.addClass('fa-filter');
 
     if (this.has_multiple_values || this.is_active()) {
       this.create_filter_elem();
@@ -178,6 +197,7 @@ class FilterBase {
 
   handle_body_mouse_down(e) {
     if (this.filter_elem && this.filter_elem[0] != e.target && !$.contains(this.filter_elem[0], e.target) &&
+        !$.contains(this.filter_btn[0], e.target) &&
         $(e.target).closest(".filter-child-elem").length == 0) {
       this.hide_filter();
     }

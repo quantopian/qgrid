@@ -5,7 +5,7 @@
  * MIT License, Copyright (c) 2010 Michael Leibman
  */
 var $ = require('jquery');
-require('slickgrid/slick.editors.js');
+require('slickgrid-qgrid/slick.editors.js');
 
 //  http://stackoverflow.com/a/22118349
 class SelectEditor {

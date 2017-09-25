@@ -22,10 +22,6 @@
   box-sizing: border-box;
 }
 
-.q-grid.force-fit-columns .slick-viewport {
-  overflow-x: hidden !important;
-}
-
 .q-grid-toolbar {
   margin: 4px 0
 }
@@ -42,6 +38,83 @@
   border-color: #CCCCCC;
 }
 
+.q-grid-toolbar .close-modal-btn {
+  display: none;
+}
+
+.qgrid-modal .q-grid-toolbar .close-modal-btn {
+  display: block;
+}
+
+.qgrid-modal .full-screen-btn {
+  display: none;
+}
+
+.qgrid-modal {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+}
+
+.qgrid-modal .modal-dialog {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  margin: 0px;
+  width: auto;
+  height: auto;
+}
+
+.qgrid-modal .modal-content {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+.qgrid-modal .modal-body {
+  position: absolute;
+  padding: 15px;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+}
+
+.qgrid-modal .modal-body button.close {
+  margin-top: 7px;
+  margin-right: 14px;
+}
+
+.qgrid-modal .q-grid-container {
+  bottom: 25px;
+  left: 20px;
+  right: 20px;
+  position: absolute;
+  top: 15px;
+}
+
+.qgrid-modal .q-grid {
+  position: absolute;
+  top: 33px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  height: auto !important;
+}
+
+.q-grid-toolbar .full-screen-btn,
+.q-grid-toolbar .close-modal-btn {
+  height: 18px;
+  width: 12px;
+  padding: 4px 7px;
+  float: right;
+  margin-right: 0px;
+}
+
 .output_scroll .q-grid {
   height: 315px !important;
 }
@@ -50,13 +123,21 @@
   height: 284px !important;
 }
 
+.q-grid.force-fit-columns .slick-viewport {
+  overflow-x: hidden !important;
+}
+
 .q-grid.hide-scrollbar > .slick-header {
   margin-bottom: -1px;
 }
 
 .q-grid.hide-scrollbar > .slick-viewport {
-  overflow: hidden !important;
+  overflow-y: hidden !important;
   height: 100%;
+}
+
+.q-grid.hide-scrollbar.force-fit-columns > .slick-viewport {
+  overflow: hidden !important;
 }
 
 .q-grid.hide-scrollbar > .slick-viewport > .grid-canvas {
@@ -75,16 +156,20 @@
   border-bottom: none;
 }
 
-.q-grid .slick-header-column:last-child .filter-button:hover,
-.q-grid .slick-header-column.active:last-child .filter-button,
-.q-grid .slick-header-column:last-child .filter-button.filter-active {
+.q-grid.force-fit-columns .slick-header-column:last-child .filter-button:hover,
+.q-grid.force-fit-columns .slick-header-column.active:last-child .filter-button,
+.q-grid.force-fit-columns .slick-header-column:last-child .filter-button.filter-active {
   border-right: 1px solid #ccc;
   margin-right: -4px;
 }
 
-.q-grid .slick-header-column:last-child .filter-button {
+.q-grid.force-fit-columns .slick-header-column:last-child .filter-button {
   margin-right: -4px;
   border-right: 1px solid transparent;
+}
+
+.q-qgrid.hide-scrollbar .slick-header-column:last-child .slick-resizable-handle {
+  right: -4px;
 }
 
 .q-grid.hide-scrollbar > .slick_header .slick-header-column:last-child .filter-button,
@@ -123,14 +208,27 @@
 
 .q-grid .slick-sort-indicator {
   height: 8px !important;
+  margin-left: 6px;
 }
 
-.q-grid .slick-sort-indicator-desc {
-  background: url(./img/sort_desc.png) no-repeat -6px -10px !important;
+.q-grid .slick-sort-indicator.fa-sort-asc {
+  margin-top: 4px;
+  color: #5862ff;
 }
 
-.q-grid .slick-sort-indicator-asc {
-  background: url(./img/sort_asc.png) no-repeat -6px -3px !important;
+.q-grid .slick-sort-indicator.fa-sort-desc {
+  margin-top: 1px;
+  color: #5862ff;
+}
+
+.q-grid .slick-sort-indicator.fa-spinner {
+  height: auto !important;;
+  width: auto !important;;
+  margin-top: 3px;
+}
+
+.q-grid .fa-check {
+  color: #17a700;
 }
 
 .q-grid .slick-column-name {
@@ -154,10 +252,14 @@
   border-right: none !important;
   border-top: 1px solid transparent;
   border-left: 1px solid transparent;
-  font-size: 14px;
+  font-size: 13px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding-top: 3px;
   padding-left: 0px;
+}
+
+.q-grid .slick-cell.idx-col {
+  font-weight: bold;
 }
 
 .q-grid .slick-cell.l0.r0 {
@@ -388,7 +490,7 @@
 
 .ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* jquery-ui datepicker style overrides */
