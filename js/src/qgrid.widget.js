@@ -9,7 +9,12 @@ var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
 var calendar_icon = require('./img/calendar.gif');
 var checkmark_icon = require('./img/tick.png');
-var bs = require('bootstrap');
+try {
+  var dialog = require('base/js/dialog');
+} catch (e) {
+  console.log('could not load base/js/dialog');
+}
+var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
 
 require('slickgrid-qgrid/slick.core.js');
 require('slickgrid-qgrid/lib/jquery.event.drag-2.3.0.js');
@@ -20,7 +25,7 @@ require('slickgrid-qgrid/slick.grid.js');
 require('slickgrid-qgrid/slick.editors.js');
 require('style-loader!slickgrid-qgrid/slick.grid.css');
 require('style-loader!slickgrid-qgrid/slick-default-theme.css');
-require('style-loader!jquery-ui/themes/base/minified/jquery-ui.min.css');
+require('style-loader!jquery-ui-dist/jquery-ui.theme.min.css');
 require('style-loader!./qgrid.css');
 
 // Model for the qgrid widget
@@ -133,20 +138,23 @@ class QgridView extends widgets.DOMWidgetView {
       this.$el_wrapper = this.$el.parent();
       this.$el_wrapper.height(this.$el_wrapper.height());
       this.$el.detach();
-      this.full_screen_modal.find('.modal-body').append(this.$el);
-
-      this.full_screen_modal.on('shown.bs.modal', (e) => {
-        this.slick_grid.resizeCanvas();
+      var qgrid_modal = dialog.modal({
+        body: this.$el[0],
+        show: false
       });
 
-      this.full_screen_modal.on('hidden.bs.modal', (e) => {
+      qgrid_modal.removeClass('fade');
+      qgrid_modal.addClass('qgrid-modal');
+      qgrid_modal.on('shown.bs.modal', (e) => {
+        this.slick_grid.resizeCanvas();
+      });
+      qgrid_modal.on('hidden.bs.modal', (e) => {
         this.$el.detach();
         this.$el_wrapper.height('auto');
         this.$el_wrapper.append(this.$el);
         this.update_size();
       });
-
-      this.full_screen_modal.modal();
+      qgrid_modal.modal('show');
     });
 
     this.close_modal_btn = $(`
@@ -168,7 +176,7 @@ class QgridView extends widgets.DOMWidgetView {
     var df_json = JSON.parse(this.model.get('_df_json'));
     var columns = this.model.get('_columns');
     this.data_view = this.create_data_view(df_json.data);
-    var options = this.model.get('grid_options');
+    this.grid_options = this.model.get('grid_options');
     this.index_col_name = this.model.get("_index_col_name");
 
     this.columns = [];
@@ -314,28 +322,16 @@ class QgridView extends widgets.DOMWidgetView {
       this.grid_elem,
       this.data_view,
       this.columns,
-      options
+      this.grid_options
     );
 
-    if (options.forceFitColumns){
+    if (this.grid_options.forceFitColumns){
       this.grid_elem.addClass('force-fit-columns');
     }
 
     setTimeout(() => {
       this.slick_grid.init();
-      var max_height = options.height || options.rowHeight * 20;
-      var grid_height = max_height;
-      // totalRowHeight is how tall the grid would have to be to fit all of the rows in the dataframe.
-      // The '+ 1' accounts for the height of the column header.
-      var total_row_height = (this.data_view.getLength() + 1) * options.rowHeight + 1;
-      if (total_row_height <= max_height){
-        grid_height = total_row_height;
-        this.grid_elem.addClass('hide-scrollbar');
-      } else {
-        this.grid_elem.removeClass('hide-scrollbar');
-      }
-      this.grid_elem.height(grid_height);
-      this.slick_grid.resizeCanvas();
+      this.update_size();
     }, 1);
 
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel());
@@ -507,13 +503,18 @@ class QgridView extends widgets.DOMWidgetView {
       if (this.buttons) {
         if (this.has_active_filter()) {
           this.buttons.addClass('disabled');
+          this.buttons.attr('title',
+              'Not available while there is an active filter');
+          this.buttons.tooltip();
           this.buttons.tooltip({
-            title: 'Not available while there is an active filter',
-            trigger: 'hover', container: 'body', placement: 'bottom',
-            delay: {"show": 200, "hide": 100}
+            show: { delay: 300 }
+          });
+          this.buttons.tooltip({
+            hide: { delay: 100, 'duration': 0 }
           });
         } else {
           this.buttons.removeClass('disabled');
+          this.buttons.attr('title', '');
           this.buttons.tooltip('destroy');
         }
       }
@@ -587,12 +588,13 @@ class QgridView extends widgets.DOMWidgetView {
    * Update the size of the dataframe.
    */
   update_size() {
-    var row_height = 28;
-    var min_height = row_height * 8;
-    var max_height = row_height * 12;
+    var row_height = this.grid_options.rowHeight;
+    var min_height = row_height * this.grid_options.minVisibleRows;
+    // add 2 to maxVisibleRows to account for the header row and padding
+    var max_height = this.grid_options.height ||
+        row_height * (this.grid_options.maxVisibleRows + 2);
     var grid_height = max_height;
-    var total_row_height =
-      (this.data_view.getLength() + 1) * row_height + 1;
+    var total_row_height = (this.data_view.getLength() + 1) * row_height + 1;
     if (total_row_height <= max_height){
       grid_height = Math.max(min_height, total_row_height);
       this.grid_elem.addClass('hide-scrollbar');

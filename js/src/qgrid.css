@@ -46,7 +46,9 @@
   display: block;
 }
 
-.qgrid-modal .full-screen-btn {
+.qgrid-modal .full-screen-btn,
+.qgrid-modal .modal-header,
+.qgrid-modal .modal-footer {
   display: none;
 }
 
@@ -472,10 +474,6 @@
   margin: 0;
 }
 
-/*.text-filter .slick-row:hover .slick-cell {
-  background-color: transparent;
-}*/
-
 /* from custom-bootstrap *****************/
 
 .q-grid-container input.datepicker {
@@ -491,6 +489,10 @@
 .ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 13px;
+}
+
+.ui-tooltip {
+  opacity: 1.0 !important;
 }
 
 /* jquery-ui datepicker style overrides */
@@ -514,7 +516,7 @@ input.editor-text {
   width: 100%;
   height: 100%;
   border: 0;
-  margin: 0;
+  margin: -1px 0 0 0;
   background: transparent;
   outline: 0;
   padding: 0;
@@ -578,127 +580,3 @@ input.bool-filter-radio {
   margin-left: -4px;
   padding-left: 4px;
 }
-
-/*.ui-datepicker .ui-corner-all, &.ui-corner-all
-    @include border-radius(0)
-
-
-#ui-datepicker-div .ui-datepicker-header {
-  border: none
-  background: none
-}
-
-#ui-datepicker span.ui-icon-circle-triangle-w {
-  background-image: url("/assets/glyphicons-halflings.png") !important;
-  background-position: -432px -72px !important;
-}
-
-#ui-datepicker  span.ui-icon-circle-triangle-e {
-  background-image: url("/assets/glyphicons-halflings.png") !important;
-  background-position: -456px -72px !important;
-}
-
-#ui-datepicker-div .ui-state-hover
-  background: none
-
-#ui-datepicker-div .ui-state-default
-  text-align: center
-  background: none
-  border: 1px solid transparent
-  &:hover
-    background: $gray-5
-  &.ui-state-active
-    border: 1px solid gray
-
-
-table.ui-datepicker-calendar
-    th
-      font-size: 11px
-      font-weight: normal
-      padding-bottom: 0
-  .ui-datepicker-title
-    font-weight: bold
-  .ui-datepicker-prev, .ui-datepicker-next
-    i
-      position: relative
-      top: 4px
-      left: 7px
-      color: gray
-      text-decoration: none
-    &:hover
-      i
-        text-decoration: none
-        color: black
-*/
-
-/*
-  .numerical-filter
-    .dropdown-body
-      margin: 20px 23px 10px 20px
-      width: 207px
-      text-align: center
-      .slider-range
-        margin-bottom: 4px
-        .ui-slider-handle
-          width: 18px
-          padding: 0
-      .slider-label
-        .range-separator
-          font-size: 28px
-          font-weight: 300
-          padding: 0 7px
-          color: #646a76
-          position: relative
-          top: 4px
-  .text-filter
-    .input-area
-      padding: 12px
-      .search-input
-        height: 30px
-        width: 100%
-        margin-bottom: 0px
-    .text-filter-grid
-      width: 300px
-      height: 250px
-      @include box-sizing-border-box
-      .slick-header-columns
-        height: 0px
-      .slick-row.active
-        .slick-cell
-          background-color: #deeaf7
-      .slick-cell
-        line-height: 30px
-        background-color: white
-        border-bottom: 1px solid #f1f1f1 !important
-        padding: 0
-        text-align: left
-        cursor: pointer
-        &.check-box-cell
-          text-align: center
-          line-height: 28px
-          input
-            margin: 0
-      .slick-row:hover
-        .slick-cell
-          background-color: #f8fbfd
-  .ticker-filter
-    .security-ticker
-      text-transform: uppercase
-      color: #999 !important
-    .label-cash
-      margin-left: 0
-    .slick-viewport
-      overflow: auto !important
-  .transaction-filter
-    .input-area
-      display: none
-    .select-all-link
-      display: none
-    .slick-header
-      border-bottom: none
-    .text-filter-grid
-      width: 170px
-      height: 63px
-      .slick-cell
-        line-height: 32px
-*/

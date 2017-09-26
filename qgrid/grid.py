@@ -30,7 +30,9 @@ class _DefaultSettings(object):
             'enableTextSelectionOnCells': True,
             'editable': True,
             'autoEdit': False,
-            'explicitInitialization': True
+            'explicitInitialization': True,
+            'maxVisibleRows': 15,
+            'minVisibleRows': 8
         }
         self._show_toolbar = False
         self._remote_js = False
@@ -498,7 +500,7 @@ class QgridWidget(widgets.DOMWidget):
             df_for_unique = self._df
 
         col_series = self._get_col_series_from_df(col_name, df_for_unique)
-        if col_info['is_index']:
+        if 'is_index' in col_info:
             col_series = pd.Series(col_series)
 
         if col_info['type'] in ['integer', 'number']:

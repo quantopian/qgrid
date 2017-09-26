@@ -1,6 +1,4 @@
-var $ = require('jquery');
 var filter_base = require('./qgrid.filterbase.js');
-var jquery_ui = require('jquery-ui');
 
 class SliderFilter extends filter_base.FilterBase {
 
