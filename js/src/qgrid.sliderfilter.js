@@ -46,8 +46,9 @@ class SliderFilter extends filter_base.FilterBase {
           clearTimeout(this.slide_timeout);
         }
         this.slide_timeout = setTimeout(() => {
-          this.filter_value_min = ui.values[0];
-          this.filter_value_max = ui.values[1];
+          var slider_values = this.slider_elem.slider("option", "values");
+          this.filter_value_min = slider_values[0];
+          this.filter_value_max = slider_values[1];
           this.set_value(this.filter_value_min, this.filter_value_max);
 
           if (this.filter_value_min == this.min_value) {

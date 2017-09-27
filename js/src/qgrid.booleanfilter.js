@@ -47,7 +47,7 @@ class BooleanFilter extends filter_base.FilterBase {
 
     this.filter_elem.find('label').click((e) => {
       var radio_id = $(e.currentTarget).attr('for');
-      this.radio_buttons.filter(`#${radio_id}`).click()
+      this.radio_buttons.filter(`#${radio_id}`).click();
     });
 
     if (this.selected == null) {
@@ -69,8 +69,7 @@ class BooleanFilter extends filter_base.FilterBase {
       if (this.selected != old_selected_value) {
         this.send_filter_changed();
       }
-      console.log('radio button changed');
-    })
+    });
   }
 
   is_active() {

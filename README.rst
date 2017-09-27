@@ -39,6 +39,40 @@ Installation
 
 Run the following to install and enable qgrid::
 
+  pip install qgrid==1.0.0b0
+  jupyter nbextension enable --py --sys-prefix qgrid
+
+  OR
+
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b0
+
+If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
+
+  jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
+At this point you should be able to run a notebook and use qgrid as you normally would.  The only breaking change in
+the API is that the **nbinstall function no longer exists, and is now unnecessary**.
+
+Jupyterlab Installation
+-----------------------
+
+If you haven't already install jupyterlab and enabled ipywidgets, do that first with the following lines::
+
+  pip install jupyterlab
+  jupyter labextension install @jupyter-widgets/jupyterlab-manager
+  jupyter labextension enable @jupyter-widgets/jupyterlab-manager
+
+Install the qgrid-jupyterlab extension, enable it.
+
+  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.0
+  jupyter labextension enable qgrid-jupyterlab
+
+At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
+able to use qgrid in notebooks as you normally would.
+
+Dependencies
+------------
+
 Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
 
@@ -55,16 +89,14 @@ Qgrid depends on the following five Python packages:
       A powerful data analysis / manipulation library for Python.  Qgrid requires that the data to be rendered as an
       interactive grid be provided in the form of a pandas DataFrame.
 
-    `Pandas Datareader <https://github.com/pydata/pandas-datareader/>`_
-      A library we use to retrieve sample DataFrames in qgrid_demo.ipynb.
-
     `Semver <https://github.com/k-bx/python-semver>`_
       A Python module for semantic versioning. Simplifies comparing versions.
 
 These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/master/requirements.txt>`_
 and will be automatically installed (if necessary) when qgrid is installed via pip.
 
-**Compatibility:**
+Compatibility:
+--------------
 
 =================  ===========================  ==============================
  qgrid             IPython / Jupyter notebook   ipywidgets
@@ -75,28 +107,16 @@ and will be automatically installed (if necessary) when qgrid is installed via p
  0.3.x             4.1                          4.1.x
  0.3.2             4.2                          5.x
  0.3.3             5.x                          6.x
- 1.0.0a3           5.x                          6.x
+ 1.0.0b0           5.x                          7.x
 =================  ===========================  ==============================
-  pip install qgrid==1.0.0b0
-  jupyter nbextension enable --py --sys-prefix qgrid
 
-  OR
-
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b0
-
-If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
-
-  jupyter nbextension enable --py --sys-prefix widgetsnbextension
-
-At this point you should be able to run a notebook and use qgrid as you normally would.  The only change in the API is
-that the **nbinstall function no longer exists, and is now unnecessary**.
 
 Running the demo notebook locally
 ---------------------------------
 
-The qgrid repository includes a demo notebook which will help you get familiar with the functionality that qgrid
-provides.  This demo notebook doesn't get downloaded to your machine when you install qgrid with pip, so you'll need
-to clone the qgrid repository to get it.  Here are the steps to clone the repository and run the demo notebook:
+There's a demo notebook in the `qgrid-notebooks <https://github.com/quantopian/qgrid-notebooks/>`_ repository
+which will help you get familiar with the functionality that qgrid provides. Here are the steps to clone the
+qgrid-notebooks repository and run the demo notebook:
 
 #. Clone the repository from GitHub::
 
@@ -104,38 +124,9 @@ to clone the qgrid repository to get it.  Here are the steps to clone the reposi
 
 #. Go to the top-level directory of the qgrid-notebooks repository and run the notebook::
 
-    cd qgrid
+    cd qgrid-notebooks
+    pip install -r requirements_dev.txt
     jupyter notebook
-
-   The advantage of running the notebook from the top-level directoy of the qgrid repository is the sample notebook
-   that comes with qgrid will be available on the first page that appears when the web browser launches.  Here's what
-   you can expect that page to look like:
-
-     .. figure:: docs/images/home_screen.png
-         :align: left
-         :target: docs/images/home_screen.png
-         :width: 800px
-
-         The "notebook dashboard" for the jupyter notebook which shows all the files in the current directory.
-
-#. Click on qgrid_demo.ipynb to open it.  Here's what that should like:
-
-     .. figure:: docs/images/notebook_screen.png
-         :align: left
-         :target: docs/images/notebook_screen.png
-         :width: 800px
-
-         The demo notebook, qgrid_demo.ipynb, rendered by a locally-running Jupyter notebook.
-
-#. Click the "Cell" menu at the top of the notebook and click "Run All" to run all the cells in the notebook and
-   render a few sample qgrids.
-
-        .. figure:: docs/images/qgrid_screen.png
-         :align: left
-         :target: docs/images/qgrid_screen.png
-         :width: 800px
-
-         A sample qgrid, as seen in the demo notebook, qgrid_demo.ipynb.
 
 
 Running from source

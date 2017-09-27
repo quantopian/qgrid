@@ -169,8 +169,7 @@ def show_grid(data_frame, show_toolbar=None,
     is constructed using the options passed in to this function.  The
     ``data_frame`` argument to this function is used as the ``df`` kwarg in
     call to the QgridWidget constructor, and the rest of the parameters
-    are passed through without any translation since they have the same name
-    in the QgridWidget constructor.
+    are passed through as is.
 
     If the ``data_frame`` argument is a Series, it will be converted to a
     DataFrame before being passed in to the QgridWidget constructor as the
@@ -212,11 +211,11 @@ def show_grid(data_frame, show_toolbar=None,
             "data_frame must be DataFrame or Series, not %s" % type(data_frame)
         )
 
-
     # create a visualization for the dataframe
     return QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
                        show_toolbar=show_toolbar)
+
 
 @widgets.register()
 class QgridWidget(widgets.DOMWidget):
@@ -284,8 +283,10 @@ class QgridWidget(widgets.DOMWidget):
     ----------
     df : DataFrame
         Get/set the DataFrame that's being displayed by the current instance.
-        This DataFrame will reflect any sorting/filtering/editing
-        changes that are made via the UI.
+        This DataFrame will NOT reflect any sorting/filtering/editing
+        changes that are made via the UI. To get a copy of the DataFrame that
+        does reflect sorting/filtering/editing changes, use the
+        ``get_changed_df()`` method.
     grid_options : dict
         Get/set the SlickGrid options being used by the current instance.
     precision : integer
@@ -346,10 +347,9 @@ class QgridWidget(widgets.DOMWidget):
 
     def _update_df(self):
         self._ignore_df_changed = True
-
         # make a copy of the user's dataframe
         self._df = self.df.copy()
-        
+
         # insert a column which we'll use later to map edits from
         # a filtered version of this df back to the unfiltered version
         self._df.insert(0, self._index_col_name, range(0, len(self._df)))
@@ -394,7 +394,7 @@ class QgridWidget(widgets.DOMWidget):
         new_df_range = (from_index, to_index)
 
         if triggered_by is 'viewport_changed' and \
-            self._df_range == new_df_range:
+                self._df_range == new_df_range:
             return
 
         self._df_range = new_df_range
@@ -409,9 +409,9 @@ class QgridWidget(widgets.DOMWidget):
             self._multi_index = False
 
         df_json = pd_json.to_json(None, df,
-                            orient='table',
-                            date_format='iso',
-                            double_precision=self.precision)
+                                  orient='table',
+                                  date_format='iso',
+                                  double_precision=self.precision)
 
         if update_columns:
             self._interval_columns = []
@@ -430,7 +430,8 @@ class QgridWidget(widgets.DOMWidget):
 
             columns = {}
             for cur_column in df_schema['fields']:
-                if 'constraints' in cur_column and isinstance(cur_column['constraints']['enum'][0], dict):
+                if 'constraints' in cur_column and \
+                        isinstance(cur_column['constraints']['enum'][0], dict):
                     cur_column['type'] = 'interval'
                     self._interval_columns.append(cur_column['name'])
 
@@ -452,10 +453,9 @@ class QgridWidget(widgets.DOMWidget):
                 self._set_col_series_on_df(col_name, df_for_display,
                                            col_series_as_strings)
             df_json = pd_json.to_json(None, df_for_display,
-                orient='table',
-                date_format='iso',
-                double_precision=self.precision
-            )
+                                      orient='table',
+                                      date_format='iso',
+                                      double_precision=self.precision)
 
         self._df_json = df_json
 
@@ -506,7 +506,7 @@ class QgridWidget(widgets.DOMWidget):
         if col_info['type'] in ['integer', 'number']:
             if 'filter_info' not in col_info or \
                     (col_info['filter_info']['min'] is None and
-                    col_info['filter_info']['max'] is None):
+                     col_info['filter_info']['max'] is None):
                 col_info['slider_max'] = max(col_series)
                 col_info['slider_min'] = min(col_series)
                 self._columns[col_name] = col_info
@@ -519,7 +519,7 @@ class QgridWidget(widgets.DOMWidget):
         elif col_info['type'] == 'datetime':
             if 'filter_info' not in col_info or \
                     (col_info['filter_info']['min'] is None and
-                    col_info['filter_info']['max'] is None):
+                     col_info['filter_info']['max'] is None):
                 col_info['filter_max'] = max(col_series)
                 col_info['filter_min'] = min(col_series)
                 self._columns[col_name] = col_info
@@ -560,17 +560,22 @@ class QgridWidget(widgets.DOMWidget):
 
             if content['search_val'] is not None:
                 unique_list = [
-                    k for k in unique_list if content['search_val'].lower() in k.lower()
+                    k for k in unique_list if
+                    content['search_val'].lower() in k.lower()
                 ]
 
-            if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
+            if 'filter_info' in col_info and \
+               'selected' in col_info['filter_info']:
                 col_filter_info = col_info['filter_info']
                 col_filter_table = self._filter_tables[col_name]
-                get_value_from_filter_table = lambda k: col_filter_table[k]
+
+                def get_value_from_filter_table(k):
+                    return col_filter_table[k]
                 selected_indices = col_filter_info['selected'] or []
                 if selected_indices == 'all':
                     excluded_indices = col_filter_info['excluded'] or []
-                    excluded_values = list(map(get_value_from_filter_table, excluded_indices))
+                    excluded_values = list(map(get_value_from_filter_table,
+                                               excluded_indices))
                     non_excluded_count = 0
                     for i in range(len(unique_list), 0, -1):
                         unique_val = unique_list[i-1]
@@ -583,7 +588,8 @@ class QgridWidget(widgets.DOMWidget):
                     col_info['selected_length'] = 0
                     col_info['values'] = unique_list
                 else:
-                    selected_vals = list(map(get_value_from_filter_table, selected_indices))
+                    selected_vals = list(map(get_value_from_filter_table,
+                                             selected_indices))
                     col_info['selected_length'] = len(selected_vals)
 
                     in_selected = set(selected_vals)
@@ -597,7 +603,6 @@ class QgridWidget(widgets.DOMWidget):
             else:
                 col_info['selected_length'] = 0
                 col_info['values'] = unique_list
-
 
             length = len(col_info['values'])
 
@@ -654,6 +659,52 @@ class QgridWidget(widgets.DOMWidget):
         else:
             df[col_name] = col_series
 
+    def _append_condition_for_column(self, col_name, filter_info,
+                                          conditions):
+        col_series = self._get_col_series_from_df(col_name,
+                                                  self._unfiltered_df)
+        if filter_info['type'] == 'slider':
+            if filter_info['min'] is not None:
+                conditions.append(col_series >= filter_info['min'])
+            if filter_info['max'] is not None:
+                conditions.append(col_series <= filter_info['max'])
+        elif filter_info['type'] == 'date':
+            if filter_info['min'] is not None:
+                conditions.append(
+                    col_series >=
+                    pd.to_datetime(filter_info['min'], unit='ms')
+                )
+            if filter_info['max'] is not None:
+                conditions.append(
+                    col_series <=
+                    pd.to_datetime(filter_info['max'], unit='ms')
+                )
+        elif filter_info['type'] == 'boolean':
+            if filter_info['selected'] is not None:
+                conditions.append(
+                    col_series == filter_info['selected']
+                )
+        elif filter_info['type'] == 'text':
+            if col_name not in self._filter_tables:
+                return
+            col_filter_table = self._filter_tables[col_name]
+            selected_indices = filter_info['selected']
+            excluded_indices = filter_info['excluded']
+
+            def get_value_from_filter_table(i):
+                col_filter_table[i]
+            if selected_indices == "all":
+                if excluded_indices is not None and len(excluded_indices) > 0:
+                    excluded_values = list(
+                        map(get_value_from_filter_table, excluded_indices)
+                    )
+                    conditions.append(~col_series.isin(excluded_values))
+            elif selected_indices is not None and len(selected_indices) > 0:
+                selected_values = list(
+                    map(get_value_from_filter_table, selected_indices)
+                )
+                conditions.append(col_series.isin(selected_values))
+
     def _handle_filter_changed(self, content):
         col_name = content['field']
         columns = self._columns.copy()
@@ -664,36 +715,9 @@ class QgridWidget(widgets.DOMWidget):
         conditions = []
         for key, value in columns.items():
             if 'filter_info' in value:
-                col_series = self._get_col_series_from_df(key, self._unfiltered_df)
-
-                filter_info = value['filter_info']
-                if filter_info['type'] == 'slider':
-                    if filter_info['min'] is not None:
-                        conditions.append(col_series >= filter_info['min'])
-                    if filter_info['max'] is not None:
-                        conditions.append(col_series <= filter_info['max'])
-                elif filter_info['type'] == 'date':
-                    if filter_info['min'] is not None:
-                        conditions.append(col_series >= pd.to_datetime(filter_info['min'], unit='ms'))
-                    if filter_info['max'] is not None:
-                        conditions.append(col_series <= pd.to_datetime(filter_info['max'], unit='ms'))
-                elif filter_info['type'] == 'boolean':
-                    if filter_info['selected'] is not None:
-                        conditions.append(col_series == filter_info['selected'])
-                elif filter_info['type'] == 'text':
-                    if key not in self._filter_tables:
-                        continue
-                    col_filter_table = self._filter_tables[key]
-                    selected_indices = filter_info['selected']
-                    excluded_indices = filter_info['excluded']
-                    get_value_from_filter_table = lambda i: col_filter_table[i]
-                    if selected_indices == "all":
-                        if excluded_indices is not None and len(excluded_indices) > 0:
-                            excluded_values = list(map(get_value_from_filter_table, excluded_indices))
-                            conditions.append(~col_series.isin(excluded_values))
-                    elif selected_indices is not None and len(selected_indices) > 0:
-                        selected_values = list(map(get_value_from_filter_table, selected_indices))
-                        conditions.append(col_series.isin(selected_values))
+                self._append_condition_for_column(
+                    key, col_info['filter_info'], conditions
+                )
 
         self._columns = columns
 
@@ -730,14 +754,28 @@ class QgridWidget(widgets.DOMWidget):
             return
 
         if content['type'] == 'cell_change':
+            col_info = self._columns[content['column']]
             try:
-                self._df.set_value(self._df.index[content['row_index']],
-                                  content['column'], content['value'])
+                val_to_set = content['value']
+                if col_info['type'] == 'datetime':
+                    val_to_set = pd.to_datetime(val_to_set)
 
-                query = self._unfiltered_df[self._index_col_name]==content['unfiltered_index']
-                self._unfiltered_df.loc[query, content['column']] = content['value']
-            except ValueError:
-                pass
+                self._df.set_value(self._df.index[content['row_index']],
+                                   content['column'], val_to_set)
+                query = self._unfiltered_df[self._index_col_name] == \
+                    content['unfiltered_index']
+                self._unfiltered_df.loc[query, content['column']] = val_to_set
+            except (ValueError, TypeError):
+                msg = "Error occurred while attempting to edit the " \
+                      "DataFrame. Check the notebook server logs for more " \
+                      "information."
+                self.log.exception(msg)
+                self.send({
+                    'type': 'show_error',
+                    'error_msg': msg,
+                    'triggered_by': 'add_row'
+                })
+                return
         elif content['type'] == 'selection_change':
             self._selected_rows = content['rows']
         elif content['type'] == 'viewport_changed':
@@ -775,16 +813,30 @@ class QgridWidget(widgets.DOMWidget):
             self._handle_filter_changed(content)
 
     def get_changed_df(self):
+        """
+        Get a copy of the DataFrame that was used to create the current
+        instance of QgridWidget which reflects the current state of the UI.
+        This includes any sorting or filtering changes, as well as edits
+        that have been made by double clicking cells.
+
+        :rtype: DataFrame
+        """
         return self._df.drop(self._index_col_name, axis=1)
 
     def get_selected_rows(self):
-        """Get the currently selected rows"""
+        """
+        Get the currently selected rows.
+
+        :rtype: List of integers
+        """
         return self._selected_rows
 
     def add_row(self):
-        """Append a row at the end of the dataframe by duplicating the
+        """
+        Append a row at the end of the dataframe by duplicating the
         last row and incrementing it's index by 1. The feature is only
-        available for DataFrames that have an integer index."""
+        available for DataFrames that have an integer index.
+        """
         df = self._df
 
         if not df.index.is_integer():
@@ -802,7 +854,9 @@ class QgridWidget(widgets.DOMWidget):
         self._update_table(triggered_by='add_row')
 
     def remove_row(self):
-        """Remove the current row from the table"""
+        """
+        Remove the current row from the table.
+        """
         if self._multi_index:
             msg = "Cannot remove a row from a table with a multi index"
             self.send({
@@ -817,6 +871,7 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
         self._update_table(triggered_by='remove_row')
+
 
 # Alias for legacy support, since we changed the capitalization
 QGridWidget = QgridWidget

@@ -31,6 +31,16 @@ def create_interval_index_df():
     df['time_bin'] = pd.cut(df['time'], bins)
     return df
 
+def test_edit_date():
+    view = QgridWidget(df=create_df())
+    view._handle_qgrid_msg_helper({
+        'column': "Date",
+        'row_index': 3,
+        'type': "cell_change",
+        'unfiltered_index': 0,
+        'value': "2013-01-16T00:00:00.000+00:00"
+    })
+
 def test_date_index():
     df = create_df()
     df.set_index('Date', inplace=True)

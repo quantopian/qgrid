@@ -131,6 +131,17 @@ class QgridView extends widgets.DOMWidgetView {
       this.send({'type': clicked.attr('data-event-type')});
     });
 
+    this.buttons.attr('title',
+        'Not available while there is an active filter');
+    this.buttons.tooltip();
+    this.buttons.tooltip({
+      show: { delay: 300 }
+    });
+    this.buttons.tooltip({
+      hide: { delay: 100, 'duration': 0 }
+    });
+    this.buttons.tooltip('disable');
+
     this.full_screen_btn = $(`
       <button
         class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
@@ -161,7 +172,7 @@ class QgridView extends widgets.DOMWidgetView {
       <button
         class='btn btn-default fa fa-times close-modal-btn'
         data-dismiss="modal"/>
-    `).appendTo(this.toolbar)
+    `).appendTo(this.toolbar);
   }
 
   /**
@@ -241,7 +252,7 @@ class QgridView extends widgets.DOMWidgetView {
           }
         },
         formatter: (row, cell, value, columnDef, dataContext) => {
-          return this.format_date(value, columnDef.name)
+          return this.format_date(value, columnDef.name);
         }
       },
       any: {
@@ -470,7 +481,7 @@ class QgridView extends widgets.DOMWidgetView {
           this.slick_grid.render();
         }, 1);
       } else {
-        date_format = this.date_formats[col_name]
+        date_format = this.date_formats[col_name];
       }
     } else {
       this.date_formats[col_name] = date_format;
@@ -503,19 +514,10 @@ class QgridView extends widgets.DOMWidgetView {
       if (this.buttons) {
         if (this.has_active_filter()) {
           this.buttons.addClass('disabled');
-          this.buttons.attr('title',
-              'Not available while there is an active filter');
-          this.buttons.tooltip();
-          this.buttons.tooltip({
-            show: { delay: 300 }
-          });
-          this.buttons.tooltip({
-            hide: { delay: 100, 'duration': 0 }
-          });
-        } else {
+          this.buttons.tooltip('enable');
+        } else if (this.buttons.hasClass('disabled')) {
           this.buttons.removeClass('disabled');
-          this.buttons.attr('title', '');
-          this.buttons.tooltip('destroy');
+          this.buttons.tooltip('disable');
         }
       }
       if (this.update_timeout){
