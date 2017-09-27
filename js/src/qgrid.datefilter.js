@@ -5,8 +5,8 @@ class DateFilter extends filter_base.FilterBase {
 
   get_filter_html() {
     return `
-      <div class='date-range-filter grid-filter dropdown-menu'>
-        <h3 class='popover-title'>
+      <div class='date-range-filter grid-filter qgrid-dropdown-menu'>
+        <h3 class='qgrid-popover-title'>
           <div class='dropdown-title'>Filter by ${this.field}</div>
           <i class='fa fa-times icon-remove close-button'/>
         </h3>
@@ -70,7 +70,7 @@ class DateFilter extends filter_base.FilterBase {
       beforeShow: (input, inst) => {
         // align the datepicker with the right edge of the input it drops down from
         var clicked_elem = $(inst);
-        clicked_elem.closest(".dropdown-menu").addClass("calendar-open");
+        clicked_elem.closest(".qgrid-dropdown-menu").addClass("calendar-open");
 
         var widget = clicked_elem.datepicker('widget');
         widget.css('margin-left', $(input).outerWidth() - widget.outerWidth());

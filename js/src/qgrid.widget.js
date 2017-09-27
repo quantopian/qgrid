@@ -7,8 +7,6 @@ var slider_filter = require('./qgrid.sliderfilter.js');
 var text_filter = require('./qgrid.textfilter.js');
 var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
-var calendar_icon = require('./img/calendar.gif');
-var checkmark_icon = require('./img/tick.png');
 try {
   var dialog = require('base/js/dialog');
 } catch (e) {
@@ -25,7 +23,7 @@ require('slickgrid-qgrid/slick.grid.js');
 require('slickgrid-qgrid/slick.editors.js');
 require('style-loader!slickgrid-qgrid/slick.grid.css');
 require('style-loader!slickgrid-qgrid/slick-default-theme.css');
-require('style-loader!jquery-ui-dist/jquery-ui.theme.min.css');
+require('style-loader!jquery-ui-dist/jquery-ui.min.css');
 require('style-loader!./qgrid.css');
 
 // Model for the qgrid widget
@@ -36,8 +34,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.0-beta.0',
-      _view_module_version : '^1.0.0-beta.0',
+      _model_module_version : '^1.0.0-beta.3',
+      _view_module_version : '^1.0.0-beta.3',
       _df_json: '',
       _columns: {}
     });

@@ -47,7 +47,7 @@ class FilterBase {
 
   create_error_msg() {
     var error_html = `
-      <div class='filter-error-msg dropdown-menu ${this.column}-filter'>
+      <div class='filter-error-msg grid-filter'>
         All values in the column are the same.  Nothing to filter.
       </div>
     `;
@@ -122,6 +122,7 @@ class FilterBase {
     var left = this.filter_btn.offset().left;
 
     var filter_width = this.filter_elem.width();
+    this.filter_elem.width(filter_width);
     var elem_right = left + filter_width;
 
     var qgrid_area = this.filter_elem.closest('.q-grid-container');
@@ -137,12 +138,12 @@ class FilterBase {
     if (!this.filter_elem)
       return;
     if (this.disabled_tooltip_showing) {
-      this.filter_elem.hide();
+      this.filter_elem.remove();
       this.filter_elem = null;
       this.disabled_tooltip_showing = false;
     } else if (!this.filter_elem.hasClass("hidden")) {
-      this.filter_elem.hide();
-      this.filter_elem.appendTo($(".filter-dropdowns"));
+      this.filter_elem.remove();
+      this.filter_elem = null;
     }
     this.filter_btn.removeClass("active");
     this.column_header_elem.removeClass("active");

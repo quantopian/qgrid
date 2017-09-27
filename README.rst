@@ -32,19 +32,19 @@ See the demo by viewing `qgrid_demo.ipynb
 
 API Documentation
 -----------------
-API documentation is hosted on `readthedocs <http://qgrid.readthedocs.org/en/latest/>`_.
+API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/widget-guidelines/>`_.
 
 Installation
 ------------
 
 Run the following to install and enable qgrid::
 
-  pip install qgrid==1.0.0b0
+  pip install qgrid==1.0.0b3
   jupyter nbextension enable --py --sys-prefix qgrid
 
   OR
 
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b0
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b3
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
@@ -56,6 +56,7 @@ the API is that the **nbinstall function no longer exists, and is now unnecessar
 Jupyterlab Installation
 -----------------------
 
+First, go through the normal installation steps above as you normally would when using qgrid in the notebook.
 If you haven't already install jupyterlab and enabled ipywidgets, do that first with the following lines::
 
   pip install jupyterlab==0.27.0
@@ -64,7 +65,7 @@ If you haven't already install jupyterlab and enabled ipywidgets, do that first 
 
 Install the qgrid-jupyterlab extension and enable::
 
-  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.0
+  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.3
   jupyter labextension enable qgrid-jupyterlab
 
 At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
@@ -107,7 +108,7 @@ Compatibility:
  0.3.x             4.1                          4.1.x
  0.3.2             4.2                          5.x
  0.3.3             5.x                          6.x
- 1.0.0b0           5.x                          7.x
+ 1.0.0b3           5.x                          7.x
 =================  ===========================  ==============================
 
 

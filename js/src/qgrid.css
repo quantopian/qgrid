@@ -14,6 +14,22 @@
   border-radius: 4px;
 }
 
+.q-grid-container .hidden {
+  display: none !important;
+}
+
+.q-grid-container a {
+  color: #337ab7 !important;
+  text-decoration: none;
+  line-height: 20px;
+}
+
+.q-grid-container a:hover,
+.q-grid-container a:focus {
+  color: #23527c;
+  text-decoration: underline;
+}
+
 .q-grid {
   position: relative;
   border: 1px solid #d3d3d3;
@@ -304,11 +320,6 @@
 
 /* Filter dropdowns */
 
-.filter-error-msg {
-  padding: 8px 14px;
-  width: 160px;
-}
-
 .q-grid-container .grid-filter {
   z-index: 1000;
   position: absolute;
@@ -317,21 +328,36 @@
   max-height: 400px;
   display: block;
   border-radius: 0px;
+  /* we previously got these style from bootstrap */
+  float: left;
+  min-width: 160px;
+  list-style: none;
+  font-size: 13px;
+  text-align: left;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  background-clip: padding-box;
 }
 
-.q-grid-container .grid-filter.hidden {
-  display: none;
+.q-grid-container .filter-error-msg {
+  padding: 8px 14px;
+  width: 160px;
 }
 
-.q-grid-container .grid-filter .dropdown-menu {
-  padding: 0px;
-  overflow: hidden;
-}
-
-.q-grid-container .grid-filter h3.popover-title {
+.q-grid-container .grid-filter h3.qgrid-popover-title {
   padding: 5px 30px 5px 11px;
   border-bottom: 1px solid #d3d3d3;
   border-radius: 0px;
+  /* we previously got these style from bootstrap */
+  margin: 0;
+  font-size: 13px;
+  background-color: #f7f7f7;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  display: block;
 }
 
 .q-grid-container .grid-filter .dropdown-title {
@@ -416,11 +442,17 @@
 }
 
 .text-filter .slick-viewport {
-  overflow: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 .text-filter .input-area {
   padding: 12px;
+}
+
+.text-filter .no-results {
+  margin-left: 12px;
+  margin-bottom: 10px;
 }
 
 .text-filter .search-input {

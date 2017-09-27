@@ -8,8 +8,8 @@ def create_df():
         'Date' : pd.Timestamp('20130102'),
         'C' : pd.Series(1,index=list(range(4)),dtype='float32'),
         'D' : np.array([3] * 4,dtype='int32'),
-        'E' : pd.Categorical(["test","train","test","train"]),
-        'F' : 'foo'
+        'E' : pd.Categorical(["test","train","foo","bar"]),
+        'F' : ['foo', 'bar', 'buzz', 'fox']
     })
 
 def create_multi_index_df():
@@ -40,6 +40,72 @@ def test_edit_date():
         'unfiltered_index': 0,
         'value': "2013-01-16T00:00:00.000+00:00"
     })
+
+def test_integer_index_filter():
+    view = QgridWidget(df=create_df())
+    view._handle_qgrid_msg_helper({
+        'field': "index",
+        'filter_info': {
+            'field': "index",
+            'max': None,
+            'min': 2,
+            'type': "slider"
+        },
+        'type': "filter_changed"
+    })
+    filtered_df = view.get_changed_df()
+    assert len(filtered_df) == 2
+
+def test_series_of_text_filters():
+    view = QgridWidget(df=create_df())
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'E',
+        'search_val': None
+    })
+    view._handle_qgrid_msg_helper({
+        'field': "E",
+        'filter_info': {
+            'field': "E",
+            'selected': [0, 1],
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+    filtered_df = view.get_changed_df()
+    assert len(filtered_df) == 2
+
+    # reset the filter...
+    view._handle_qgrid_msg_helper({
+        'field': "E",
+        'filter_info': {
+            'field': "E",
+            'selected': None,
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+
+    # ...and apply a text filter on a different column
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'F',
+        'search_val': None
+    })
+    view._handle_qgrid_msg_helper({
+        'field': "F",
+        'filter_info': {
+            'field': "F",
+            'selected': [0, 1],
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+    filtered_df = view.get_changed_df()
+    assert len(filtered_df) == 2
 
 def test_date_index():
     df = create_df()

@@ -300,8 +300,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.0-beta.0').tag(sync=True)
-    _model_module_version = Unicode('1.0.0-beta.0').tag(sync=True)
+    _view_module_version = Unicode('1.0.0-beta.3').tag(sync=True)
+    _model_module_version = Unicode('1.0.0-beta.3').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -659,8 +659,7 @@ class QgridWidget(widgets.DOMWidget):
         else:
             df[col_name] = col_series
 
-    def _append_condition_for_column(self, col_name, filter_info,
-                                          conditions):
+    def _append_condition_for_column(self, col_name, filter_info, conditions):
         col_series = self._get_col_series_from_df(col_name,
                                                   self._unfiltered_df)
         if filter_info['type'] == 'slider':
@@ -671,13 +670,11 @@ class QgridWidget(widgets.DOMWidget):
         elif filter_info['type'] == 'date':
             if filter_info['min'] is not None:
                 conditions.append(
-                    col_series >=
-                    pd.to_datetime(filter_info['min'], unit='ms')
+                    col_series >= pd.to_datetime(filter_info['min'], unit='ms')
                 )
             if filter_info['max'] is not None:
                 conditions.append(
-                    col_series <=
-                    pd.to_datetime(filter_info['max'], unit='ms')
+                    col_series <= pd.to_datetime(filter_info['max'], unit='ms')
                 )
         elif filter_info['type'] == 'boolean':
             if filter_info['selected'] is not None:
@@ -692,7 +689,7 @@ class QgridWidget(widgets.DOMWidget):
             excluded_indices = filter_info['excluded']
 
             def get_value_from_filter_table(i):
-                col_filter_table[i]
+                return col_filter_table[i]
             if selected_indices == "all":
                 if excluded_indices is not None and len(excluded_indices) > 0:
                     excluded_values = list(
@@ -716,7 +713,7 @@ class QgridWidget(widgets.DOMWidget):
         for key, value in columns.items():
             if 'filter_info' in value:
                 self._append_condition_for_column(
-                    key, col_info['filter_info'], conditions
+                    key, value['filter_info'], conditions
                 )
 
         self._columns = columns
