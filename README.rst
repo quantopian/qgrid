@@ -58,11 +58,11 @@ Jupyterlab Installation
 
 If you haven't already install jupyterlab and enabled ipywidgets, do that first with the following lines::
 
-  pip install jupyterlab
-  jupyter labextension install @jupyter-widgets/jupyterlab-manager
+  pip install jupyterlab==0.27.0
+  jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.27.0
   jupyter labextension enable @jupyter-widgets/jupyterlab-manager
 
-Install the qgrid-jupyterlab extension, enable it.
+Install the qgrid-jupyterlab extension and enable::
 
   jupyter labextension install qgrid-jupyterlab@1.0.0-beta.0
   jupyter labextension enable qgrid-jupyterlab
