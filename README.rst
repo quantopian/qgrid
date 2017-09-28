@@ -27,8 +27,7 @@ qgrid 1.0, and the instructions that follow are for this new version.
 
 Demo
 ----
-See the demo by viewing `qgrid_demo.ipynb
-<http://nbviewer.jupyter.org/gist/TimShawver/8fcef51dd3c222ed25306c002ab89b60>`_ in nbviewer.
+Try out qgrid in a live sample notebook: .. image:: https://beta.mybinder.org/badge.svg :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
 
 API Documentation
 -----------------
