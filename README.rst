@@ -27,7 +27,10 @@ qgrid 1.0, and the instructions that follow are for this new version.
 
 Demo
 ----
-Try out qgrid in a live sample notebook: .. image:: https://beta.mybinder.org/badge.svg :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
+Click the badge below to try out qgrid in a live sample notebook:
+
+.. image:: https://beta.mybinder.org/badge.svg 
+    :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
 
 API Documentation
 -----------------
