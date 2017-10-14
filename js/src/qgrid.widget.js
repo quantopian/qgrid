@@ -110,7 +110,31 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     this.buttons = this.toolbar.find('.btn');
+    this.buttons.attr('title',
+        'Not available while there is an active filter');
+    this.buttons.tooltip();
+    this.buttons.tooltip({
+      show: { delay: 300 }
+    });
+    this.buttons.tooltip({
+      hide: { delay: 100, 'duration': 0 }
+    });
+    this.buttons.tooltip('disable');
+    this.full_screen_btn = $(`
+      <button
+        class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
+    `).appendTo(this.toolbar);
 
+    this.close_modal_btn = $(`
+      <button
+        class='btn btn-default fa fa-times close-modal-btn'
+        data-dismiss="modal"/>
+    `).appendTo(this.toolbar);
+    this.bind_toolbar_events();
+  }
+
+  bind_toolbar_events() {
+    this.buttons.off('click');
     this.buttons.click((e) => {
       let clicked = $(e.target);
       if (clicked.hasClass('disabled')){
@@ -129,28 +153,19 @@ class QgridView extends widgets.DOMWidgetView {
       this.send({'type': clicked.attr('data-event-type')});
     });
 
-    this.buttons.attr('title',
-        'Not available while there is an active filter');
-    this.buttons.tooltip();
-    this.buttons.tooltip({
-      show: { delay: 300 }
-    });
-    this.buttons.tooltip({
-      hide: { delay: 100, 'duration': 0 }
-    });
-    this.buttons.tooltip('disable');
-
-    this.full_screen_btn = $(`
-      <button
-        class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
-    `).appendTo(this.toolbar).click((e) => {
+    this.full_screen_btn.off('click');
+    this.full_screen_btn.click((e) => {
       this.$el_wrapper = this.$el.parent();
       this.$el_wrapper.height(this.$el_wrapper.height());
       this.$el.detach();
-      var qgrid_modal = dialog.modal({
+      var modal_options = {
         body: this.$el[0],
         show: false
-      });
+      };
+      if (IPython && IPython.keyboard_manager){
+        modal_options.keyboard_manager = IPython.keyboard_manager;
+      }
+      var qgrid_modal = dialog.modal(modal_options);
 
       qgrid_modal.removeClass('fade');
       qgrid_modal.addClass('qgrid-modal');
@@ -162,15 +177,11 @@ class QgridView extends widgets.DOMWidgetView {
         this.$el_wrapper.height('auto');
         this.$el_wrapper.append(this.$el);
         this.update_size();
+        this.slick_grid.bindAllEvents();
+        this.bind_toolbar_events();
       });
       qgrid_modal.modal('show');
     });
-
-    this.close_modal_btn = $(`
-      <button
-        class='btn btn-default fa fa-times close-modal-btn'
-        data-dismiss="modal"/>
-    `).appendTo(this.toolbar);
   }
 
   /**
