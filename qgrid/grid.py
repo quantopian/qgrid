@@ -300,8 +300,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.0-beta.3').tag(sync=True)
-    _model_module_version = Unicode('1.0.0-beta.3').tag(sync=True)
+    _view_module_version = Unicode('1.0.0-beta.4').tag(sync=True)
+    _model_module_version = Unicode('1.0.0-beta.4').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
