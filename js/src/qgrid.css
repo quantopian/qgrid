@@ -53,6 +53,10 @@
   border-color: #CCCCCC;
 }
 
+.q-grid-toolbar .btn:focus {
+  outline: none;
+}
+
 .q-grid-toolbar .close-modal-btn {
   display: none;
 }
