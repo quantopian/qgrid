@@ -7,6 +7,46 @@
 var $ = require('jquery');
 require('slickgrid-qgrid/slick.editors.js');
 
+class IndexEditor {
+  constructor(args){
+    this.column_info = args.column;
+    this.$cell = $(args.container);
+    this.$cell.attr('title',
+      'Editing index columns is not supported');
+    this.$cell.tooltip();
+    this.$cell.tooltip('enable');
+    this.$cell.tooltip("open");
+    this.$cell.off('tooltipclose');
+    this.$cell.on("tooltipclose", (event, ui) => {
+      this.$cell.tooltip('destroy');
+      args.cancelChanges();
+    });
+  }
+
+  destroy() {}
+
+  focus() {}
+
+  loadValue(item) {
+    this.$cell.text(item[this.column_info.field]);
+  }
+
+  serializeValue() {}
+
+  applyValue(item, state) {}
+
+  isValueChanged() {
+    return false;
+  };
+
+  validate() {
+    return {
+      valid: true,
+      msg: null
+    };
+  };
+}
+
 //  http://stackoverflow.com/a/22118349
 class SelectEditor {
   constructor(args) {
@@ -83,5 +123,6 @@ var validateNumber = (value) => {
 
 module.exports = {
   'validateNumber': validateNumber,
-  'SelectEditor': SelectEditor
+  'SelectEditor': SelectEditor,
+  'IndexEditor': IndexEditor
 };

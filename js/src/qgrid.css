@@ -586,7 +586,7 @@ input.bool-filter-radio {
   margin-left: -23px;
 }
 
-.slick-cell.editable {
+.slick-cell.editable:not(.idx-col) {
   background-color: rgb(255, 247, 141) !important;
   border: 1px solid rgba(0, 0, 0, 0.26) !important;
   margin-top: -1px;
@@ -594,7 +594,7 @@ input.bool-filter-radio {
   padding-bottom: 2px;
 }
 
-.slick-cell.editable:not(:last-child) {
+.slick-cell.editable:not(:last-child):not(.idx-col) {
   margin-right: 3px;
 }
 
