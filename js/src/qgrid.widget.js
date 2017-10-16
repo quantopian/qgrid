@@ -298,7 +298,7 @@ class QgridView extends widgets.DOMWidgetView {
         name: cur_column.name,
         field: cur_column.name,
         id: cur_column.name,
-        sortable: true,
+        sortable: false,
         resizable: true,
         cssClass: cur_column.type
       };
@@ -374,23 +374,41 @@ class QgridView extends widgets.DOMWidgetView {
 
     this.slick_grid.setSortColumns([]);
 
-    this.slick_grid.onSort.subscribe((e, args) => {
+    this.grid_header = this.$el.find('.slick-header-columns');
+    this.grid_header.click((e) => {
       if (this.sort_in_progress){
         return;
       }
       this.sort_in_progress = true;
-      this.grid_elem.find('.slick-sort-indicator').removeClass(
-          'fa-sort-asc fa-sort-desc fa fa-spin fa-spinner'
-      );
-      this.sort_indicator = $(e.target).find('.slick-sort-indicator');
-      this.sort_indicator.removeClass(
-          'slick-sort-indicator-desc slick-sort-indicator-asc'
-      );
+
+      var col_header = $(e.target).closest(".slick-header-column");
+      if (!col_header.length) {
+        return;
+      }
+
+      var column = col_header.data("column");
+      if (this.sorted_column == column){
+        this.sort_ascending = !this.sort_ascending;
+      } else {
+        this.sorted_column = column;
+        this.sort_ascending = true;
+      }
+
+      var all_classes = 'fa-sort-asc fa-sort-desc fa fa-spin fa-spinner';
+      var clicked_column_sort_indicator = col_header.find('.slick-sort-indicator');
+      if (clicked_column_sort_indicator.length == 0){
+        clicked_column_sort_indicator =
+            $("<span class='slick-sort-indicator'/>").appendTo(col_header)
+      }
+
+      this.sort_indicator = clicked_column_sort_indicator;
+      this.sort_indicator.removeClass(all_classes);
+      this.grid_elem.find('.slick-sort-indicator').removeClass(all_classes);
       this.sort_indicator.addClass(`fa fa-spinner fa-spin`);
       var msg = {
         'type': 'sort_changed',
-        'sort_field': args.sortCol.field,
-        'sort_ascending': args.sortAsc
+        'sort_field': this.sorted_column.field,
+        'sort_ascending': this.sort_ascending
       };
       this.send(msg);
     });
@@ -425,6 +443,15 @@ class QgridView extends widgets.DOMWidgetView {
       var msg = {'rows': args.rows, 'type': 'selection_change'};
       this.send(msg);
     });
+
+    setTimeout(() => {
+      this.$el.closest('.output_wrapper')
+          .find('.out_prompt_overlay,.output_collapsed').click(() => {
+        setTimeout(() => {
+          this.slick_grid.resizeCanvas();
+        }, 1)
+      });
+    }, 1)
   }
 
   has_active_filter() {

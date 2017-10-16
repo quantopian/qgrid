@@ -10,8 +10,8 @@ from traitlets import Unicode, Instance, Bool, Integer, Dict, List, Tuple, Any
 # when calling the 'to_json' function on DataFrames.  to get around this we
 # have our own copy of the panda's 0.20.0 implementation that we use for old
 # versions of pandas.
-import semver
-if semver.compare(pd.__version__, '0.20.0') > 0:
+from distutils.version import LooseVersion
+if LooseVersion(pd.__version__) > LooseVersion('0.20.0'):
     import pandas.io.json as pd_json
 else:
     from . import pd_json
