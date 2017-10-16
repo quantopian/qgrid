@@ -29,7 +29,7 @@ cloud.  This shouldn't take more than a minute, and usually completes in under 1
 
 API Documentation
 -----------------
-API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/widget-guidelines/>`_.
+API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/latest/>`_.
 
 Installation
 ------------
