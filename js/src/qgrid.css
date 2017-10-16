@@ -46,6 +46,21 @@
   border-color: #E0E0E0;
   margin-right: 6px;
   padding: 4px 40px;
+  /* taken from bootstrap's btn class, since
+     jupyterlab doesn't include bootstrap css */
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid #E0E0E0;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1.42857143;
+  border-radius: 2px;
 }
 
 .q-grid-toolbar .btn:hover {

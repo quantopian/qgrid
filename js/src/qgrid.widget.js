@@ -7,10 +7,12 @@ var slider_filter = require('./qgrid.sliderfilter.js');
 var text_filter = require('./qgrid.textfilter.js');
 var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
+var dialog = null;
 try {
-  var dialog = require('base/js/dialog');
+  dialog = require('base/js/dialog');
 } catch (e) {
-  console.log('could not load base/js/dialog');
+  console.warn("Qgrid was unable to load base/js/dialog. " +
+               "Full screen button won't be available");
 }
 var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
 
@@ -72,19 +74,6 @@ class QgridView extends widgets.DOMWidgetView {
     this.$el.addClass('show-toolbar');
     this.toolbar = $("<div class='q-grid-toolbar'>").appendTo(this.$el);
 
-    this.full_screen_modal = $('body').find('.qgrid-modal');
-    if (this.full_screen_modal.length == 0){
-      this.full_screen_modal = $(`
-        <div class="modal qgrid-modal">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-body"></div>
-            </div>
-          </div>
-        </div>
-      `).appendTo($('body'));
-    }
-
     let append_btn = (btn_info) => {
       return $(`
         <button
@@ -114,22 +103,38 @@ class QgridView extends widgets.DOMWidgetView {
         'Not available while there is an active filter');
     this.buttons.tooltip();
     this.buttons.tooltip({
-      show: { delay: 300 }
+      show: {delay: 300}
     });
     this.buttons.tooltip({
-      hide: { delay: 100, 'duration': 0 }
+      hide: {delay: 100, 'duration': 0}
     });
     this.buttons.tooltip('disable');
-    this.full_screen_btn = $(`
-      <button
-        class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
-    `).appendTo(this.toolbar);
 
-    this.close_modal_btn = $(`
-      <button
-        class='btn btn-default fa fa-times close-modal-btn'
-        data-dismiss="modal"/>
-    `).appendTo(this.toolbar);
+    this.full_screen_btn = null;
+    if (dialog) {
+      this.full_screen_modal = $('body').find('.qgrid-modal');
+      if (this.full_screen_modal.length == 0) {
+        this.full_screen_modal = $(`
+          <div class="modal qgrid-modal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-body"></div>
+              </div>
+            </div>
+          </div>
+        `).appendTo($('body'));
+      }
+      this.full_screen_btn = $(`
+        <button
+          class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
+      `).appendTo(this.toolbar);
+      this.close_modal_btn = $(`
+        <button
+          class='btn btn-default fa fa-times close-modal-btn'
+          data-dismiss="modal"/>
+      `).appendTo(this.toolbar);
+
+    }
     this.bind_toolbar_events();
   }
 
@@ -146,13 +151,14 @@ class QgridView extends widgets.DOMWidgetView {
           previous operation is still in progress.
         `);
       }
-
       this.in_progress_btn = clicked;
       clicked.text(clicked.attr('data-loading-text'));
       clicked.addClass('disabled');
       this.send({'type': clicked.attr('data-event-type')});
     });
-
+    if (!this.full_screen_btn) {
+      return;
+    }
     this.full_screen_btn.off('click');
     this.full_screen_btn.click((e) => {
       this.$el_wrapper = this.$el.parent();
@@ -162,7 +168,7 @@ class QgridView extends widgets.DOMWidgetView {
         body: this.$el[0],
         show: false
       };
-      if (IPython && IPython.keyboard_manager){
+      if (IPython && IPython.keyboard_manager) {
         modal_options.keyboard_manager = IPython.keyboard_manager;
       }
       var qgrid_modal = dialog.modal(modal_options);
@@ -398,7 +404,7 @@ class QgridView extends widgets.DOMWidgetView {
       var clicked_column_sort_indicator = col_header.find('.slick-sort-indicator');
       if (clicked_column_sort_indicator.length == 0){
         clicked_column_sort_indicator =
-            $("<span class='slick-sort-indicator'/>").appendTo(col_header)
+            $("<span class='slick-sort-indicator'/>").appendTo(col_header);
       }
 
       this.sort_indicator = clicked_column_sort_indicator;
@@ -449,9 +455,9 @@ class QgridView extends widgets.DOMWidgetView {
           .find('.out_prompt_overlay,.output_collapsed').click(() => {
         setTimeout(() => {
           this.slick_grid.resizeCanvas();
-        }, 1)
+        }, 1);
       });
-    }, 1)
+    }, 1);
   }
 
   has_active_filter() {

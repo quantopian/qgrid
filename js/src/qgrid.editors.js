@@ -37,14 +37,14 @@ class IndexEditor {
 
   isValueChanged() {
     return false;
-  };
+  }
 
   validate() {
     return {
       valid: true,
       msg: null
     };
-  };
+  }
 }
 
 //  http://stackoverflow.com/a/22118349
