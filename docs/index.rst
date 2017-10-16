@@ -12,9 +12,9 @@
 Qgrid API Documentation
 =======================
 
-Qgrid is an `IPython widget <https://github.com/ipython/ipywidgets>`_ which uses
+Qgrid is an `Jupyter notebook widget <https://github.com/ipython/ipywidgets>`_ which uses
 `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render `pandas <https://github.com/pydata/pandas>`_ DataFrames
-within a `Jupyter notebook <https://github.com/jupyter/notebook>`_.
+as interactive grid controls.
 
 Other qgrid resources
 ---------------------
@@ -26,9 +26,13 @@ resources:
   This is where you'll find the source code and the rest of the documentation for the project, including the
   instructions for installing and running qgrid.
 
-`qgrid demo on nbviewer <http://nbviewer.jupyter.org/gist/TimShawver/8fcef51dd3c222ed25306c002ab89b60>`_
-  See a demo of qgrid in your browser without installing anything.  The functionality of qgrid is somewhat limited
-  in this environment, but it'll give you an idea of how the grid will look and feel when you install it locally.
+`qgrid demo on binder <https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb>`_
+  Click the badge below or the link above to try out qgrid in your browser.  You'll see a brief loading screen and
+  then a notebook will appear:
+
+  .. image:: https://beta.mybinder.org/badge.svg
+    :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
+
 
 :mod:`qgrid` Module
 -------------------
