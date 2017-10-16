@@ -47,8 +47,7 @@ If you haven't enabled the ipywidgets nbextension yet, you'll need to also run t
 
   jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
-At this point you should be able to run a notebook and use qgrid as you normally would.  The only breaking change in
-the API is that the **nbinstall function no longer exists, and is now unnecessary**.
+At this point you should be able to run a notebook server and use qgrid.
 
 Jupyterlab Installation
 -----------------------
