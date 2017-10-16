@@ -10,3 +10,16 @@ dist
 *.egg-info
 
 docs/_build/*
+
+build/
+*.py[cod]
+node_modules/
+package-lock.json
+js/package-lock.json
+jslab/package-lock.json
+
+# Compiled javascript
+qgrid/static/
+
+# OS X
+.DS_Store

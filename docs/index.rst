@@ -35,3 +35,7 @@ resources:
 
 .. automodule:: qgrid
     :members:
+    :exclude-members: QgridWidget
+
+    .. autoclass:: QgridWidget(df=None, grid_options=None, precision=None, show_toolbar=None)
+        :members:

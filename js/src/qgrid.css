@@ -7,20 +7,160 @@
 
 .q-grid-container {
   position: relative;
-  margin: 3px 0;
-  overflow-x: scroll;
-}
-
-.q-grid {
+  overflow-x: auto;
   width: auto;
-  min-width: 600px;
-  height: 571px;
-  border: 1px solid #d3d3d3;
+  height: auto;
   border-radius: 4px;
 }
 
+.q-grid-container .hidden {
+  display: none !important;
+}
+
+.q-grid-container a {
+  color: #337ab7 !important;
+  text-decoration: none;
+  line-height: 20px;
+}
+
+.q-grid-container a:hover,
+.q-grid-container a:focus {
+  color: #23527c;
+  text-decoration: underline;
+}
+
+.q-grid {
+  position: relative;
+  border: 1px solid #d3d3d3;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  box-sizing: border-box;
+}
+
+.q-grid-toolbar {
+  margin: 4px 0
+}
+
+.q-grid-toolbar .btn {
+  background-color: #EEEEEE;
+  border-color: #E0E0E0;
+  margin-right: 6px;
+  padding: 4px 40px;
+  /* taken from bootstrap's btn class, since
+     jupyterlab doesn't include bootstrap css */
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid #E0E0E0;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1.42857143;
+  border-radius: 2px;
+}
+
+.q-grid-toolbar .btn:hover {
+  background-color: #DDDDDD;
+  border-color: #CCCCCC;
+}
+
+.q-grid-toolbar .btn:focus {
+  outline: none;
+}
+
+.q-grid-toolbar .close-modal-btn {
+  display: none;
+}
+
+.qgrid-modal .q-grid-toolbar .close-modal-btn {
+  display: block;
+}
+
+.qgrid-modal .full-screen-btn,
+.qgrid-modal .modal-header,
+.qgrid-modal .modal-footer {
+  display: none;
+}
+
+.qgrid-modal {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+}
+
+.qgrid-modal .modal-dialog {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  bottom: 20px;
+  right: 20px;
+  margin: 0px;
+  width: auto;
+  height: auto;
+}
+
+.qgrid-modal .modal-content {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+.qgrid-modal .modal-body {
+  position: absolute;
+  padding: 15px;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+}
+
+.qgrid-modal .modal-body button.close {
+  margin-top: 7px;
+  margin-right: 14px;
+}
+
+.qgrid-modal .q-grid-container {
+  bottom: 25px;
+  left: 20px;
+  right: 20px;
+  position: absolute;
+  top: 15px;
+}
+
+.qgrid-modal .q-grid {
+  position: absolute;
+  top: 33px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  height: auto !important;
+}
+
+.q-grid-toolbar .full-screen-btn,
+.q-grid-toolbar .close-modal-btn {
+  height: 18px;
+  width: 12px;
+  padding: 4px 7px;
+  float: right;
+  margin-right: 0px;
+}
+
 .output_scroll .q-grid {
-  height: 320px !important;
+  height: 315px !important;
+}
+
+.output_scroll .show-toolbar .q-grid {
+  height: 284px !important;
+}
+
+.q-grid.force-fit-columns .slick-viewport {
+  overflow-x: hidden !important;
 }
 
 .q-grid.hide-scrollbar > .slick-header {
@@ -28,8 +168,12 @@
 }
 
 .q-grid.hide-scrollbar > .slick-viewport {
-  overflow: hidden !important;
+  overflow-y: hidden !important;
   height: 100%;
+}
+
+.q-grid.hide-scrollbar.force-fit-columns > .slick-viewport {
+  overflow: hidden !important;
 }
 
 .q-grid.hide-scrollbar > .slick-viewport > .grid-canvas {
@@ -48,16 +192,20 @@
   border-bottom: none;
 }
 
-.q-grid .slick-header-column:last-child .filter-button:hover,
-.q-grid .slick-header-column.active:last-child .filter-button,
-.q-grid .slick-header-column:last-child .filter-button.filter-active {
+.q-grid.force-fit-columns .slick-header-column:last-child .filter-button:hover,
+.q-grid.force-fit-columns .slick-header-column.active:last-child .filter-button,
+.q-grid.force-fit-columns .slick-header-column:last-child .filter-button.filter-active {
   border-right: 1px solid #ccc;
   margin-right: -4px;
 }
 
-.q-grid .slick-header-column:last-child .filter-button {
+.q-grid.force-fit-columns .slick-header-column:last-child .filter-button {
   margin-right: -4px;
   border-right: 1px solid transparent;
+}
+
+.q-qgrid.hide-scrollbar .slick-header-column:last-child .slick-resizable-handle {
+  right: -4px;
 }
 
 .q-grid.hide-scrollbar > .slick_header .slick-header-column:last-child .filter-button,
@@ -96,18 +244,32 @@
 
 .q-grid .slick-sort-indicator {
   height: 8px !important;
+  margin-left: 6px;
 }
 
-.q-grid .slick-sort-indicator-desc {
-  background: url(lib/sort_desc.png) no-repeat -6px -10px !important;
+.q-grid .slick-sort-indicator.fa-sort-asc {
+  margin-top: 4px;
+  color: #5862ff;
 }
 
-.q-grid .slick-sort-indicator-asc {
-  background: url(lib/sort_asc.png) no-repeat -6px -3px !important;
+.q-grid .slick-sort-indicator.fa-sort-desc {
+  margin-top: 1px;
+  color: #5862ff;
+}
+
+.q-grid .slick-sort-indicator.fa-spinner {
+  height: auto !important;;
+  width: auto !important;;
+  margin-top: 3px;
+}
+
+.q-grid .fa-check {
+  color: #17a700;
 }
 
 .q-grid .slick-column-name {
   margin-bottom: 0px;
+  float: left;
 }
 
 .q-grid .slick-resizable-handle {
@@ -126,10 +288,14 @@
   border-right: none !important;
   border-top: 1px solid transparent;
   border-left: 1px solid transparent;
-  font-size: 14px;
+  font-size: 13px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding-top: 3px;
   padding-left: 0px;
+}
+
+.q-grid .slick-cell.idx-col {
+  font-weight: bold;
 }
 
 .q-grid .slick-cell.l0.r0 {
@@ -180,21 +346,36 @@
   max-height: 400px;
   display: block;
   border-radius: 0px;
+  /* we previously got these style from bootstrap */
+  float: left;
+  min-width: 160px;
+  list-style: none;
+  font-size: 13px;
+  text-align: left;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  background-clip: padding-box;
 }
 
-.q-grid-container .grid-filter.hidden {
-  display: none;
+.q-grid-container .filter-error-msg {
+  padding: 8px 14px;
+  width: 160px;
 }
 
-.q-grid-container .grid-filter .dropdown-menu {
-  padding: 0px;
-  overflow: hidden;
-}
-
-.q-grid-container .grid-filter h3.popover-title {
+.q-grid-container .grid-filter h3.qgrid-popover-title {
   padding: 5px 30px 5px 11px;
   border-bottom: 1px solid #d3d3d3;
   border-radius: 0px;
+  /* we previously got these style from bootstrap */
+  margin: 0;
+  font-size: 13px;
+  background-color: #f7f7f7;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  display: block;
 }
 
 .q-grid-container .grid-filter .dropdown-title {
@@ -279,11 +460,17 @@
 }
 
 .text-filter .slick-viewport {
-  overflow: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 .text-filter .input-area {
   padding: 12px;
+}
+
+.text-filter .no-results {
+  margin-left: 12px;
+  margin-bottom: 10px;
 }
 
 .text-filter .search-input {
@@ -337,10 +524,6 @@
   margin: 0;
 }
 
-/*.text-filter .slick-row:hover .slick-cell {
-  background-color: transparent;
-}*/
-
 /* from custom-bootstrap *****************/
 
 .q-grid-container input.datepicker {
@@ -353,9 +536,13 @@
 
 /* jquery-ui overrides */
 
-.ui-widget {
+.ui-widget, .ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.ui-tooltip {
+  opacity: 1.0 !important;
 }
 
 /* jquery-ui datepicker style overrides */
@@ -373,126 +560,73 @@
   border: 1px solid gray;
 }
 
-/*.ui-datepicker .ui-corner-all, &.ui-corner-all
-    @include border-radius(0)
 
-
-#ui-datepicker-div .ui-datepicker-header {
-  border: none
-  background: none
+/* from slickgrid editing example */
+input.editor-text {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  margin: -1px 0 0 0;
+  background: transparent;
+  outline: 0;
+  padding: 0;
 }
 
-#ui-datepicker span.ui-icon-circle-triangle-w {
-  background-image: url("/assets/glyphicons-halflings.png") !important;
-  background-position: -432px -72px !important;
+.ui-datepicker-trigger {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  padding: 0;
+  vertical-align: top;
+  left: 4px;
+  position: relative;
 }
 
-#ui-datepicker  span.ui-icon-circle-triangle-e {
-  background-image: url("/assets/glyphicons-halflings.png") !important;
-  background-position: -456px -72px !important;
+.slick-cell.boolean {
+  text-align: center;
 }
 
-#ui-datepicker-div .ui-state-hover
-  background: none
+.bool-radio-wrapper {
+  width: 150px;
+  position: relative;
+  margin: 8px auto 4px auto;
+}
 
-#ui-datepicker-div .ui-state-default
-  text-align: center
-  background: none
-  border: 1px solid transparent
-  &:hover
-    background: $gray-5
-  &.ui-state-active
-    border: 1px solid gray
+.label-true {
+  padding: 4px 28px 4px 13px;
+}
 
+.label-false {
+  padding: 4px 28px 4px 4px;
+  margin-left: 15px;
+}
 
-table.ui-datepicker-calendar
-    th
-      font-size: 11px
-      font-weight: normal
-      padding-bottom: 0
-  .ui-datepicker-title
-    font-weight: bold
-  .ui-datepicker-prev, .ui-datepicker-next
-    i
-      position: relative
-      top: 4px
-      left: 7px
-      color: gray
-      text-decoration: none
-    &:hover
-      i
-        text-decoration: none
-        color: black
-*/
+input.bool-filter-radio {
+  margin-left: -23px;
+}
 
-/*
-  .numerical-filter
-    .dropdown-body
-      margin: 20px 23px 10px 20px
-      width: 207px
-      text-align: center
-      .slider-range
-        margin-bottom: 4px
-        .ui-slider-handle
-          width: 18px
-          padding: 0
-      .slider-label
-        .range-separator
-          font-size: 28px
-          font-weight: 300
-          padding: 0 7px
-          color: #646a76
-          position: relative
-          top: 4px
-  .text-filter
-    .input-area
-      padding: 12px
-      .search-input
-        height: 30px
-        width: 100%
-        margin-bottom: 0px
-    .text-filter-grid
-      width: 300px
-      height: 250px
-      @include box-sizing-border-box
-      .slick-header-columns
-        height: 0px
-      .slick-row.active
-        .slick-cell
-          background-color: #deeaf7
-      .slick-cell
-        line-height: 30px
-        background-color: white
-        border-bottom: 1px solid #f1f1f1 !important
-        padding: 0
-        text-align: left
-        cursor: pointer
-        &.check-box-cell
-          text-align: center
-          line-height: 28px
-          input
-            margin: 0
-      .slick-row:hover
-        .slick-cell
-          background-color: #f8fbfd
-  .ticker-filter
-    .security-ticker
-      text-transform: uppercase
-      color: #999 !important
-    .label-cash
-      margin-left: 0
-    .slick-viewport
-      overflow: auto !important
-  .transaction-filter
-    .input-area
-      display: none
-    .select-all-link
-      display: none
-    .slick-header
-      border-bottom: none
-    .text-filter-grid
-      width: 170px
-      height: 63px
-      .slick-cell
-        line-height: 32px
-*/
+.slick-cell.editable:not(.idx-col) {
+  background-color: rgb(255, 247, 141) !important;
+  border: 1px solid rgba(0, 0, 0, 0.26) !important;
+  margin-top: -1px;
+  padding-top: 4px;
+  padding-bottom: 2px;
+}
+
+.slick-cell.editable:not(:last-child):not(.idx-col) {
+  margin-right: 3px;
+}
+
+.slick-cell {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none;
+}
+
+.slick-row .slick-cell:not(:first-child) {
+  margin-left: -4px;
+  padding-left: 4px;
+}
