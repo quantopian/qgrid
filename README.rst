@@ -7,22 +7,14 @@
 =====
 qgrid
 =====
-Qgrid is an Jupyter notebook widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas
+Qgrid is a Jupyter notebook widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas
 DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
 filtering controls, as well as edit your DataFrames by double clicking cells.
 
 We originally developed qgrid for use in `Quantopian's hosted research environment
-<https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_, but had to put it
-on the backburner for a while so we could focus on higher priority projects (like developing the research environment
-in which qgrid would be deployed, and adding the ability to share notebooks from that environment to the
-`Quantopian forums <https://www.quantopian.com?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_).  So after
-being initially released on github in `October of 2014
-<https://twitter.com/Tim_Shawver/status/521092342162681857>`_, this project has not gotten significant attention by
-Quantopian engineers, other than for the purposes of fixing critical bugs or reviewing PRs from the community.
+<https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_ in fall of 2014, but had to put it on the backburner for a while so we could focus on higher priority projects.
 
-That changed a bit in summer 2017, when we started a major refactoring project to allow qgrid to take advantage
-of the latest advances in ipywidgets (specifically, ipywidget 7.x).  As a part of this refactoring we also moved
-qgrid's sorting, and filtering logic from the client (javascript) to the server (python). This new version is called
+Qgrid development started up again in summer 2017, when we started a major refactoring project to allow qgrid to take advantage of the latest advances in ipywidgets (specifically, ipywidget 7.x).  As a part of this refactoring we also moved qgrid's sorting, and filtering logic from the client (javascript) to the server (python). This new version is called
 qgrid 1.0, and the instructions that follow are for this new version.
 
 Demo
@@ -32,8 +24,8 @@ Click the badge below to try out qgrid in a live sample notebook:
 .. image:: https://beta.mybinder.org/badge.svg 
     :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
 
-**Please Note:** You'll see a brief loading screen while a notebook server instance is being created for you in the
-cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.
+*You'll see a brief loading screen while a notebook server is being created for you in the
+cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
 
 API Documentation
 -----------------
@@ -76,11 +68,11 @@ Install the qgrid-jupyterlab extension and enable::
 At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
 able to use qgrid in notebooks as you normally would.
 
-**Please Note:** The reason version 0.27.0 is specified in the example commands above is because that's the version
+*Please Note: The reason version 0.27.0 is specified in the example commands above is because that's the version
 we used for testing qgrid with Jupyterlab. The Jupyterlab project is changing quickly so if you want to
 be certain that qgrid will work, using 0.27.0 is your best bet. If you use a different Jupyterlab version,
 it's more likely you'll run into issues since we haven't tested it. If that happens please file an issue
-if the version is newer than 0.27.0 and we'll try and get to it as soon as possible.
+if the version is newer than 0.27.0 and we'll try and get to it as soon as possible.*
 
 Dependencies
 ------------
