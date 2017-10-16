@@ -9,7 +9,7 @@ qgrid
 =====
 Qgrid is an Jupyter notebook widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas
 DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
-filtering controls, as well as edit your DataFrames by double clicking a cell.
+filtering controls, as well as edit your DataFrames by double clicking cells.
 
 We originally developed qgrid for use in `Quantopian's hosted research environment
 <https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_, but had to put it
@@ -32,6 +32,9 @@ Click the badge below to try out qgrid in a live sample notebook:
 .. image:: https://beta.mybinder.org/badge.svg 
     :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
 
+**Please Note:** You'll see a brief loading screen while a notebook server instance is being created for you in the
+cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.
+
 API Documentation
 -----------------
 API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/widget-guidelines/>`_.
@@ -41,12 +44,12 @@ Installation
 
 Run the following to install and enable qgrid::
 
-  pip install qgrid==1.0.0b3
+  pip install qgrid --pre
   jupyter nbextension enable --py --sys-prefix qgrid
 
   OR
 
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b3
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b7
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
@@ -67,11 +70,17 @@ If you haven't already install jupyterlab and enabled ipywidgets, do that first 
 
 Install the qgrid-jupyterlab extension and enable::
 
-  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.3
+  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.7
   jupyter labextension enable qgrid-jupyterlab
 
 At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
 able to use qgrid in notebooks as you normally would.
+
+**Please Note:** The reason version 0.27.0 is specified in the example commands above is because that's the version
+we used for testing qgrid with Jupyterlab. The Jupyterlab project is changing quickly so if you want to
+be certain that qgrid will work, using 0.27.0 is your best bet. If you use a different Jupyterlab version,
+it's more likely you'll run into issues since we haven't tested it. If that happens please file an issue
+if the version is newer than 0.27.0 and we'll try and get to it as soon as possible.
 
 Dependencies
 ------------
@@ -79,7 +88,7 @@ Dependencies
 Qgrid runs on `Python 2 or 3 <https://www.python.org/downloads/>`_.  You'll also need
 `pip <https://pypi.python.org/pypi/pip>`_ for the installation steps below.
 
-Qgrid depends on the following five Python packages:
+Qgrid depends on the following three Python packages:
 
     `Jupyter notebook <https://github.com/jupyter/notebook>`_
       This is the interactive Python environment in which qgrid runs.
@@ -91,9 +100,6 @@ Qgrid depends on the following five Python packages:
     `Pandas <http://pandas.pydata.org/>`_
       A powerful data analysis / manipulation library for Python.  Qgrid requires that the data to be rendered as an
       interactive grid be provided in the form of a pandas DataFrame.
-
-    `Semver <https://github.com/k-bx/python-semver>`_
-      A Python module for semantic versioning. Simplifies comparing versions.
 
 These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/master/requirements.txt>`_
 and will be automatically installed (if necessary) when qgrid is installed via pip.
@@ -110,7 +116,7 @@ Compatibility:
  0.3.x             4.1                          4.1.x
  0.3.2             4.2                          5.x
  0.3.3             5.x                          6.x
- 1.0.0b3           5.x                          7.x
+ 1.0.0b7           5.x                          7.x
 =================  ===========================  ==============================
 
 
@@ -171,8 +177,8 @@ Continuing to use qgrid 0.3.3
 -----------------------------
 If you're looking for the installation and usage instructions for qgrid 0.3.3 and the sample notebook that goes
 along with it, please see the `qgrid 0.3.3 tag <https://github.com/quantopian/qgrid/tree/v0.3.3>`_ in this
-repository. The installation steps will be the same except when you run "pip install" you'll have to explicitly
-specify that you want to install version 0.3.3, like this::
+repository. The installation steps will be mostly the same. The only difference is that when you run "pip install"
+you'll have to explicitly specify that you want to install version 0.3.3, like this::
 
   pip install qgrid==0.3.3
 
