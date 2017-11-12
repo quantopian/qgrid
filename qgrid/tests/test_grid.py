@@ -41,6 +41,21 @@ def test_edit_date():
         'value': "2013-01-16T00:00:00.000+00:00"
     })
 
+def test_mixed_type_column():
+    df = pd.DataFrame({'A': [1.2, 'xy', 4], 'B': [3, 4, 5]})
+    df = df.set_index(pd.Index(['yz', 7, 3.2]))
+    view = QgridWidget(df=df)
+    view._handle_qgrid_msg_helper({
+        'type': 'sort_changed',
+        'sort_field': 'A',
+        'sort_ascending': True
+    })
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'A',
+        'search_val': None
+    })
+
 def test_integer_index_filter():
     view = QgridWidget(df=create_df())
     view._handle_qgrid_msg_helper({
