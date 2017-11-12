@@ -213,6 +213,7 @@ class QgridView extends widgets.DOMWidgetView {
     this.last_vp = null;
     this.sort_in_progress = false;
     this.sort_indicator = null;
+    this.resizing_column = false;
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
@@ -382,6 +383,10 @@ class QgridView extends widgets.DOMWidgetView {
 
     this.grid_header = this.$el.find('.slick-header-columns');
     this.grid_header.click((e) => {
+      if (this.resizing_column) {
+        return;
+      }
+
       if (this.sort_in_progress){
         return;
       }
@@ -457,6 +462,18 @@ class QgridView extends widgets.DOMWidgetView {
           this.slick_grid.resizeCanvas();
         }, 1);
       });
+
+      this.resize_handles = this.grid_header.find('.slick-resizable-handle');
+      this.resize_handles.mousedown((e) => {
+        this.resizing_column = true;
+      });
+      $(document).mouseup(() => {
+        // wait for the column header click handler to run before
+        // setting the resizing_column flag back to false
+        setTimeout(() => {
+          this.resizing_column = false;
+        }, 1);
+      })
     }, 1);
   }
 
