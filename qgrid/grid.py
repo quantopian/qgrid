@@ -865,6 +865,18 @@ class QgridWidget(widgets.DOMWidget):
         col_names_to_drop.append(self._index_col_name)
         return self._df.drop(col_names_to_drop, axis=1)
 
+    def get_selected_df(self):
+        """
+        Get a DataFrame which reflects the current state of the UI and only
+        includes the currently selected row(s). Internally it calls
+        ``get_changed_df()`` and then filters down to the selected rows
+        using ``iloc``.
+
+        :rtype: DataFrame
+        """
+        changed_df = self.get_changed_df()
+        return changed_df.iloc[self._selected_rows]
+
     def get_selected_rows(self):
         """
         Get the currently selected rows.

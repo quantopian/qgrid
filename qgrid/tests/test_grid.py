@@ -56,6 +56,18 @@ def test_mixed_type_column():
         'search_val': None
     })
 
+def test_get_selected_df():
+    sample_df = create_df()
+    selected_rows = [1, 3]
+    view = QgridWidget(df=sample_df)
+    view._handle_qgrid_msg_helper({
+        'rows': selected_rows,
+        'type': "selection_change"
+    })
+    selected_df = view.get_selected_df()
+    assert len(selected_df) == 2
+    assert sample_df.iloc[selected_rows].equals(selected_df)
+
 def test_integer_index_filter():
     view = QgridWidget(df=create_df())
     view._handle_qgrid_msg_helper({
