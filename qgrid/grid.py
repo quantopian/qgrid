@@ -602,6 +602,10 @@ class QgridWidget(widgets.DOMWidget):
                     content['search_val'].lower() in k.lower()
                 ]
 
+            # if the filter that we're opening is already active (as indicated
+            # by the presence of a 'selected' attribute on the column's
+            # filter_info attribute), show the selected rows at the top and
+            # specify that they should be checked
             if 'filter_info' in col_info and \
                'selected' in col_info['filter_info']:
                 col_filter_info = col_info['filter_info']
@@ -644,10 +648,7 @@ class QgridWidget(widgets.DOMWidget):
 
             length = len(col_info['values'])
 
-            # only cache unique filter values if the
-            # values are not filtered by a search string
-            if content['search_val'] is None:
-                self._filter_tables[col_name] = list(col_info['values'])
+            self._filter_tables[col_name] = list(col_info['values'])
 
             if col_info['type'] == 'any':
                 col_info['value_range'] = (0, length)
