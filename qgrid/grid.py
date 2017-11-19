@@ -315,7 +315,6 @@ class QgridWidget(widgets.DOMWidget):
     _period_columns = List([])
     _string_columns = List([])
     _sort_helper_columns = Dict({})
-    _index_name = Unicode('')
     _initialized = Bool(False)
     _ignore_df_changed = Bool(False)
     _unfiltered_df = Instance(pd.DataFrame)
@@ -391,7 +390,8 @@ class QgridWidget(widgets.DOMWidget):
             return
         self._rebuild_widget()
 
-    def _update_table(self, update_columns=False, triggered_by=None):
+    def _update_table(self, update_columns=False, triggered_by=None,
+                      scroll_to_row=None):
         df = self._df.copy()
 
         from_index = max(self._viewport_range[0] - self._page_size, 0)
@@ -502,13 +502,15 @@ class QgridWidget(widgets.DOMWidget):
                                       double_precision=self.precision)
 
         self._df_json = df_json
-
         if not update_columns:
-            self.send({
+            data_to_send = {
                 'type': 'update_data_view',
                 'columns': self._columns,
                 'triggered_by': triggered_by
-            })
+            }
+            if scroll_to_row:
+                data_to_send['scroll_to_row'] = scroll_to_row
+            self.send(data_to_send)
 
     def _update_sort(self):
         try:
@@ -967,11 +969,15 @@ class QgridWidget(widgets.DOMWidget):
                 'triggered_by': 'add_row'
             })
             return
-        last = df.iloc[-1]
+
+        last_index = max(df.index)
+        last = df.loc[last_index].copy()
         last.name += 1
+        last[self._index_col_name] = last.name
         df.loc[last.name] = last.values
         self._unfiltered_df.loc[last.name] = last.values
-        self._update_table(triggered_by='add_row')
+        self._update_table(triggered_by='add_row',
+                           scroll_to_row=df.index.get_loc(last.name))
 
     def remove_row(self):
         """
