@@ -473,7 +473,7 @@ class QgridView extends widgets.DOMWidgetView {
         setTimeout(() => {
           this.resizing_column = false;
         }, 1);
-      })
+      });
     }, 1);
   }
 

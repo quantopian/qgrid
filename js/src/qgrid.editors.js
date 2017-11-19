@@ -28,7 +28,11 @@ class IndexEditor {
   focus() {}
 
   loadValue(item) {
-    this.$cell.text(item[this.column_info.field]);
+    this.$cell.text(
+        this.column_info.formatter(
+            null, null, item[this.column_info.field], this.column_info, null
+        )
+    );
   }
 
   serializeValue() {}
