@@ -41,6 +41,64 @@ def test_edit_date():
         'value': "2013-01-16T00:00:00.000+00:00"
     })
 
+def test_add_row():
+    view = QgridWidget(df=create_df())
+    view._handle_qgrid_msg_helper({
+        'type': 'add_row'
+    })
+
+def test_mixed_type_column():
+    df = pd.DataFrame({'A': [1.2, 'xy', 4], 'B': [3, 4, 5]})
+    df = df.set_index(pd.Index(['yz', 7, 3.2]))
+    view = QgridWidget(df=df)
+    view._handle_qgrid_msg_helper({
+        'type': 'sort_changed',
+        'sort_field': 'A',
+        'sort_ascending': True
+    })
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'A',
+        'search_val': None
+    })
+
+def test_period_object_column():
+    range_index = pd.period_range(start='2000', periods=10, freq='B')
+    df = pd.DataFrame({'a': 5, 'b': range_index}, index=range_index)
+    view = QgridWidget(df=df)
+    view._handle_qgrid_msg_helper({
+        'type': 'sort_changed',
+        'sort_field': 'index',
+        'sort_ascending': True
+    })
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'index',
+        'search_val': None
+    })
+    view._handle_qgrid_msg_helper({
+        'type': 'sort_changed',
+        'sort_field': 'b',
+        'sort_ascending': True
+    })
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'b',
+        'search_val': None
+    })
+
+def test_get_selected_df():
+    sample_df = create_df()
+    selected_rows = [1, 3]
+    view = QgridWidget(df=sample_df)
+    view._handle_qgrid_msg_helper({
+        'rows': selected_rows,
+        'type': "selection_change"
+    })
+    selected_df = view.get_selected_df()
+    assert len(selected_df) == 2
+    assert sample_df.iloc[selected_rows].equals(selected_df)
+
 def test_integer_index_filter():
     view = QgridWidget(df=create_df())
     view._handle_qgrid_msg_helper({

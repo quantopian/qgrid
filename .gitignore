@@ -9,6 +9,14 @@
 dist
 *.egg-info
 
+# pytest
+.cache/*
+
+# Jupyter notebook
+jupyterhub.sqlite
+jupyterhub_cookie_secret
+index.ipynb
+
 docs/_build/*
 
 build/

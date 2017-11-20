@@ -41,7 +41,7 @@ Run the following to install and enable qgrid::
 
   OR
 
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b7
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b8
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
@@ -107,7 +107,7 @@ Compatibility:
  0.3.x             4.1                          4.1.x
  0.3.2             4.2                          5.x
  0.3.3             5.x                          6.x
- 1.0.0b7           5.x                          7.x
+ 1.0.0b8           5.x                          7.x
 =================  ===========================  ==============================
 
 

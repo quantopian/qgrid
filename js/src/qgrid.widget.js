@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.0-beta.7',
-      _view_module_version : '^1.0.0-beta.7',
+      _model_module_version : '^1.0.0-beta.8',
+      _view_module_version : '^1.0.0-beta.8',
       _df_json: '',
       _columns: {}
     });
@@ -213,6 +213,7 @@ class QgridView extends widgets.DOMWidgetView {
     this.last_vp = null;
     this.sort_in_progress = false;
     this.sort_indicator = null;
+    this.resizing_column = false;
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
@@ -382,6 +383,10 @@ class QgridView extends widgets.DOMWidgetView {
 
     this.grid_header = this.$el.find('.slick-header-columns');
     this.grid_header.click((e) => {
+      if (this.resizing_column) {
+        return;
+      }
+
       if (this.sort_in_progress){
         return;
       }
@@ -455,6 +460,18 @@ class QgridView extends widgets.DOMWidgetView {
           .find('.out_prompt_overlay,.output_collapsed').click(() => {
         setTimeout(() => {
           this.slick_grid.resizeCanvas();
+        }, 1);
+      });
+
+      this.resize_handles = this.grid_header.find('.slick-resizable-handle');
+      this.resize_handles.mousedown((e) => {
+        this.resizing_column = true;
+      });
+      $(document).mouseup(() => {
+        // wait for the column header click handler to run before
+        // setting the resizing_column flag back to false
+        setTimeout(() => {
+          this.resizing_column = false;
         }, 1);
       });
     }, 1);
@@ -596,9 +613,8 @@ class QgridView extends widgets.DOMWidgetView {
         if (top_row) {
           this.slick_grid.scrollRowIntoView(top_row);
         } else if (msg.triggered_by === 'add_row') {
-          let data_length = data_view.getLength();
-          this.slick_grid.scrollRowIntoView(data_length);
-          this.slick_grid.setSelectedRows([data_length - 1]);
+          this.slick_grid.scrollRowIntoView(msg.scroll_to_row);
+          this.slick_grid.setSelectedRows([msg.scroll_to_row]);
         } else if (msg.triggered_by === 'viewport_changed' &&
             this.last_vp.bottom >= this.df_length) {
           this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
