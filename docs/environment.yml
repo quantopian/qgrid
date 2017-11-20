@@ -1,0 +1,6 @@
+name: qgrid_docs
+channels:
+  - tim_shawver/label/dev
+  - conda-forge
+dependencies:
+  - qgrid=1.0.0b8
