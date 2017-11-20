@@ -61,7 +61,7 @@ If you haven't already install jupyterlab and enabled ipywidgets, do that first 
 
 Install the qgrid-jupyterlab extension and enable::
 
-  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.7
+  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.8
   jupyter labextension enable qgrid-jupyterlab
 
 At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
