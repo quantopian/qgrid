@@ -453,7 +453,7 @@ class QgridWidget(widgets.DOMWidget):
                 self._primary_key = [df.index.name]
 
             columns = {}
-            for cur_column in df_schema['fields']:
+            for i, cur_column in enumerate(df_schema['fields']):
                 col_name = cur_column['name']
                 if 'constraints' in cur_column and \
                         isinstance(cur_column['constraints']['enum'][0], dict):
@@ -466,6 +466,7 @@ class QgridWidget(widgets.DOMWidget):
                 if col_name in self._primary_key:
                     cur_column['is_index'] = True
 
+                cur_column['position'] = i
                 columns[col_name] = cur_column
 
             self._columns = columns

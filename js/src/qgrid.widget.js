@@ -294,9 +294,13 @@ class QgridView extends widgets.DOMWidgetView {
       constrainInput: false
     });
 
-    $.each(columns, (i, cur_column) => {
+    var sorted_columns = Object.values(columns).sort(
+        (a, b) => a.position - b.position
+    );
+
+    for(let cur_column of sorted_columns){
       if (cur_column.name == this.index_col_name){
-        return;
+        continue;
       }
 
       var type_info = this.type_infos[cur_column.type] || {};
@@ -333,10 +337,10 @@ class QgridView extends widgets.DOMWidgetView {
         slick_column.editor = editors.IndexEditor;
         slick_column.cssClass += ' idx-col';
         this.index_columns.push(slick_column);
-        return;
+        continue;
       }
       this.columns.push(slick_column);
-    });
+    }
 
     if (this.index_columns.length > 0) {
       this.columns = this.index_columns.concat(this.columns);
