@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.0-beta.8',
-      _view_module_version : '^1.0.0-beta.8',
+      _model_module_version : '^1.0.0-beta.9',
+      _view_module_version : '^1.0.0-beta.9',
       _df_json: '',
       _columns: {}
     });
@@ -244,9 +244,9 @@ class QgridView extends widgets.DOMWidgetView {
             super(args);
 
             this.loadValue = (item) => {
-              var date_value = item[args.column.field];
+              this.date_value = item[args.column.field];
               var formatted_val = self.format_date(
-                  date_value, args.column.field
+                  this.date_value, args.column.field
               );
               this.input = $(args.container).find('.editor-text');
               this.input.val(formatted_val);
@@ -259,7 +259,14 @@ class QgridView extends widgets.DOMWidgetView {
               });
             };
 
+            this.isValueChanged = () => {
+              return this.input.val() != this.date_value;
+            };
+
             this.serializeValue = () => {
+              if (this.input.val() === "") {
+                  return null;
+              }
               var parsed_date = moment.parseZone(
                   this.input.val(), "YYYY-MM-DD HH:mm:ss.SSS"
               );
@@ -268,6 +275,9 @@ class QgridView extends widgets.DOMWidgetView {
           }
         },
         formatter: (row, cell, value, columnDef, dataContext) => {
+          if (value === null){
+            return "NaT";
+          }
           return this.format_date(value, columnDef.name);
         }
       },
@@ -294,9 +304,13 @@ class QgridView extends widgets.DOMWidgetView {
       constrainInput: false
     });
 
-    $.each(columns, (i, cur_column) => {
+    var sorted_columns = Object.values(columns).sort(
+        (a, b) => a.position - b.position
+    );
+
+    for(let cur_column of sorted_columns){
       if (cur_column.name == this.index_col_name){
-        return;
+        continue;
       }
 
       var type_info = this.type_infos[cur_column.type] || {};
@@ -333,10 +347,10 @@ class QgridView extends widgets.DOMWidgetView {
         slick_column.editor = editors.IndexEditor;
         slick_column.cssClass += ' idx-col';
         this.index_columns.push(slick_column);
-        return;
+        continue;
       }
       this.columns.push(slick_column);
-    });
+    }
 
     if (this.index_columns.length > 0) {
       this.columns = this.index_columns.concat(this.columns);
@@ -554,6 +568,9 @@ class QgridView extends widgets.DOMWidgetView {
   }
 
   format_number(row, cell, value, columnDef, dataContext) {
+    if (value === null){
+      return 'NaN';
+    }
     return value;
   }
 

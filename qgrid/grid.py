@@ -301,8 +301,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.0-beta.8').tag(sync=True)
-    _model_module_version = Unicode('1.0.0-beta.8').tag(sync=True)
+    _view_module_version = Unicode('1.0.0-beta.9').tag(sync=True)
+    _model_module_version = Unicode('1.0.0-beta.9').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -453,7 +453,7 @@ class QgridWidget(widgets.DOMWidget):
                 self._primary_key = [df.index.name]
 
             columns = {}
-            for cur_column in df_schema['fields']:
+            for i, cur_column in enumerate(df_schema['fields']):
                 col_name = cur_column['name']
                 if 'constraints' in cur_column and \
                         isinstance(cur_column['constraints']['enum'][0], dict):
@@ -466,6 +466,7 @@ class QgridWidget(widgets.DOMWidget):
                 if col_name in self._primary_key:
                     cur_column['is_index'] = True
 
+                cur_column['position'] = i
                 columns[col_name] = cur_column
 
             self._columns = columns
@@ -538,6 +539,8 @@ class QgridWidget(widgets.DOMWidget):
                     inplace=True
                 )
         except TypeError:
+            self.log.info('TypeError occurred, assuming mixed data type '
+                          'column')
             # if there's a TypeError, assume it means that we have a mixed
             # type column, and attempt to create a stringified version of
             # the column to use for sorting/filtering
@@ -560,7 +563,7 @@ class QgridWidget(widgets.DOMWidget):
             self._get_col_series_from_df(col_name, self._df)
         sort_col_series_unfiltered = \
             self._get_col_series_from_df(col_name, self._unfiltered_df)
-        sort_column_name = col_name + self._sort_col_suffix
+        sort_column_name = str(col_name) + self._sort_col_suffix
 
         if to_timestamp:
             self._df[sort_column_name] = sort_col_series.to_timestamp()
