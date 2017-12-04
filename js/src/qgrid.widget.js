@@ -244,9 +244,9 @@ class QgridView extends widgets.DOMWidgetView {
             super(args);
 
             this.loadValue = (item) => {
-              var date_value = item[args.column.field];
+              this.date_value = item[args.column.field];
               var formatted_val = self.format_date(
-                  date_value, args.column.field
+                  this.date_value, args.column.field
               );
               this.input = $(args.container).find('.editor-text');
               this.input.val(formatted_val);
@@ -259,7 +259,14 @@ class QgridView extends widgets.DOMWidgetView {
               });
             };
 
+            this.isValueChanged = () => {
+              return this.input.val() != this.date_value;
+            };
+
             this.serializeValue = () => {
+              if (this.input.val() === "") {
+                  return null;
+              }
               var parsed_date = moment.parseZone(
                   this.input.val(), "YYYY-MM-DD HH:mm:ss.SSS"
               );
@@ -268,6 +275,9 @@ class QgridView extends widgets.DOMWidgetView {
           }
         },
         formatter: (row, cell, value, columnDef, dataContext) => {
+          if (value === null){
+            return "NaT";
+          }
           return this.format_date(value, columnDef.name);
         }
       },
@@ -558,6 +568,9 @@ class QgridView extends widgets.DOMWidgetView {
   }
 
   format_number(row, cell, value, columnDef, dataContext) {
+    if (value === null){
+      return 'NaN';
+    }
     return value;
   }
 

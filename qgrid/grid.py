@@ -539,6 +539,8 @@ class QgridWidget(widgets.DOMWidget):
                     inplace=True
                 )
         except TypeError:
+            self.log.info('TypeError occurred, assuming mixed data type '
+                          'column')
             # if there's a TypeError, assume it means that we have a mixed
             # type column, and attempt to create a stringified version of
             # the column to use for sorting/filtering
@@ -561,7 +563,7 @@ class QgridWidget(widgets.DOMWidget):
             self._get_col_series_from_df(col_name, self._df)
         sort_col_series_unfiltered = \
             self._get_col_series_from_df(col_name, self._unfiltered_df)
-        sort_column_name = col_name + self._sort_col_suffix
+        sort_column_name = str(col_name) + self._sort_col_suffix
 
         if to_timestamp:
             self._df[sort_column_name] = sort_col_series.to_timestamp()

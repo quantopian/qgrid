@@ -62,6 +62,20 @@ def test_mixed_type_column():
         'search_val': None
     })
 
+def test_nans():
+    df = pd.DataFrame([(pd.Timestamp('2017-02-02'), np.nan), (4, 2), ('foo', 'bar')])
+    view = QgridWidget(df=df)
+    view._handle_qgrid_msg_helper({
+        'type': 'sort_changed',
+        'sort_field': 1,
+        'sort_ascending': True
+    })
+    view._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 1,
+        'search_val': None
+    })
+
 def test_period_object_column():
     range_index = pd.period_range(start='2000', periods=10, freq='B')
     df = pd.DataFrame({'a': 5, 'b': range_index}, index=range_index)
