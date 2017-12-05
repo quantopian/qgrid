@@ -1,10 +1,28 @@
 {
   "name": "qgrid-jupyterlab",
-  "version": "1.0.0-beta.9",
+  "version": "1.0.0b9",
   "description": "A JupyterLab extension exposing qgrid",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublish": "npm run build"
+  },
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.css"
+  ],
+  "jupyterlab": {
+    "extension": true
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^0.12.0",
+    "@jupyter-widgets/jupyterlab-manager": "^0.30.0",
+    "qgrid": "1.0.0-beta.9"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.1",
+    "typescript": "~2.4.0"
   },
   "repository": {
     "type": "git",
@@ -14,12 +32,5 @@
     "name": "Quantopian, Inc.",
     "email": "tshawver@quantopian.com"
   },
-  "license": "Apache-2.0",
-  "dependencies": {
-    "@jupyter-widgets/jupyterlab-manager": "^0.27.0",
-    "qgrid": "1.0.0-beta.9"
-  },
-  "jupyterlab": {
-    "extension": true
-  }
+  "license": "Apache-2.0"
 }
