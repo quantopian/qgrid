@@ -91,7 +91,10 @@ def set_defaults(show_toolbar=None, precision=None, grid_options=None):
     QgridWidget :
         The widget whose default behavior is changed by ``set_defaults``.
     """
-    defaults.set_defaults(show_toolbar, precision, grid_options)
+    defaults.set_defaults(
+        show_toolbar=show_toolbar,
+        precision=precision,
+        grid_options=grid_options)
 
 
 def set_grid_option(optname, optvalue):
