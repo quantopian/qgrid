@@ -44,5 +44,8 @@
   "files": [
     "dist/",
     "src/"
-  ]
+  ],
+  "jupyterlab": {
+    "extension": "src/jupyterlab-plugin"
+  }
 }
