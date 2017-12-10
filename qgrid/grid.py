@@ -874,8 +874,8 @@ class QgridWidget(widgets.DOMWidget):
                 if col_info['type'] == 'datetime':
                     val_to_set = pd.to_datetime(val_to_set)
 
-                self._df.set_value(self._df.index[content['row_index']],
-                                   content['column'], val_to_set)
+                self._df.at[self._df.index[content['row_index']],
+                            content['column']] =  val_to_set
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
