@@ -41,7 +41,7 @@ Run the following to install and enable qgrid::
 
   OR
 
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b9
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b10
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
@@ -57,7 +57,6 @@ If you haven't already install jupyterlab and enabled ipywidgets, do that first 
 
   pip install jupyterlab
   jupyter labextension install @jupyter-widgets/jupyterlab-manager
-  jupyter labextension enable @jupyter-widgets/jupyterlab-manager
 
 Install the qgrid-jupyterlab extension and enable::
 
