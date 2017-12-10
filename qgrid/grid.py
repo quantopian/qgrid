@@ -36,18 +36,15 @@ class _DefaultSettings(object):
             'minVisibleRows': 8
         }
         self._show_toolbar = False
-        self._remote_js = False
         self._precision = None  # Defer to pandas.get_option
 
     def set_grid_option(self, optname, optvalue):
         self._grid_options[optname] = optvalue
 
-    def set_defaults(self, show_toolbar=None, remote_js=None,
-                     precision=None, grid_options=None):
+    def set_defaults(self, show_toolbar=None, precision=None,
+                     grid_options=None):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
-        if remote_js is not None:
-            self._remote_js = remote_js
         if precision is not None:
             self._precision = precision
         if grid_options is not None:
@@ -91,10 +88,8 @@ def set_defaults(show_toolbar=None, precision=None, grid_options=None):
     QgridWidget :
         The widget whose default behavior is changed by ``set_defaults``.
     """
-    defaults.set_defaults(
-        show_toolbar=show_toolbar,
-        precision=precision,
-        grid_options=grid_options)
+    defaults.set_defaults(show_toolbar=show_toolbar, precision=precision,
+                          grid_options=grid_options)
 
 
 def set_grid_option(optname, optvalue):
@@ -351,6 +346,9 @@ class QgridWidget(widgets.DOMWidget):
 
     def _precision_default(self):
         return defaults.precision
+
+    def _show_toolbar_default(self):
+        return defaults.show_toolbar
 
     def _update_df(self):
         self._ignore_df_changed = True
@@ -875,7 +873,7 @@ class QgridWidget(widgets.DOMWidget):
                     val_to_set = pd.to_datetime(val_to_set)
 
                 self._df.at[self._df.index[content['row_index']],
-                            content['column']] =  val_to_set
+                            content['column']] = val_to_set
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
