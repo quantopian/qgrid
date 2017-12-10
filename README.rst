@@ -41,7 +41,7 @@ Run the following to install and enable qgrid::
 
   OR
 
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b9
+  conda install -c tim_shawver/label/dev qgrid==1.0.0b10
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
@@ -55,23 +55,19 @@ Jupyterlab Installation
 First, go through the normal installation steps above as you normally would when using qgrid in the notebook.
 If you haven't already install jupyterlab and enabled ipywidgets, do that first with the following lines::
 
-  pip install jupyterlab==0.27.0
-  jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.27.0
-  jupyter labextension enable @jupyter-widgets/jupyterlab-manager
+  pip install jupyterlab
+  jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 Install the qgrid-jupyterlab extension and enable::
 
-  jupyter labextension install qgrid-jupyterlab@1.0.0-beta.9
-  jupyter labextension enable qgrid-jupyterlab
+  jupyter labextension install qgrid@1.0.0-beta.10
 
 At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
 able to use qgrid in notebooks as you normally would.
 
-*Please Note: The reason version 0.27.0 is specified in the example commands above is because that's the version
-we used for testing qgrid with Jupyterlab. The Jupyterlab project is changing quickly so if you want to
-be certain that qgrid will work, using 0.27.0 is your best bet. If you use a different Jupyterlab version,
-it's more likely you'll run into issues since we haven't tested it. If that happens please file an issue
-if the version is newer than 0.27.0 and we'll try and get to it as soon as possible.*
+*Please Note: Jupyterlab support has been tested with jupyterlab 0.30.5 and jupyterlab-manager 0.31.3, so if you're
+having trouble, try installing those versions. Feel free to file an issue if you find that qgrid isn't working
+with a newer version of either dependency.*
 
 Dependencies
 ------------
@@ -95,20 +91,20 @@ Qgrid depends on the following three Python packages:
 These are listed in `requirements.txt <https://github.com/quantopian/qgrid/blob/master/requirements.txt>`_
 and will be automatically installed (if necessary) when qgrid is installed via pip.
 
-Compatibility:
---------------
+Compatibility
+-------------
 
-=================  ===========================  ==============================
- qgrid             IPython / Jupyter notebook   ipywidgets
-=================  ===========================  ==============================
- 0.2.0             2.x                          N/A
- 0.3.x             3.x                          N/A
- 0.3.x             4.0                          4.0.x
- 0.3.x             4.1                          4.1.x
- 0.3.2             4.2                          5.x
- 0.3.3             5.x                          6.x
- 1.0.0b9           5.x                          7.x
-=================  ===========================  ==============================
+=================  ===========================  ==============================  ==============================
+ qgrid             IPython / Jupyter notebook   ipywidgets                      Jupyterlab
+=================  ===========================  ==============================  ==============================
+ 0.2.0             2.x                          N/A                             N/A
+ 0.3.x             3.x                          N/A                             N/A
+ 0.3.x             4.0                          4.0.x                           N/A
+ 0.3.x             4.1                          4.1.x                           N/A
+ 0.3.2             4.2                          5.x                             N/A
+ 0.3.3             5.x                          6.x                             N/A
+ 1.0.0b10          5.x                          7.x                             0.30.x
+=================  ===========================  ==============================  ==============================
 
 
 Running the demo notebook locally

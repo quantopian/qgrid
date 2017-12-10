@@ -1,4 +1,8 @@
-from qgrid import QgridWidget
+from qgrid import (
+    QgridWidget,
+    set_defaults,
+    show_grid
+)
 import numpy as np
 import pandas as pd
 
@@ -237,4 +241,36 @@ def test_multi_interval_index():
     df.set_index(['time', 'time_bin'], inplace=True)
     view = QgridWidget(df=df)
 
+def test_set_defaults():
+    fake_grid_options_a = {'foo':'bar'}
+    set_defaults(show_toolbar=False, precision=4,
+                 grid_options=fake_grid_options_a)
+
+    def assert_widget_vals_a(widget):
+        assert not widget.show_toolbar
+        assert widget.precision == 4
+        assert widget.grid_options == fake_grid_options_a
+
+    df = create_df()
+    view = show_grid(df)
+    assert_widget_vals_a(view)
+
+    view = QgridWidget(df=df)
+    assert_widget_vals_a(view)
+
+    fake_grid_options_b = {'foo': 'buzz'}
+    set_defaults(show_toolbar=True, precision=2,
+                 grid_options=fake_grid_options_b)
+
+    def assert_widget_vals_b(widget):
+        assert widget.show_toolbar
+        assert widget.precision == 2
+        assert widget.grid_options == fake_grid_options_b
+
+    df = create_df()
+    view = show_grid(df)
+    assert_widget_vals_b(view)
+
+    view = QgridWidget(df=df)
+    assert_widget_vals_b(view)
 

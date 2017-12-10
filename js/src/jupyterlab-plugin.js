@@ -1,13 +1,13 @@
-var qgrid = require('qgrid');
+var qgrid = require('./index');
 
-var jupyterlab_widgets = require('@jupyter-widgets/jupyterlab-manager');
+var base = require('@jupyter-widgets/base');
 
 /**
  * The widget manager provider.
  */
 module.exports = {
   id: 'qgrid',
-  requires: [jupyterlab_widgets.INBWidgetExtension],
+  requires: [base.IJupyterWidgetRegistry],
   activate: function(app, widgets) {
       widgets.registerWidget({
           name: 'qgrid',
