@@ -42,6 +42,8 @@ Run the following to install and enable qgrid::
   OR
 
   conda install -c tim_shawver/label/dev qgrid==1.0.0b10
+  # the following step is required for windows users only. linux and osx users can skip it.
+  jupyter nbextension enable --py --sys-prefix qgrid
 
 If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
 
