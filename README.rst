@@ -127,8 +127,8 @@ qgrid-notebooks repository and run the demo notebook:
     jupyter notebook
 
 
-Running from source
--------------------
+Running from source & testing your changes
+------------------------------------------
 
 If you'd like to contribute to qgrid, or just want to be able to modify the source code for your own purposes, you'll
 want to clone this repository and run qgrid from your local copy of the repository.  The following steps explain how
@@ -156,11 +156,31 @@ to do this.
 
     jupyter notebook
 
-#. If the code you need to change is in qgrid's python code, then restart the kernel of the notebook you're in and
-   rerun any qgrid cells to see your changes take effect.
+Manually testing server-side changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If the code you need to change is in qgrid's python code, then restart the kernel of the notebook you're in and
+rerun any qgrid cells to see your changes take effect.
 
-#. If the code you need to change is in qgrid's javascript code, repeat step 3 to rebuild qgrid's javascript, then
-   refresh the browser tab where you're viewing your notebook to see your changes take effect.
+Manually testing client-side changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If the code you need to change is in qgrid's javascript or css code, repeat step 3 to rebuild qgrid's npm package,
+then refresh the browser tab where you're viewing your notebook to see your changes take effect.
+
+Running automated tests
+^^^^^^^^^^^^^^^^^^^^^^^
+There is a small python test suite which can be run locally by running the command ``pytest`` in the root folder
+of the repository.
+
+Building docs
+^^^^^^^^^^^^^
+The read-the-docs page is generated using sphinx. If you change any doc strings or want to add something to the
+read-the-docs page, you can preview your changes locally before submitting a PR using the following commands::
+
+    pip install sphinx sphinx_rtd_theme
+    cd docs && make html
+
+This will result in the ``docs/_build/html`` folder being populated with a new version of the read-the-docs site. If
+you open the ``index.html`` file in your browser, you should be able to preview your changes.
 
 Continuing to use qgrid 0.3.3
 -----------------------------
@@ -179,3 +199,13 @@ If you're looking for the demo notebook for 0.3.3, it's still availabe `in nbvie
 
 Qgrid 0.3.3 is not compatible with ipywidgets 7, so if you need support for ipywidgets 7, you'll need to use
 qgrid 1.0.
+
+Contributing
+------------
+All contributions, bug reports, bug fixes, documentation improvements, enhancements, and ideas are welcome. See the
+`Running from source & testing your changes`_ section above for more details on local qgrid development.
+
+If you are looking to start working with the qgrid codebase, navigate to the GitHub issues tab and start looking
+through interesting issues.
+
+Feel free to ask questions by submitting an issue with your question.
