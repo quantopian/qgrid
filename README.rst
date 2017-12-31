@@ -36,7 +36,7 @@ Installation
 
 Run the following to install and enable qgrid::
 
-  pip install qgrid --pre
+  pip install qgrid==1.0.0b10
   jupyter nbextension enable --py --sys-prefix qgrid
 
   OR
