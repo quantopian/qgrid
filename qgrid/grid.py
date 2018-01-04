@@ -256,17 +256,25 @@ class QgridWidget(widgets.DOMWidget):
             'fullWidthRows': True,
             'syncColumnCellResize': True,
             'forceFitColumns': True,
+            'defaultColumnWidth': 150,
             'rowHeight': 28,
             'enableColumnReorder': False,
             'enableTextSelectionOnCells': True,
             'editable': True,
-            'autoEdit': False
+            'autoEdit': False,
+            'explicitInitialization': True,
+            'maxVisibleRows': 15,
+            'minVisibleRows': 8
         }
 
-    See the `SlickGrid
-    documentation
-    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_
-    for information about these options.
+    Most of these options are SlickGrid options which are described
+    in the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_. The
+    two exceptions are `maxVisibleRows` and `minVisibleRows`, which
+    are options that were added specifically for Qgrid and therefore
+    are not documented in the SlickGrid documentation.  These options
+    allow you to set an upper and lower bound on the height of your
+    Qgrid widget in terms of number of rows that are visible.
 
     See Also
     --------
