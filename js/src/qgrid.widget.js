@@ -666,10 +666,15 @@ class QgridView extends widgets.DOMWidgetView {
    */
   update_size() {
     var row_height = this.grid_options.rowHeight;
-    var min_height = row_height * this.grid_options.minVisibleRows;
+    var min_visible = 'minVisibleRows' in this.grid_options ?
+        this.grid_options.minVisibleRows : 8;
+    var max_visible = 'maxVisibleRows' in this.grid_options ?
+        this.grid_options.maxVisibleRows : 15;
+
+    var min_height = row_height * min_visible;
     // add 2 to maxVisibleRows to account for the header row and padding
-    var max_height = this.grid_options.height ||
-        row_height * (this.grid_options.maxVisibleRows + 2);
+    var max_height = 'height' in this.grid_options ? this.grid_options.height :
+      row_height * (max_visible + 2);
     var grid_height = max_height;
     var total_row_height = (this.data_view.getLength() + 1) * row_height + 1;
     if (total_row_height <= max_height){
