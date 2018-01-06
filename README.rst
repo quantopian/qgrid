@@ -27,6 +27,12 @@ Click the badge below to try out qgrid in a live sample notebook:
 *You'll see a brief loading screen while a notebook server is being created for you in the
 cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
 
+Experimental Demo
+-----------------
+As of qgrid 1.0 there are some interesting ways we can use qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
+
+Currently these ways of using qgrid are not documented in the API docs or extensively tested, so they're still considered experimental. See the `experimental notebook <https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=experimental.ipynb>`_ to try them out for yourself in a live sample notebook.
+
 API Documentation
 -----------------
 API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/latest/>`_.
