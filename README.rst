@@ -27,12 +27,6 @@ Click the badge below to try out qgrid in a live sample notebook:
 *You'll see a brief loading screen while a notebook server is being created for you in the
 cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
 
-Experimental Demo
------------------
-As of qgrid 1.0 there are some interesting ways we can use qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
-
-Currently these ways of using qgrid are not documented in the API docs or extensively tested, so they're still considered experimental. See the `experimental notebook <https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=experimental.ipynb>`_ to try them out for yourself in a live sample notebook.
-
 API Documentation
 -----------------
 API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/latest/>`_.
@@ -115,23 +109,26 @@ Compatibility
 =================  ===========================  ==============================  ==============================
 
 
-Running the demo notebook locally
----------------------------------
+Running the demo notebooks locally
+----------------------------------
 
-There's a demo notebook in the `qgrid-notebooks <https://github.com/quantopian/qgrid-notebooks/>`_ repository
+There are a couple of demo notebooks in the `qgrid-notebooks <https://github.com/quantopian/qgrid-notebooks/>`_ repository
 which will help you get familiar with the functionality that qgrid provides. Here are the steps to clone the
-qgrid-notebooks repository and run the demo notebook:
+qgrid-notebooks repository and open a demo notebook:
 
-#. Clone the repository from GitHub::
+#. Install qgrid by following the instructions in the `Installation`_ section above, if you haven't already
+
+#. Clone the qgrid-notebooks repository from GitHub::
 
     git clone https://github.com/quantopian/qgrid-notebooks.git
 
-#. Go to the top-level directory of the qgrid-notebooks repository and run the notebook::
+#. Install the dev requirements for the repository and start the notebook server::
 
     cd qgrid-notebooks
     pip install -r requirements_dev.txt
     jupyter notebook
 
+#. Click on one of the two notebooks (`index.ipynb <https://github.com/quantopian/qgrid-notebooks/blob/master/index.ipynb>`_ or `experimental.ipynb <https://github.com/quantopian/qgrid-notebooks/blob/master/experimental.ipynb>`_) that you see listed in the notebook UI in your browser.
 
 Running from source & testing your changes
 ------------------------------------------
@@ -187,6 +184,12 @@ read-the-docs page, you can preview your changes locally before submitting a PR 
 
 This will result in the ``docs/_build/html`` folder being populated with a new version of the read-the-docs site. If
 you open the ``index.html`` file in your browser, you should be able to preview your changes.
+
+Experimental Demo
+-----------------
+As of qgrid 1.0 there are some interesting ways we can use qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
+
+Currently these ways of using qgrid are not documented in the API docs or extensively tested, so they're still considered experimental. See the `experimental notebook <https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=experimental.ipynb>`_ to learn more.
 
 Continuing to use qgrid 0.3.3
 -----------------------------
