@@ -12,10 +12,13 @@ DataFrames within a Jupyter notebook. This allows you to explore your DataFrames
 filtering controls, as well as edit your DataFrames by double clicking cells.
 
 We originally developed qgrid for use in `Quantopian's hosted research environment
-<https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_ in fall of 2014, but had to put it on the backburner for a while so we could focus on higher priority projects.
+<https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_ in fall of 2014, but
+had to put it on the backburner for a while so we could focus on higher priority projects.
 
-Qgrid development started up again in summer 2017, when we started a major refactoring project to allow qgrid to take advantage of the latest advances in ipywidgets (specifically, ipywidget 7.x).  As a part of this refactoring we also moved qgrid's sorting, and filtering logic from the client (javascript) to the server (python). This new version is called
-qgrid 1.0, and the instructions that follow are for this new version.
+Qgrid development started up again in summer 2017, when we started a major refactoring project to allow qgrid to take
+advantage of the latest advances in ipywidgets (specifically, ipywidget 7.x).  As a part of this refactoring we also
+moved qgrid's sorting, and filtering logic from the client (javascript) to the server (python). This new version is
+called qgrid 1.0, and the instructions that follow are for this new version.
 
 Demo
 ----
@@ -36,12 +39,12 @@ Installation
 
 Run the following to install and enable qgrid::
 
-  pip install qgrid==1.0.0b10
+  pip install qgrid
   jupyter nbextension enable --py --sys-prefix qgrid
 
   OR
 
-  conda install -c tim_shawver/label/dev qgrid==1.0.0b10
+  conda install -c tim_shawver qgrid
   # the following step is required for windows users only. linux and osx users can skip it.
   jupyter nbextension enable --py --sys-prefix qgrid
 
@@ -62,7 +65,7 @@ If you haven't already install jupyterlab and enabled ipywidgets, do that first 
 
 Install the qgrid-jupyterlab extension and enable::
 
-  jupyter labextension install qgrid@1.0.0-beta.10
+  jupyter labextension install qgrid@1.0.0
 
 At this point if you run jupyter lab normally with the 'jupyter lab' command, you should be
 able to use qgrid in notebooks as you normally would.
@@ -105,7 +108,7 @@ Compatibility
  0.3.x             4.1                          4.1.x                           N/A
  0.3.2             4.2                          5.x                             N/A
  0.3.3             5.x                          6.x                             N/A
- 1.0.0b10          5.x                          7.x                             0.30.x
+ 1.0.0             5.x                          7.x                             0.30.x
 =================  ===========================  ==============================  ==============================
 
 
