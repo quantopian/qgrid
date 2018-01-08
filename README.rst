@@ -35,7 +35,7 @@ For people who would rather not go to another page to try out qgrid for real, he
         .. figure:: docs/images/filtering_demo.gif
          :align: left
          :target: docs/images/filtering_demo.gif
-         :width: 800px
+         :width: 200px
 
           A brief demo showing filtering, editing, and the `get_changed_df()` method
 
@@ -202,6 +202,15 @@ Experimental Demo
 As of qgrid 1.0 there are some interesting ways we can use qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
 
 Currently these ways of using qgrid are not documented in the API docs or extensively tested, so they're still considered experimental. See the `experimental notebook <https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=experimental.ipynb>`_ to learn more.
+
+For people who would rather not go to another page to try out the experimental notebook, here's the tldr; version:
+
+        .. figure:: docs/images/linked_to_scatter.gif
+         :align: left
+         :target: docs/images/linked_to_scatter.gif
+         :width: 600px
+
+          A brief demo showing filtering, editing, and the `get_changed_df()` method
 
 Continuing to use qgrid 0.3.3
 -----------------------------
