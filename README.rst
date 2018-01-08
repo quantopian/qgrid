@@ -30,6 +30,15 @@ Click the badge below to try out qgrid in a live sample notebook:
 *You'll see a brief loading screen while a notebook server is being created for you in the
 cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
 
+For people who would rather not go to another page to try out qgrid for real, here's the tldr; version:
+
+        .. figure:: docs/images/filtering_demo.gif
+         :align: left
+         :target: docs/images/filtering_demo.gif
+         :width: 800px
+
+          A brief demo showing filtering, editing, and the `get_changed_df()` method
+
 API Documentation
 -----------------
 API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/latest/>`_.
