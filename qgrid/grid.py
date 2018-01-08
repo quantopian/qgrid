@@ -216,6 +216,8 @@ def show_grid(data_frame, show_toolbar=None,
                        show_toolbar=show_toolbar)
 
 
+PAGE_SIZE = 100
+
 @widgets.register()
 class QgridWidget(widgets.DOMWidget):
     """
@@ -307,12 +309,11 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.0').tag(sync=True)
-    _model_module_version = Unicode('1.0.0').tag(sync=True)
+    _view_module_version = Unicode('1.0.1-alpha.2').tag(sync=True)
+    _model_module_version = Unicode('1.0.1-alpha.2').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
-    _page_size = Integer(100, sync=True)
     _primary_key = List()
     _columns = Dict({}, sync=True)
     _filter_tables = Dict({})
@@ -403,8 +404,8 @@ class QgridWidget(widgets.DOMWidget):
                       scroll_to_row=None):
         df = self._df.copy()
 
-        from_index = max(self._viewport_range[0] - self._page_size, 0)
-        to_index = max(self._viewport_range[0] + self._page_size, 0)
+        from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
+        to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
         new_df_range = (from_index, to_index)
 
         if triggered_by is 'viewport_changed' and \
@@ -724,7 +725,7 @@ class QgridWidget(widgets.DOMWidget):
             if col_info['type'] == 'any':
                 col_info['value_range'] = (0, length)
             else:
-                max_items = self._page_size * 2
+                max_items = PAGE_SIZE * 2
                 range_max = length
                 if length > max_items:
                     col_info['values'] = col_info['values'][:max_items]
@@ -910,8 +911,8 @@ class QgridWidget(widgets.DOMWidget):
             col_info = self._columns[col_name]
             col_filter_table = self._filter_tables[col_name]
 
-            from_index = max(content['top'] - self._page_size, 0)
-            to_index = max(content['top'] + self._page_size, 0)
+            from_index = max(content['top'] - PAGE_SIZE, 0)
+            to_index = max(content['top'] + PAGE_SIZE, 0)
 
             col_info['values'] = col_filter_table[from_index:to_index]
             col_info['value_range'] = (from_index, to_index)
