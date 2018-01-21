@@ -5,6 +5,7 @@ from qgrid import (
 )
 import numpy as np
 import pandas as pd
+import json
 
 def create_df():
     return pd.DataFrame({
@@ -274,3 +275,68 @@ def test_set_defaults():
     view = QgridWidget(df=df)
     assert_widget_vals_b(view)
 
+
+class MyObject(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+
+my_object_vals = [MyObject(MyObject(None)), MyObject(None)]
+
+
+def test_object_dtype():
+    df = pd.DataFrame({'a': my_object_vals})
+    widget = QgridWidget(df=df)
+    grid_data = json.loads(widget._df_json)['data']
+
+    widget._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'a',
+        'search_val': None
+    })
+    widget._handle_qgrid_msg_helper({
+        'field': "a",
+        'filter_info': {
+            'field': "a",
+            'selected': [0, 1],
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+
+    filter_table = widget._filter_tables['a']
+    assert not isinstance(filter_table[0], dict)
+    assert not isinstance(filter_table[1], dict)
+
+    assert not isinstance(grid_data[0]['a'], dict)
+    assert not isinstance(grid_data[1]['a'], dict)
+
+
+def test_object_dtype_categorical():
+    cat_series = pd.Series(
+        pd.Categorical(my_object_vals,
+                       categories=my_object_vals)
+    )
+    widget = show_grid(cat_series)
+    constraints_enum = widget._columns[0]['constraints']['enum']
+    assert not isinstance(constraints_enum[0], dict)
+    assert not isinstance(constraints_enum[1], dict)
+
+    widget._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 0,
+        'search_val': None
+    })
+    widget._handle_qgrid_msg_helper({
+        'field': 0,
+        'filter_info': {
+            'field': 0,
+            'selected': [0],
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+    assert len(widget._df) == 1
+    assert widget._df[0][0] == cat_series[0]

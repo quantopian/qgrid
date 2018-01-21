@@ -425,7 +425,7 @@ class QgridWidget(widgets.DOMWidget):
 
         if update_columns:
             self._string_columns = list(df.select_dtypes(
-                include=[np.dtype('O')]
+                include=[np.dtype('O'), 'category']
             ).columns.values)
 
         # call map(str) for all columns identified as string columns, in
@@ -650,7 +650,7 @@ class QgridWidget(widgets.DOMWidget):
             return
         else:
             if col_info['type'] == 'any':
-                unique_list = col_info['constraints']['enum']
+                unique_list = col_series.dtype.categories
             else:
                 if col_name in self._sorted_column_cache:
                     unique_list = self._sorted_column_cache[col_name]
