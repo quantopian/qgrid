@@ -33,7 +33,11 @@ class _DefaultSettings(object):
             'autoEdit': False,
             'explicitInitialization': True,
             'maxVisibleRows': 15,
-            'minVisibleRows': 8
+            'minVisibleRows': 8,
+            'sortable': True,
+            'filterable': True,
+            'highlightSelectedCell': False,
+            'highlightSelectedRow': True
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -266,17 +270,36 @@ class QgridWidget(widgets.DOMWidget):
             'autoEdit': False,
             'explicitInitialization': True,
             'maxVisibleRows': 15,
-            'minVisibleRows': 8
+            'minVisibleRows': 8,
+            'sortable': True,
+            'filterable': True,
+            'highlightSelectedCell': False,
+            'highlightSelectedRow': True
         }
 
     Most of these options are SlickGrid options which are described
     in the `SlickGrid documentation
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_. The
-    two exceptions are `maxVisibleRows` and `minVisibleRows`, which
-    are options that were added specifically for Qgrid and therefore
-    are not documented in the SlickGrid documentation.  These options
-    allow you to set an upper and lower bound on the height of your
-    Qgrid widget in terms of number of rows that are visible.
+    exceptions are the last 6 options listed, which are options that were
+    added specifically for Qgrid and therefore are not documented in the
+    SlickGrid documentation.
+
+    The first two, `maxVisibleRows` and `minVisibleRows`, allow you to set
+    an upper and lower bound on the height of your Qgrid widget in terms of
+    number of rows that are visible.
+
+    The next two, `sortable` and `filterable`, control whether qgrid will
+    allow the user to sort and filter, respectively. If you set `sortable` to
+    False nothing will happen when the column headers are clicked.
+    If you set `filterable` to False, the filter icons won't be shown for any
+    columns.
+
+    The last two, `highlightSelectedCell` and `highlightSelectedRow`, control
+    how the styling of qgrid changes when a cell is selected. If you set
+    `highlightSelectedCell` to True, the selected cell will be given
+    a light blue border. If you set `highlightSelectedRow` to False, the
+    light blue background that's shown by default for selected rows will be
+    hidden.
 
     See Also
     --------

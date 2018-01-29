@@ -16,11 +16,11 @@ class IndexEditor {
     this.$cell.tooltip();
     this.$cell.tooltip('enable');
     this.$cell.tooltip("open");
-    this.$cell.off('tooltipclose');
-    this.$cell.on("tooltipclose", (event, ui) => {
+    // automatically hide it after 4 seconds
+    setTimeout((event, ui) => {
       this.$cell.tooltip('destroy');
       args.cancelChanges();
-    });
+    }, 3000);
   }
 
   destroy() {}
