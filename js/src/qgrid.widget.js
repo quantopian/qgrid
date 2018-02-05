@@ -509,6 +509,18 @@ class QgridView extends widgets.DOMWidgetView {
     }, 1);
   }
 
+  processPhosphorMessage(msg) {
+    super.processPhosphorMessage(msg)
+    switch (msg.type) {
+    case 'resize':
+    case 'after-show':
+      if (this.slick_grid){
+        this.slick_grid.resizeCanvas();
+      }
+      break;
+    }
+  }
+
   has_active_filter() {
     for (var i=0; i < this.filter_list.length; i++){
       var cur_filter = this.filter_list[i];
