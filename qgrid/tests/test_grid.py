@@ -38,6 +38,15 @@ def create_interval_index_df():
 
 def test_edit_date():
     view = QgridWidget(df=create_df())
+    observer_called = False
+
+    def on_value_change(change):
+        nonlocal observer_called
+        observer_called = True
+        assert change['new']['Date'][3] == pd.Timestamp('2013-01-16 00:00:00')
+
+    view.observe(on_value_change, names=['_df'])
+
     view._handle_qgrid_msg_helper({
         'column': "Date",
         'row_index': 3,
@@ -46,11 +55,24 @@ def test_edit_date():
         'value': "2013-01-16T00:00:00.000+00:00"
     })
 
+    assert observer_called
+
 def test_add_row():
     view = QgridWidget(df=create_df())
+
+    observer_called = False
+    def on_value_change(change):
+        nonlocal observer_called
+        observer_called = True
+        assert len(change['new']) == 5
+
+    view.observe(on_value_change, names=['_df'])
+
     view._handle_qgrid_msg_helper({
         'type': 'add_row'
     })
+
+    assert observer_called
 
 def test_mixed_type_column():
     df = pd.DataFrame({'A': [1.2, 'xy', 4], 'B': [3, 4, 5]})
@@ -202,6 +224,13 @@ def test_date_index():
 def test_multi_index():
     view = QgridWidget(df=create_multi_index_df())
 
+    observer_count = 0
+    def on_value_change(change):
+        nonlocal observer_count
+        observer_count += 1
+
+    view.observe(on_value_change, names=['_df'])
+
     view._handle_qgrid_msg_helper({
         'type': 'get_column_min_max',
         'field': 'level_0',
@@ -230,6 +259,8 @@ def test_multi_index():
         'sort_field': 'level_0',
         'sort_ascending': True
     })
+
+    assert observer_count == 3
 
 def test_interval_index():
     df = create_interval_index_df()

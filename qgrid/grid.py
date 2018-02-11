@@ -6,6 +6,7 @@ import json
 from IPython.display import display
 from numbers import Integral
 from traitlets import Unicode, Instance, Bool, Integer, Dict, List, Tuple, Any
+from traitlets.utils.bunch import Bunch
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -909,6 +910,7 @@ class QgridWidget(widgets.DOMWidget):
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
+                self._trigger_df_change_event()
             except (ValueError, TypeError):
                 msg = "Error occurred while attempting to edit the " \
                       "DataFrame. Check the notebook server logs for more " \
@@ -951,10 +953,20 @@ class QgridWidget(widgets.DOMWidget):
             self._sorted_column_cache = {}
             self._update_sort()
             self._update_table(triggered_by='sort_changed')
+            self._trigger_df_change_event()
         elif content['type'] == 'get_column_min_max':
             self._handle_get_column_min_max(content)
         elif content['type'] == 'filter_changed':
             self._handle_filter_changed(content)
+
+    def _trigger_df_change_event(self):
+        self.notify_change(Bunch(
+            name='_df',
+            old=None,
+            new=self._df,
+            owner=self,
+            type='change',
+        ))
 
     def get_changed_df(self):
         """
@@ -1014,6 +1026,7 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.loc[last.name] = last.values
         self._update_table(triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(last.name))
+        self._trigger_df_change_event()
 
     def remove_row(self):
         """
@@ -1033,6 +1046,7 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
         self._update_table(triggered_by='remove_row')
+        self._trigger_df_change_event()
 
 
 # Alias for legacy support, since we changed the capitalization
