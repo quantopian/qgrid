@@ -100,6 +100,7 @@ class SliderFilter extends filter_base.FilterBase {
       });
       this.set_value(this.min_value, this.max_value);
     }
+    this.send_filter_changed();
   }
 
   is_active() {

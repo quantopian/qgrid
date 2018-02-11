@@ -79,6 +79,7 @@ class BooleanFilter extends filter_base.FilterBase {
   reset_filter() {
     this.radio_buttons.prop('checked', false);
     this.selected = null;
+    this.send_filter_changed();
   }
 
   get_filter_info() {

@@ -51,6 +51,7 @@ class DateFilter extends filter_base.FilterBase {
 
     this.filter_start_date = null;
     this.filter_end_date = null;
+    this.send_filter_changed();
   }
 
   initialize_controls() {

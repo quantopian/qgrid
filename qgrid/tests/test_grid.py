@@ -249,6 +249,17 @@ def test_multi_index():
     })
 
     view._handle_qgrid_msg_helper({
+        'type': 'filter_changed',
+        'field': 3,
+        'filter_info': {
+            'field': 3,
+            'type': 'slider',
+            'min': None,
+            'max': None
+        }
+    })
+
+    view._handle_qgrid_msg_helper({
         'type': 'sort_changed',
         'sort_field': 3,
         'sort_ascending': True
@@ -260,7 +271,7 @@ def test_multi_index():
         'sort_ascending': True
     })
 
-    assert observer_count == 3
+    assert observer_count == 4
 
 def test_interval_index():
     df = create_interval_index_df()
