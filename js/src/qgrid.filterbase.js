@@ -152,10 +152,10 @@ class FilterBase {
 
   initialize_controls() {
     this.filter_elem.find("a.reset-link").click(
-        (e) => this.handle_reset_filter_clicked(e)
+        (e) => this.reset_filter()
     );
     this.filter_elem.find("i.close-button").click(
-        (e) => this.handle_close_button_clicked(e)
+        (e) => this.hide_filter()
     );
     $(document.body).bind("mousedown",
         (e) => this.handle_body_mouse_down(e)
@@ -178,22 +178,6 @@ class FilterBase {
       'filter_info': this.get_filter_info()
     };
     this.widget_model.send(msg);
-  }
-
-  handle_reset_filter_clicked(e) {
-    this.reset_filter();
-    this.send_filter_changed();
-    // The "false" parameter tells backtest_table_manager that we want to recalculate the min/max values for this filter
-    // based on the rows that are still included in the grid.  This is because if this filter was already active,
-    // its min/max could be out-of-date because we don't adjust the min/max on active filters (to prevent confusion).
-    // This is currently the only filter_changed case where it's appropriate to have this filter's min/max recalculated,
-    // because you wouldn't want to adjust a slider's min/max while the user was moving the slider, for example.
-    return false;
-  }
-
-  handle_close_button_clicked(e) {
-    this.hide_filter();
-    return false;
   }
 
   handle_body_mouse_down(e) {

@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.0',
-      _view_module_version : '^1.0.0',
+      _model_module_version : '^1.0.1',
+      _view_module_version : '^1.0.1',
       _df_json: '',
       _columns: {}
     });
@@ -370,6 +370,16 @@ class QgridView extends widgets.DOMWidgetView {
       this.grid_elem.addClass('force-fit-columns');
     }
 
+    if (this.grid_options.highlightSelectedCell) {
+      this.grid_elem.addClass('highlight-selected-cell');
+    }
+
+    // compare to false since we still want to show row
+    // selection if this option is excluded entirely
+    if (this.grid_options.highlightSelectedRow != false) {
+      this.grid_elem.addClass('highlight-selected-row');
+    }
+
     setTimeout(() => {
       this.slick_grid.init();
       this.update_size();
@@ -378,12 +388,16 @@ class QgridView extends widgets.DOMWidgetView {
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel());
     this.slick_grid.render();
 
-    this.slick_grid.onHeaderCellRendered.subscribe((e, args) => {
+    var render_header_cell = (e, args) => {
       var cur_filter = this.filters[args.column.id];
-      if (cur_filter){
-        cur_filter.render_filter_button($(args.node), this.slick_grid);
-      }
-    });
+        if (cur_filter) {
+          cur_filter.render_filter_button($(args.node), this.slick_grid);
+        }
+    };
+
+    if (this.grid_options.filterable != false) {
+      this.slick_grid.onHeaderCellRendered.subscribe(render_header_cell);
+    }
 
     // Force the grid to re-render the column headers so the
     // onHeaderCellRendered event is triggered.
@@ -396,7 +410,7 @@ class QgridView extends widgets.DOMWidgetView {
     this.slick_grid.setSortColumns([]);
 
     this.grid_header = this.$el.find('.slick-header-columns');
-    this.grid_header.click((e) => {
+    var handle_header_click = (e) => {
       if (this.resizing_column) {
         return;
       }
@@ -436,7 +450,11 @@ class QgridView extends widgets.DOMWidgetView {
         'sort_ascending': this.sort_ascending
       };
       this.send(msg);
-    });
+    };
+
+    if (this.grid_options.sortable != false) {
+      this.grid_header.click(handle_header_click)
+    }
 
     this.slick_grid.onViewportChanged.subscribe((e) => {
       if (this.viewport_timeout){
@@ -489,6 +507,18 @@ class QgridView extends widgets.DOMWidgetView {
         }, 1);
       });
     }, 1);
+  }
+
+  processPhosphorMessage(msg) {
+    super.processPhosphorMessage(msg)
+    switch (msg.type) {
+    case 'resize':
+    case 'after-show':
+      if (this.slick_grid){
+        this.slick_grid.resizeCanvas();
+      }
+      break;
+    }
   }
 
   has_active_filter() {

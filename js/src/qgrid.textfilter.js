@@ -355,11 +355,20 @@ class TextFilter extends filter_base.FilterBase {
   }
 
   reset_filter() {
+    this.ignore_selection_changed = true;
     this.search_string = "";
     this.excluded_rows = null;
     this.security_search.val("");
     this.row_selection_model.setSelectedRows([]);
     this.filter_list = null;
+    this.send_filter_changed();
+    var msg = {
+      'type': 'get_column_min_max',
+      'field': this.field,
+      'search_val': this.search_string
+    };
+    this.widget_model.send(msg);
+    this.ignore_selection_changed = false;
   }
 
   get_filter_info() {

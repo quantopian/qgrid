@@ -6,6 +6,7 @@ import json
 from IPython.display import display
 from numbers import Integral
 from traitlets import Unicode, Instance, Bool, Integer, Dict, List, Tuple, Any
+from traitlets.utils.bunch import Bunch
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -33,7 +34,11 @@ class _DefaultSettings(object):
             'autoEdit': False,
             'explicitInitialization': True,
             'maxVisibleRows': 15,
-            'minVisibleRows': 8
+            'minVisibleRows': 8,
+            'sortable': True,
+            'filterable': True,
+            'highlightSelectedCell': False,
+            'highlightSelectedRow': True
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -216,6 +221,8 @@ def show_grid(data_frame, show_toolbar=None,
                        show_toolbar=show_toolbar)
 
 
+PAGE_SIZE = 100
+
 @widgets.register()
 class QgridWidget(widgets.DOMWidget):
     """
@@ -264,17 +271,36 @@ class QgridWidget(widgets.DOMWidget):
             'autoEdit': False,
             'explicitInitialization': True,
             'maxVisibleRows': 15,
-            'minVisibleRows': 8
+            'minVisibleRows': 8,
+            'sortable': True,
+            'filterable': True,
+            'highlightSelectedCell': False,
+            'highlightSelectedRow': True
         }
 
     Most of these options are SlickGrid options which are described
     in the `SlickGrid documentation
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_. The
-    two exceptions are `maxVisibleRows` and `minVisibleRows`, which
-    are options that were added specifically for Qgrid and therefore
-    are not documented in the SlickGrid documentation.  These options
-    allow you to set an upper and lower bound on the height of your
-    Qgrid widget in terms of number of rows that are visible.
+    exceptions are the last 6 options listed, which are options that were
+    added specifically for Qgrid and therefore are not documented in the
+    SlickGrid documentation.
+
+    The first two, `maxVisibleRows` and `minVisibleRows`, allow you to set
+    an upper and lower bound on the height of your Qgrid widget in terms of
+    number of rows that are visible.
+
+    The next two, `sortable` and `filterable`, control whether qgrid will
+    allow the user to sort and filter, respectively. If you set `sortable` to
+    False nothing will happen when the column headers are clicked.
+    If you set `filterable` to False, the filter icons won't be shown for any
+    columns.
+
+    The last two, `highlightSelectedCell` and `highlightSelectedRow`, control
+    how the styling of qgrid changes when a cell is selected. If you set
+    `highlightSelectedCell` to True, the selected cell will be given
+    a light blue border. If you set `highlightSelectedRow` to False, the
+    light blue background that's shown by default for selected rows will be
+    hidden.
 
     See Also
     --------
@@ -307,12 +333,11 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.0').tag(sync=True)
-    _model_module_version = Unicode('1.0.0').tag(sync=True)
+    _view_module_version = Unicode('1.0.1').tag(sync=True)
+    _model_module_version = Unicode('1.0.1').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
-    _page_size = Integer(100, sync=True)
     _primary_key = List()
     _columns = Dict({}, sync=True)
     _filter_tables = Dict({})
@@ -403,8 +428,8 @@ class QgridWidget(widgets.DOMWidget):
                       scroll_to_row=None):
         df = self._df.copy()
 
-        from_index = max(self._viewport_range[0] - self._page_size, 0)
-        to_index = max(self._viewport_range[0] + self._page_size, 0)
+        from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
+        to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
         new_df_range = (from_index, to_index)
 
         if triggered_by is 'viewport_changed' and \
@@ -424,7 +449,7 @@ class QgridWidget(widgets.DOMWidget):
 
         if update_columns:
             self._string_columns = list(df.select_dtypes(
-                include=[np.dtype('O')]
+                include=[np.dtype('O'), 'category']
             ).columns.values)
 
         # call map(str) for all columns identified as string columns, in
@@ -649,7 +674,7 @@ class QgridWidget(widgets.DOMWidget):
             return
         else:
             if col_info['type'] == 'any':
-                unique_list = col_info['constraints']['enum']
+                unique_list = col_series.dtype.categories
             else:
                 if col_name in self._sorted_column_cache:
                     unique_list = self._sorted_column_cache[col_name]
@@ -724,7 +749,7 @@ class QgridWidget(widgets.DOMWidget):
             if col_info['type'] == 'any':
                 col_info['value_range'] = (0, length)
             else:
-                max_items = self._page_size * 2
+                max_items = PAGE_SIZE * 2
                 range_max = length
                 if length > max_items:
                     col_info['values'] = col_info['values'][:max_items]
@@ -885,6 +910,7 @@ class QgridWidget(widgets.DOMWidget):
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
+                self._trigger_df_change_event()
             except (ValueError, TypeError):
                 msg = "Error occurred while attempting to edit the " \
                       "DataFrame. Check the notebook server logs for more " \
@@ -910,8 +936,8 @@ class QgridWidget(widgets.DOMWidget):
             col_info = self._columns[col_name]
             col_filter_table = self._filter_tables[col_name]
 
-            from_index = max(content['top'] - self._page_size, 0)
-            to_index = max(content['top'] + self._page_size, 0)
+            from_index = max(content['top'] - PAGE_SIZE, 0)
+            to_index = max(content['top'] + PAGE_SIZE, 0)
 
             col_info['values'] = col_filter_table[from_index:to_index]
             col_info['value_range'] = (from_index, to_index)
@@ -927,10 +953,20 @@ class QgridWidget(widgets.DOMWidget):
             self._sorted_column_cache = {}
             self._update_sort()
             self._update_table(triggered_by='sort_changed')
+            self._trigger_df_change_event()
         elif content['type'] == 'get_column_min_max':
             self._handle_get_column_min_max(content)
         elif content['type'] == 'filter_changed':
             self._handle_filter_changed(content)
+
+    def _trigger_df_change_event(self):
+        self.notify_change(Bunch(
+            name='_df',
+            old=None,
+            new=self._df,
+            owner=self,
+            type='change',
+        ))
 
     def get_changed_df(self):
         """
@@ -990,6 +1026,7 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.loc[last.name] = last.values
         self._update_table(triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(last.name))
+        self._trigger_df_change_event()
 
     def remove_row(self):
         """
@@ -1009,6 +1046,7 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
         self._update_table(triggered_by='remove_row')
+        self._trigger_df_change_event()
 
 
 # Alias for legacy support, since we changed the capitalization

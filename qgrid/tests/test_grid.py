@@ -5,6 +5,7 @@ from qgrid import (
 )
 import numpy as np
 import pandas as pd
+import json
 
 def create_df():
     return pd.DataFrame({
@@ -37,6 +38,15 @@ def create_interval_index_df():
 
 def test_edit_date():
     view = QgridWidget(df=create_df())
+    observer_called = False
+
+    def on_value_change(change):
+        nonlocal observer_called
+        observer_called = True
+        assert change['new']['Date'][3] == pd.Timestamp('2013-01-16 00:00:00')
+
+    view.observe(on_value_change, names=['_df'])
+
     view._handle_qgrid_msg_helper({
         'column': "Date",
         'row_index': 3,
@@ -45,11 +55,24 @@ def test_edit_date():
         'value': "2013-01-16T00:00:00.000+00:00"
     })
 
+    assert observer_called
+
 def test_add_row():
     view = QgridWidget(df=create_df())
+
+    observer_called = False
+    def on_value_change(change):
+        nonlocal observer_called
+        observer_called = True
+        assert len(change['new']) == 5
+
+    view.observe(on_value_change, names=['_df'])
+
     view._handle_qgrid_msg_helper({
         'type': 'add_row'
     })
+
+    assert observer_called
 
 def test_mixed_type_column():
     df = pd.DataFrame({'A': [1.2, 'xy', 4], 'B': [3, 4, 5]})
@@ -201,6 +224,13 @@ def test_date_index():
 def test_multi_index():
     view = QgridWidget(df=create_multi_index_df())
 
+    observer_count = 0
+    def on_value_change(change):
+        nonlocal observer_count
+        observer_count += 1
+
+    view.observe(on_value_change, names=['_df'])
+
     view._handle_qgrid_msg_helper({
         'type': 'get_column_min_max',
         'field': 'level_0',
@@ -219,6 +249,17 @@ def test_multi_index():
     })
 
     view._handle_qgrid_msg_helper({
+        'type': 'filter_changed',
+        'field': 3,
+        'filter_info': {
+            'field': 3,
+            'type': 'slider',
+            'min': None,
+            'max': None
+        }
+    })
+
+    view._handle_qgrid_msg_helper({
         'type': 'sort_changed',
         'sort_field': 3,
         'sort_ascending': True
@@ -229,6 +270,8 @@ def test_multi_index():
         'sort_field': 'level_0',
         'sort_ascending': True
     })
+
+    assert observer_count == 4
 
 def test_interval_index():
     df = create_interval_index_df()
@@ -274,3 +317,68 @@ def test_set_defaults():
     view = QgridWidget(df=df)
     assert_widget_vals_b(view)
 
+
+class MyObject(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+
+my_object_vals = [MyObject(MyObject(None)), MyObject(None)]
+
+
+def test_object_dtype():
+    df = pd.DataFrame({'a': my_object_vals})
+    widget = QgridWidget(df=df)
+    grid_data = json.loads(widget._df_json)['data']
+
+    widget._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 'a',
+        'search_val': None
+    })
+    widget._handle_qgrid_msg_helper({
+        'field': "a",
+        'filter_info': {
+            'field': "a",
+            'selected': [0, 1],
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+
+    filter_table = widget._filter_tables['a']
+    assert not isinstance(filter_table[0], dict)
+    assert not isinstance(filter_table[1], dict)
+
+    assert not isinstance(grid_data[0]['a'], dict)
+    assert not isinstance(grid_data[1]['a'], dict)
+
+
+def test_object_dtype_categorical():
+    cat_series = pd.Series(
+        pd.Categorical(my_object_vals,
+                       categories=my_object_vals)
+    )
+    widget = show_grid(cat_series)
+    constraints_enum = widget._columns[0]['constraints']['enum']
+    assert not isinstance(constraints_enum[0], dict)
+    assert not isinstance(constraints_enum[1], dict)
+
+    widget._handle_qgrid_msg_helper({
+        'type': 'get_column_min_max',
+        'field': 0,
+        'search_val': None
+    })
+    widget._handle_qgrid_msg_helper({
+        'field': 0,
+        'filter_info': {
+            'field': 0,
+            'selected': [0],
+            'type': "text",
+            'excluded': []
+        },
+        'type': "filter_changed"
+    })
+    assert len(widget._df) == 1
+    assert widget._df[0][0] == cat_series[0]
