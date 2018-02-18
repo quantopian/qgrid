@@ -46,22 +46,20 @@ API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/late
 Installation
 ------------
 
-Run the following to install and enable qgrid::
+Installing with pip::
 
   pip install qgrid
   jupyter nbextension enable --py --sys-prefix qgrid
-
-  OR
-
-  conda install -c tim_shawver qgrid
-  # the following step is required for windows users only. linux and osx users can skip it.
-  jupyter nbextension enable --py --sys-prefix qgrid
-
-If you haven't enabled the ipywidgets nbextension yet, you'll need to also run this command::
-
+  
+  # only required if you have not enabled the ipywidgets nbextension yet
   jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
-At this point you should be able to run a notebook server and use qgrid.
+Installing with conda::
+
+  # only required if you have not added conda-forge to your channels yet
+  conda config --add channels conda-forge
+  
+  conda install qgrid
 
 Jupyterlab Installation
 -----------------------
