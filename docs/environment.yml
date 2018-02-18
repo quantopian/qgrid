@@ -1,6 +1,5 @@
 name: qgrid_docs
 channels:
-  - tim_shawver
   - conda-forge
 dependencies:
   - qgrid
