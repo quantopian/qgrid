@@ -38,32 +38,60 @@ def create_interval_index_df():
 
 def test_edit_date():
     view = QgridWidget(df=create_df())
-    observer_called = False
+    check_edit_success(view,
+                       'Date',
+                       3,
+                       "2013-01-02T00:00:00.000Z",
+                       pd.Timestamp('2013-01-16 00:00:00'),
+                       "2013-01-16T00:00:00.000Z")
 
+def check_edit_success(widget,
+                       col_name,
+                       row_index,
+                       old_value,
+                       new_val_obj,
+                       new_val_json):
+
+    observer_called = {}
     def on_value_change(change):
-        nonlocal observer_called
-        observer_called = True
-        assert change['new']['Date'][3] == pd.Timestamp('2013-01-16 00:00:00')
+        observer_called['called'] = True
+        assert change['new'][col_name][row_index] == new_val_obj
 
-    view.observe(on_value_change, names=['_df'])
+    widget.observe(on_value_change, names=['_df'])
 
-    view._handle_qgrid_msg_helper({
-        'column': "Date",
-        'row_index': 3,
+    grid_data = json.loads(widget._df_json)['data']
+    assert grid_data[row_index][col_name] == old_value
+
+    widget._handle_qgrid_msg_helper({
+        'column': col_name,
+        'row_index': row_index,
         'type': "cell_change",
-        'unfiltered_index': 0,
-        'value': "2013-01-16T00:00:00.000+00:00"
+        'unfiltered_index': row_index,
+        'value': new_val_json
     })
 
-    assert observer_called
+    assert observer_called['called']
+    widget.unobserve(on_value_change, names=['_df'])
+
+    # call _update_table so the widget updates _df_json
+    widget._update_table(fire_data_change_event=False)
+    grid_data = json.loads(widget._df_json)['data']
+    assert grid_data[row_index][col_name] == new_val_json
+
+def test_edit_number():
+    old_val = 3
+    view = QgridWidget(df=create_df())
+
+    for idx in range(-10, 10, 1):
+        check_edit_success(view, 'D', 2, old_val, idx, idx)
+        old_val = idx
 
 def test_add_row():
     view = QgridWidget(df=create_df())
 
-    observer_called = False
+    observer_called = {}
     def on_value_change(change):
-        nonlocal observer_called
-        observer_called = True
+        observer_called['called'] = True
         assert len(change['new']) == 5
 
     view.observe(on_value_change, names=['_df'])
@@ -72,7 +100,7 @@ def test_add_row():
         'type': 'add_row'
     })
 
-    assert observer_called
+    assert observer_called['called']
 
 def test_mixed_type_column():
     df = pd.DataFrame({'A': [1.2, 'xy', 4], 'B': [3, 4, 5]})
@@ -224,10 +252,9 @@ def test_date_index():
 def test_multi_index():
     view = QgridWidget(df=create_multi_index_df())
 
-    observer_count = 0
-    def on_value_change(change):
-        nonlocal observer_count
-        observer_count += 1
+    observer_called = {'count': 0}
+    def on_value_change(_):
+        observer_called['count'] += 1
 
     view.observe(on_value_change, names=['_df'])
 
@@ -271,7 +298,7 @@ def test_multi_index():
         'sort_ascending': True
     })
 
-    assert observer_count == 4
+    assert observer_called['count'] == 4
 
 def test_interval_index():
     df = create_interval_index_df()

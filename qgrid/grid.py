@@ -223,6 +223,7 @@ def show_grid(data_frame, show_toolbar=None,
 
 PAGE_SIZE = 100
 
+
 @widgets.register()
 class QgridWidget(widgets.DOMWidget):
     """
@@ -333,8 +334,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.1').tag(sync=True)
-    _model_module_version = Unicode('1.0.1').tag(sync=True)
+    _view_module_version = Unicode('1.0.2').tag(sync=True)
+    _model_module_version = Unicode('1.0.2').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -396,7 +397,7 @@ class QgridWidget(widgets.DOMWidget):
         # for filters, and the state we return to when filters are removed
         self._unfiltered_df = self._df.copy()
 
-        self._update_table(update_columns=True)
+        self._update_table(update_columns=True, fire_data_change_event=False)
         self._ignore_df_changed = False
 
     def _rebuild_widget(self):
@@ -424,8 +425,11 @@ class QgridWidget(widgets.DOMWidget):
             return
         self._rebuild_widget()
 
-    def _update_table(self, update_columns=False, triggered_by=None,
-                      scroll_to_row=None):
+    def _update_table(self,
+                      update_columns=False,
+                      triggered_by=None,
+                      scroll_to_row=None,
+                      fire_data_change_event=True):
         df = self._df.copy()
 
         from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
@@ -537,7 +541,7 @@ class QgridWidget(widgets.DOMWidget):
                                       double_precision=self.precision)
 
         self._df_json = df_json
-        if not update_columns:
+        if fire_data_change_event:
             data_to_send = {
                 'type': 'update_data_view',
                 'columns': self._columns,

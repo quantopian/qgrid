@@ -11,6 +11,7 @@ dist
 
 # pytest
 .cache/*
+.pytest_cache/*
 
 # Jupyter notebook
 jupyterhub.sqlite
