@@ -25,10 +25,14 @@ Demo
 Click the badge below to try out qgrid in a live sample notebook:
 
 .. image:: https://beta.mybinder.org/badge.svg 
-    :target: https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
+    :target: https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
+|
+Click the following badge to try out qgrid in Jupyterlab:
 
-*You'll see a brief loading screen while a notebook server is being created for you in the
-cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
+.. image:: https://mybinder.org/badge.svg 
+    :target: https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?urlpath=lab
+|
+*For both binder links, you'll see a brief loading screen while a server is being created for you in the cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
 
 For people who would rather not go to another page to try out qgrid for real, here's the tldr; version:
 
