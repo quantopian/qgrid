@@ -38,7 +38,12 @@ class _DefaultSettings(object):
             'sortable': True,
             'filterable': True,
             'highlightSelectedCell': False,
-            'highlightSelectedRow': True
+            'highlightSelectedRow': True,
+            'boldIndex': True
+        }
+        self._column_options = {
+            'editable': True,
+            'toolTip': "",
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -47,13 +52,15 @@ class _DefaultSettings(object):
         self._grid_options[optname] = optvalue
 
     def set_defaults(self, show_toolbar=None, precision=None,
-                     grid_options=None):
+                     grid_options=None, column_options=None):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
         if precision is not None:
             self._precision = precision
         if grid_options is not None:
             self._grid_options = grid_options
+        if column_options is not None:
+            self._column_options = column_options
 
     @property
     def show_toolbar(self):
@@ -67,11 +74,15 @@ class _DefaultSettings(object):
     def precision(self):
         return self._precision or pd.get_option('display.precision') - 1
 
+    @property
+    def column_options(self):
+        return self._column_options
+
 
 defaults = _DefaultSettings()
 
 
-def set_defaults(show_toolbar=None, precision=None, grid_options=None):
+def set_defaults(show_toolbar=None, precision=None, grid_options=None, column_options=None):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
@@ -94,7 +105,7 @@ def set_defaults(show_toolbar=None, precision=None, grid_options=None):
         The widget whose default behavior is changed by ``set_defaults``.
     """
     defaults.set_defaults(show_toolbar=show_toolbar, precision=precision,
-                          grid_options=grid_options)
+                          grid_options=grid_options, column_options=column_options)
 
 
 def set_grid_option(optname, optvalue):
@@ -166,7 +177,9 @@ def disable():
 
 
 def show_grid(data_frame, show_toolbar=None,
-              precision=None, grid_options=None):
+              precision=None, grid_options=None,
+              column_options=None, column_definitions=None,
+              row_edit_conditions=None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -196,6 +209,12 @@ def show_grid(data_frame, show_toolbar=None,
         precision = defaults.precision
     if not isinstance(precision, Integral):
         raise TypeError("precision must be int, not %s" % type(precision))
+    if column_options is None:
+        column_options = defaults.column_options
+    else:
+        options = defaults.column_options.copy()
+        options.update(column_options)
+        column_options = options
     if grid_options is None:
         grid_options = defaults.grid_options
     else:
@@ -218,6 +237,9 @@ def show_grid(data_frame, show_toolbar=None,
     # create a visualization for the dataframe
     return QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
+                       column_options=column_options,
+                       column_definitions=column_definitions,
+                       row_edit_conditions=row_edit_conditions,
                        show_toolbar=show_toolbar)
 
 
@@ -364,6 +386,9 @@ class QgridWidget(widgets.DOMWidget):
     df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
+    column_options = Dict(sync=True)
+    column_definitions = Dict({})
+    row_edit_conditions = Dict(sync=True)
     show_toolbar = Bool(False, sync=True)
 
     def __init__(self, *args, **kwargs):
@@ -506,6 +531,10 @@ class QgridWidget(widgets.DOMWidget):
 
                 cur_column['position'] = i
                 columns[col_name] = cur_column
+
+                columns[col_name].update(self.column_options)
+                if col_name in self.column_definitions.keys():
+                    columns[col_name].update(self.column_definitions[col_name])
 
             self._columns = columns
 
