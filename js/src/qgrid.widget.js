@@ -484,7 +484,7 @@ class QgridView extends widgets.DOMWidgetView {
 
     // set up callbacks
 
-    // evaluate conditions under which cells should be disabled -- this occurs on a per-row basis, i.e.,
+    // evaluate conditions under which cells in a row should be disabled (contingent on values of other cells in the same row)
     var evaluateRowEditConditions = function(current_row, obj) {
       var result;
 
@@ -493,36 +493,39 @@ class QgridView extends widgets.DOMWidgetView {
             if (result == null) {
               result = true;
             }
-            var and_result = true;
+            //var and_result = true;
             for (var cond in obj[op]) {
               if (cond == 'AND' || cond == 'OR' || cond == 'NOT') {
-                and_result = and_result && evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
+                result = result && evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
               } else {
-                and_result = and_result && (current_row[cond] == obj[op][cond]);
+                result = result && (current_row[cond] == obj[op][cond]);
               }
             }
-            result = result && and_result;
         } else if (op == 'OR') {
           if (result == null) {
             result = false;
           }
           var or_result = false;
           for (var cond in obj[op]) {
-              if (cond == 'AND' || cond == 'OR' || cond == 'NOT') {
-                or_result = or_result || evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
+              if (cond == 'AND' || cond == 'OR' || cond == 'NAND' || cond == 'NOR') {
+                result = result || evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
               } else {
-                or_result = or_result || (current_row[cond] == obj[op][cond]);
+                result = result || (current_row[cond] == obj[op][cond]);
               }
             }
-            result = result || or_result;
-
-        } else if (op == 'NOT') {
+        } else if (op == 'NAND') {
             if (result == null) {
               result = true;
             }
             result = result && !evaluateRowEditConditions(current_row, {'AND': obj[op]});
+        } else if (op == 'NOR') {
+            if (result == null) {
+              result = true;
+            }
+            result = result && !evaluateRowEditConditions(current_row, {'OR': obj[op]});
+
         } else {
-          alert("Unsupported operation '" + op + "' found in cell edit conditions!")
+          alert("Unsupported operation '" + op + "' found in row edit conditions!")
         }
       }
       return result;
