@@ -1527,6 +1527,39 @@ class QgridWidget(widgets.DOMWidget):
                            scroll_to_row=df.index.get_loc(last.name))
         return last.name
 
+    def add_row_internally(self, row):
+        """
+        Append a new row to the end of the dataframe given a list of 2-tuples of (column name, column value).
+        This feature will work for dataframes with arbitrary index types.
+        """
+        df = self._df
+
+        col_names, col_data = zip(*row)
+        col_names = list(col_names)
+        col_data = list(col_data)
+        index_col_val = dict(row)[df.index.name]
+
+        # check that the given column names match what already exists in the dataframe
+        required_cols = set(df.columns.values).union({df.index.name}) - {self._index_col_name}
+        if set(col_names) != required_cols:
+            msg = "Cannot add row -- column names don't match in the existing dataframe"
+            self.send({
+                'type': 'show_error',
+                'error_msg': msg,
+                'triggered_by': 'add_row'
+            })
+            return
+
+        for i, s in enumerate(col_data):
+            if col_names[i] == df.index.name:
+                continue
+
+            df.loc[index_col_val, col_names[i]] = s
+            self._unfiltered_df.loc[index_col_val, col_names[i]] = s
+
+        self._update_table(triggered_by='add_row', scroll_to_row=df.index.get_loc(index_col_val))
+        self._trigger_df_change_event()
+
     def remove_row(self):
         """
         Remove the currently selected row (or rows) from the table.
