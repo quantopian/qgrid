@@ -493,7 +493,6 @@ class QgridView extends widgets.DOMWidgetView {
             if (result == null) {
               result = true;
             }
-            //var and_result = true;
             for (var cond in obj[op]) {
               if (cond == 'AND' || cond == 'OR' || cond == 'NOT') {
                 result = result && evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
@@ -518,12 +517,6 @@ class QgridView extends widgets.DOMWidgetView {
               result = true;
             }
             result = result && !evaluateRowEditConditions(current_row, {'AND': obj[op]});
-        } else if (op == 'NOR') {
-            if (result == null) {
-              result = true;
-            }
-            result = result && !evaluateRowEditConditions(current_row, {'OR': obj[op]});
-
         } else {
           alert("Unsupported operation '" + op + "' found in row edit conditions!")
         }
@@ -741,6 +734,12 @@ class QgridView extends widgets.DOMWidgetView {
           'type': 'selection_change'
         });
       }, 100);
+    } else if (msg.type == 'toggle_editable') {
+        if (this.slick_grid.getOptions().editable == false) {
+          this.slick_grid.setOptions({'editable': true});
+        } else {
+          this.slick_grid.setOptions({'editable': false});
+        }
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);

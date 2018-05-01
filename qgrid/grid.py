@@ -234,6 +234,9 @@ def show_grid(data_frame, show_toolbar=None,
             "data_frame must be DataFrame or Series, not %s" % type(data_frame)
         )
 
+    row_edit_conditions = (row_edit_conditions or {})
+    column_definitions = (column_definitions or {})
+
     # create a visualization for the dataframe
     return QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
@@ -1091,7 +1094,7 @@ class QgridWidget(widgets.DOMWidget):
             df.loc[index_col_val, col_names[i]] = s
             self._unfiltered_df.loc[index_col_val, col_names[i]] = s
 
-        self._update_table(triggered_by='add_row', scroll_to_row=df.index.get_loc(index_col_val))
+        self._update_table(triggered_by='add_row', scroll_to_row=df.index.get_loc(index_col_val), fire_data_change_event=True)
         self._trigger_df_change_event()
 
     def remove_row(self):
