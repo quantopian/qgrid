@@ -1563,6 +1563,12 @@ class QgridWidget(widgets.DOMWidget):
         self._update_table(triggered_by='add_row', scroll_to_row=df.index.get_loc(index_col_val), fire_data_change_event=True)
         self._trigger_df_change_event()
 
+    def set_value_internally(self, index, column, value):
+        self._df.loc[index, column] = value
+        self._unfiltered_df.loc[index, column] = value
+        self._update_table(triggered_by='cell_change', fire_data_change_event=True)
+        self._trigger_df_change_event()
+
     def remove_row(self):
         """
         Remove the currently selected row (or rows) from the table.
