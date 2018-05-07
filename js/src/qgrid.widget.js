@@ -517,6 +517,11 @@ class QgridView extends widgets.DOMWidgetView {
               result = true;
             }
             result = result && !evaluateRowEditConditions(current_row, {'AND': obj[op]});
+        } else if (op == 'NOR') {
+            if (result == null) {
+              result = false;
+            }
+            result = result || !evaluateRowEditConditions(current_row, {'OR': obj[op]});
         } else {
           alert("Unsupported operation '" + op + "' found in row edit conditions!")
         }
