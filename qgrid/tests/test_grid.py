@@ -409,3 +409,33 @@ def test_object_dtype_categorical():
     })
     assert len(widget._df) == 1
     assert widget._df[0][0] == cat_series[0]
+
+
+def test_add_row_internally():
+    df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
+    df.set_index('baz', inplace=True, drop=True)
+
+    q = QgridWidget(df=df)
+
+    new_row = [
+        ('baz', 43),
+        ('bar', "new bar"),
+        ('boo', 58),
+        ('foo', "new foo")
+    ]
+
+    q.add_row_internally(new_row)
+
+    assert q._df.loc[43, 'foo'] == 'new foo'
+    assert q._df.loc[42, 'foo'] == 'hello'
+
+
+def test_set_value_internally():
+    df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
+    df.set_index('baz', inplace=True, drop=True)
+
+    q = QgridWidget(df=df)
+
+    q.set_value_internally(42, 'foo', 'hola')
+
+    assert q._df.loc[42, 'foo'] == 'hola'
