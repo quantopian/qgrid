@@ -483,7 +483,7 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
-      var msg = {'rows': args.rows, 'type': 'selection_change'};
+      var msg = {'rows': args.rows, 'type': 'selection_changed'};
       this.send(msg);
     });
 
@@ -672,7 +672,7 @@ class QgridView extends widgets.DOMWidgetView {
         });
         this.send({
           'rows': selected_rows,
-          'type': 'selection_change'
+          'type': 'selection_changed'
         });
       }, 100);
     } else if (msg.col_info) {

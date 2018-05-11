@@ -5,8 +5,20 @@ import json
 
 from IPython.display import display
 from numbers import Integral
-from traitlets import Unicode, Instance, Bool, Integer, Dict, List, Tuple, Any
-from traitlets.utils.bunch import Bunch
+from traitlets import (
+    Unicode,
+    Instance,
+    Bool,
+    Integer,
+    Dict,
+    List,
+    Tuple,
+    Any,
+    All,
+    parse_notifier_name
+)
+from itertools import chain
+from uuid import uuid4
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -68,7 +80,36 @@ class _DefaultSettings(object):
         return self._precision or pd.get_option('display.precision') - 1
 
 
+class _EventHandlers(object):
+
+    def __init__(self):
+        self._listeners = {}
+
+    def on(self, names, handler):
+        names = parse_notifier_name(names)
+        for n in names:
+            self._listeners.setdefault(n, []).append(handler)
+
+    def off(self, names, handler):
+        names = parse_notifier_name(names)
+        for n in names:
+            try:
+                if handler is None:
+                    del self._listeners[n]
+                else:
+                    self._listeners[n].remove(handler)
+            except KeyError:
+                pass
+
+    def notify_listeners(self, event, qgrid_widget):
+        event_listeners = self._listeners.get(event['name'], [])
+        all_listeners = self._listeners.get(All, [])
+        for c in chain(event_listeners, all_listeners):
+            c(event, qgrid_widget)
+
+
 defaults = _DefaultSettings()
+handlers = _EventHandlers()
 
 
 def set_defaults(show_toolbar=None, precision=None, grid_options=None):
@@ -93,8 +134,97 @@ def set_defaults(show_toolbar=None, precision=None, grid_options=None):
     QgridWidget :
         The widget whose default behavior is changed by ``set_defaults``.
     """
-    defaults.set_defaults(show_toolbar=show_toolbar, precision=precision,
+    defaults.set_defaults(show_toolbar=show_toolbar,
+                          precision=precision,
                           grid_options=grid_options)
+
+
+def on(names, handler):
+    """
+    Setup a handler to be called when a user interacts with any qgrid instance.
+
+    Parameters
+    ----------
+    names : list, str, All
+        If names is All, the handler will apply to all events.  If a list
+        of str, handler will apply to all events named in the list.  If a
+        str, the handler will apply just the event with that name.
+    handler : callable
+        A callable that is called when the event occurs. Its
+        signature should be ``handler(event, qgrid_widget)``, where
+        ``event`` is a dictionary and ``qgrid_widget`` is the QgridWidget
+        instance that fired the event. The ``event`` dictionary at least
+        holds a ``name`` key which specifies the name of the event that
+        occurred.
+
+    Notes
+    -----
+    There is also an ``on`` method on each individual QgridWidget instance,
+    which works exactly like this one except it only listens for events on an
+    individual instance (whereas this module-level method listens for events
+    on all instances).
+
+    See that instance-level method (linked below) for a list of all events
+    that can be listened to via this module-level ``on`` method.  Both
+    methods support the same events with one exception: the
+    ``instance_create`` event.  This event is only available at the
+    module-level and not on individual QgridWidget instances.
+
+    The reason it's not available on individual qgrid instances is because
+    the only time it fires is when a new instance is created. This means
+    it's already donefiring by the time a user has a chance to hook up any
+    event listeners.
+
+    Here's the full list of events that can be listened for via this
+    module-level ``on`` method::
+
+        [
+            'instance_created',
+            'cell_edited',
+            'selection_changed',
+            'viewport_changed',
+            'row_added',
+            'row_removed',
+            'filter_dropdown_shown',
+            'filter_changed',
+            'sort_changed',
+            'text_filter_viewport_changed',
+            'json_updated'
+        ]
+
+    See Also
+    --------
+    QgridWidget.on :
+        Same as this ``on`` method except it listens for events on an
+        individual QgridWidget instance rather than on all instances.  See
+        this method for a list of all the types of events that can be
+        listened for via either ``on`` method.
+    off:
+        Unhook a handler that was hooked up using this ``on`` method.
+
+    """
+    handlers.on(names, handler)
+
+
+def off(names, handler):
+    """
+    Remove a qgrid event handler that was registered with the ``on`` method.
+
+    Parameters
+    ----------
+    names : list, str, All (default: All)
+        The names of the events for which the specified handler should be
+        uninstalled. If names is All, the specified handler is uninstalled
+        from the list of notifiers corresponding to all events.
+    handler : callable
+        A callable that was previously registered with the 'on' method.
+
+    See Also
+    --------
+    on:
+        The method for hooking up handlers that this ``off`` method can remove.
+    """
+    handlers.off(names, handler)
 
 
 def set_grid_option(optname, optvalue):
@@ -358,20 +488,29 @@ class QgridWidget(widgets.DOMWidget):
     _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
     _row_count = Integer(0, sync=True)
-    _sort_field = Any('', sync=True)
+    _sort_field = Any(None, sync=True)
     _sort_ascending = Bool(True, sync=True)
+    _handlers = Instance(_EventHandlers)
 
     df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
     show_toolbar = Bool(False, sync=True)
+    id = Unicode(sync=True)
 
     def __init__(self, *args, **kwargs):
+        self.id = str(uuid4())
         self._initialized = False
         super(QgridWidget, self).__init__(*args, **kwargs)
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
         self._initialized = True
+        self._handlers = _EventHandlers()
+
+        handlers.notify_listeners({
+            'name': 'instance_created'
+        }, self)
+
         if self.df is not None:
             self._update_df()
 
@@ -383,6 +522,167 @@ class QgridWidget(widgets.DOMWidget):
 
     def _show_toolbar_default(self):
         return defaults.show_toolbar
+
+    def on(self, names, handler):
+        """
+        Setup a handler to be called when a user interacts with the current
+        instance.
+
+        Parameters
+        ----------
+        names : list, str, All
+            If names is All, the handler will apply to all events.  If a list
+            of str, handler will apply to all events named in the list.  If a
+            str, the handler will apply just the event with that name.
+        handler : callable
+            A callable that is called when the event occurs. Its
+            signature should be ``handler(event, qgrid_widget)``, where
+            ``event`` is a dictionary and ``qgrid_widget`` is the QgridWidget
+            instance that fired the event. The ``event`` dictionary at least
+            holds a ``name`` key which specifies the name of the event that
+            occurred.
+
+        Notes
+        -----
+        Here's the list of events that you can listen to on QgridWidget
+        instances via the ``on`` method::
+
+            [
+                'cell_edited',
+                'selection_changed',
+                'viewport_changed',
+                'row_added',
+                'row_removed',
+                'filter_dropdown_shown',
+                'filter_changed',
+                'sort_changed',
+                'text_filter_viewport_changed',
+                'json_updated'
+            ]
+
+        The following bullet points describe the events listed above in more
+        detail.  Each event bullet point is followed by sub-bullets which
+        describe the keys that will be included in the ``event`` dictionary
+        for each event.
+
+        * **cell_edited** The user changed the value of a cell in the grid.
+
+            * **index** The index of the row that contains the edited cell.
+            * **column** The name of the column that contains the edited cell.
+            * **old** The previous value of the cell.
+            * **new** The new value of the cell.
+
+        * **filter_changed** The user changed the filter setting for a column.
+
+            * **column** The name of the column for which the filter setting
+              was changed.
+
+        * **filter_dropdown_shown** The user showed the filter control for a
+          column by clicking the filter icon in the column's header.
+
+            * **column** The name of the column for which the filter control
+              was shown.
+
+        * **json_updated** A user action causes QgridWidget to send rows of
+          data (in json format) down to the browser. This happens as a side
+          effect of certain actions such as scrolling, sorting, and filtering.
+
+            * **triggered_by** The name of the event that resulted in rows of
+              data being sent down to the browser.
+            * **range** A tuple specifying the range of rows that have been
+              sent down to the browser.
+
+        * **row_added** The user added a new row using the "Add Row" button
+          in the grid toolbar.
+
+            * **index** The index of the newly added row.
+
+        * **row_removed** The user added removed one or more rows using the
+          "Remove Row" button in the grid toolbar.
+
+            * **indices** The indices of the removed rows, specified as an
+              array of integers.
+
+        * **selection_changed** The user changed which rows were highlighted
+          in the grid.
+
+            * **old** An array specifying the indices of the previously
+              selected rows.
+            * **new** The indices of the rows that are now selected, again
+              specified as an array.
+
+        * **sort_changed** The user changed the sort setting for the grid.
+
+            * **old** The previous sort setting for the grid, specified as a
+              dict with the following keys:
+
+                * **column** The name of the column that the grid was sorted by
+                * **ascending** Boolean indicating ascending/descending order
+
+            * **new** The new sort setting for the grid, specified as a dict
+              with the following keys:
+
+                * **column** The name of the column that the grid is currently
+                  sorted by
+                * **ascending** Boolean indicating ascending/descending order
+
+        * **text_filter_viewport_changed** The user scrolled the new rows
+          into view in the filter dropdown for a text field.
+
+            * **column** The name of the column whose filter dropdown is
+              visible
+            * **old** A tuple specifying the previous range of visible rows
+              in the filter dropdown.
+            * **new** A tuple specifying the range of rows that are now
+              visible in the filter dropdown.
+
+        * **viewport_changed** The user scrolled the new rows into view in
+          the grid.
+
+            * **old** A tuple specifying the previous range of visible rows.
+            * **new** A tuple specifying the range of rows that are now
+              visible.
+
+        The ``event`` dictionary for every type of event will contain a
+        ``name`` key specifying the name of the event that occurred.  That
+        key is excluded from the lists of keys above to avoid redundacy.
+
+        See Also
+        --------
+        on :
+            Same as the instance-level ``on`` method except it listens for
+            events on all instances rather than on an individual QgridWidget
+            instance.
+        QgridWidget.off:
+            Unhook a handler that was hooked up using the instance-level
+            ``on`` method.
+
+        """
+        self._handlers.on(names, handler)
+
+    def off(self, names, handler):
+        """
+        Remove a qgrid event handler that was registered with the current
+        instance's ``on`` method.
+
+        Parameters
+        ----------
+        names : list, str, All (default: All)
+            The names of the events for which the specified handler should be
+            uninstalled. If names is All, the specified handler is uninstalled
+            from the list of notifiers corresponding to all events.
+        handler : callable
+            A callable that was previously registered with the current
+            instance's ``on`` method.
+
+        See Also
+        --------
+        QgridWidget.on:
+            The method for hooking up instance-level handlers that this
+            ``off`` method can remove.
+
+        """
+        self._handlers.off(names, handler)
 
     def _update_df(self):
         self._ignore_df_changed = True
@@ -542,6 +842,11 @@ class QgridWidget(widgets.DOMWidget):
 
         self._df_json = df_json
         if fire_data_change_event:
+            self._notify_listeners({
+                'name': 'json_updated',
+                'triggered_by': triggered_by,
+                'range': self._df_range
+            })
             data_to_send = {
                 'type': 'update_data_view',
                 'columns': self._columns,
@@ -553,7 +858,7 @@ class QgridWidget(widgets.DOMWidget):
 
     def _update_sort(self):
         try:
-            if self._sort_field == '':
+            if self._sort_field is None:
                 return
             if self._sort_field in self._primary_key:
                 if len(self._primary_key) == 1:
@@ -760,6 +1065,7 @@ class QgridWidget(widgets.DOMWidget):
                     range_max = max_items
                 col_info['value_range'] = (0, range_max)
 
+            col_info['viewport_range'] = col_info['value_range']
             col_info['length'] = length
 
             self._columns[col_name] = col_info
@@ -912,11 +1218,19 @@ class QgridWidget(widgets.DOMWidget):
                 if col_info['type'] == 'datetime':
                     val_to_set = pd.to_datetime(val_to_set)
 
+                old_value = self._df.at[location]
                 self._df.at[location] = val_to_set
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
-                self._trigger_df_change_event(location)
+                self._notify_listeners({
+                    'name': 'cell_edited',
+                    'index': location[0],
+                    'column': location[1],
+                    'old': old_value,
+                    'new': val_to_set
+                })
+
             except (ValueError, TypeError):
                 msg = "Error occurred while attempting to edit the " \
                       "DataFrame. Check the notebook server logs for more " \
@@ -928,15 +1242,42 @@ class QgridWidget(widgets.DOMWidget):
                     'triggered_by': 'add_row'
                 })
                 return
-        elif content['type'] == 'selection_change':
+        elif content['type'] == 'selection_changed':
+            old_selection = self._selected_rows
             self._selected_rows = content['rows']
+
+            # if the selection didn't change, just return without firing
+            # the event
+            if old_selection == self._selected_rows:
+                return
+
+            self._notify_listeners({
+                'name': 'selection_changed',
+                'old': old_selection,
+                'new': self._selected_rows
+            })
         elif content['type'] == 'viewport_changed':
+            old_viewport_range = self._viewport_range
             self._viewport_range = (content['top'], content['bottom'])
             self._update_table(triggered_by='viewport_changed')
+            self._notify_listeners({
+                'name': 'viewport_changed',
+                'old': old_viewport_range,
+                'new': self._viewport_range
+            })
+
         elif content['type'] == 'add_row':
-            self.add_row()
+            row_index = self.add_row()
+            self._notify_listeners({
+                'name': 'row_added',
+                'index': row_index
+            })
         elif content['type'] == 'remove_row':
-            self.remove_row()
+            removed_indices = self.remove_row()
+            self._notify_listeners({
+                'name': 'row_removed',
+                'indices': removed_indices
+            })
         elif content['type'] == 'viewport_changed_filter':
             col_name = content['field']
             col_info = self._columns[col_name]
@@ -945,35 +1286,61 @@ class QgridWidget(widgets.DOMWidget):
             from_index = max(content['top'] - PAGE_SIZE, 0)
             to_index = max(content['top'] + PAGE_SIZE, 0)
 
+            old_viewport_range = col_info['viewport_range']
             col_info['values'] = col_filter_table[from_index:to_index]
             col_info['value_range'] = (from_index, to_index)
+            col_info['viewport_range'] = (content['top'], content['bottom'])
+
             self._columns[col_name] = col_info
             self.send({
                 'type': 'update_data_view_filter',
                 'field': col_name,
                 'col_info': col_info
             })
+            self._notify_listeners({
+                'name': 'text_filter_viewport_changed',
+                'column': col_name,
+                'old': old_viewport_range,
+                'new': col_info['viewport_range']
+            })
         elif content['type'] == 'sort_changed':
+            old_column = self._sort_field
+            old_ascending = self._sort_ascending
             self._sort_field = content['sort_field']
             self._sort_ascending = content['sort_ascending']
             self._sorted_column_cache = {}
             self._update_sort()
             self._update_table(triggered_by='sort_changed')
-            self._trigger_df_change_event()
+            self._notify_listeners({
+                'name': 'sort_changed',
+                'old': {
+                    'column': old_column,
+                    'ascending': old_ascending
+                },
+                'new': {
+                    'column': self._sort_field,
+                    'ascending': self._sort_ascending
+                }
+            })
         elif content['type'] == 'get_column_min_max':
             self._handle_get_column_min_max(content)
+            self._notify_listeners({
+                'name': 'filter_dropdown_shown',
+                'column': content['field']
+            })
         elif content['type'] == 'filter_changed':
             self._handle_filter_changed(content)
+            self._notify_listeners({
+                'name': 'filter_changed',
+                'column': content['field']
+            })
 
-    def _trigger_df_change_event(self, location=None):
-        self.notify_change(Bunch(
-            name='_df',
-            old=None,
-            new=self._df,
-            owner=self,
-            type='change',
-            location=location,
-        ))
+    def _notify_listeners(self, event):
+        # notify listeners at the module level
+        handlers.notify_listeners(event, self)
+
+        # notify listeners on this class instance
+        self._handlers.notify_listeners(event, self)
 
     def get_changed_df(self):
         """
@@ -1033,11 +1400,11 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.loc[last.name] = last.values
         self._update_table(triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(last.name))
-        self._trigger_df_change_event()
+        return last.name
 
     def remove_row(self):
         """
-        Remove the current row from the table.
+        Remove the currently selected row (or rows) from the table.
         """
         if self._multi_index:
             msg = "Cannot remove a row from a table with a multi index"
@@ -1048,12 +1415,12 @@ class QgridWidget(widgets.DOMWidget):
             })
             return
         selected_names = \
-            map(lambda x: self._df.iloc[x].name, self._selected_rows)
+            list(map(lambda x: self._df.iloc[x].name, self._selected_rows))
         self._df.drop(selected_names, inplace=True)
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
         self._update_table(triggered_by='remove_row')
-        self._trigger_df_change_event()
+        return selected_names
 
 
 # Alias for legacy support, since we changed the capitalization
