@@ -905,16 +905,18 @@ class QgridWidget(widgets.DOMWidget):
         if content['type'] == 'cell_change':
             col_info = self._columns[content['column']]
             try:
+                location = (self._df.index[content['row_index']],
+                            content['column'])
+
                 val_to_set = content['value']
                 if col_info['type'] == 'datetime':
                     val_to_set = pd.to_datetime(val_to_set)
 
-                self._df.at[self._df.index[content['row_index']],
-                            content['column']] = val_to_set
+                self._df.at[location] = val_to_set
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
-                self._trigger_df_change_event()
+                self._trigger_df_change_event(location)
             except (ValueError, TypeError):
                 msg = "Error occurred while attempting to edit the " \
                       "DataFrame. Check the notebook server logs for more " \
@@ -963,13 +965,14 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'filter_changed':
             self._handle_filter_changed(content)
 
-    def _trigger_df_change_event(self):
+    def _trigger_df_change_event(self, location=None):
         self.notify_change(Bunch(
             name='_df',
             old=None,
             new=self._df,
             owner=self,
             type='change',
+            location=location,
         ))
 
     def get_changed_df(self):
