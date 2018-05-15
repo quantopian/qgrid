@@ -38,7 +38,12 @@ class _DefaultSettings(object):
             'sortable': True,
             'filterable': True,
             'highlightSelectedCell': False,
-            'highlightSelectedRow': True
+            'highlightSelectedRow': True,
+            'boldIndex': True
+        }
+        self._column_options = {
+            'editable': True,
+            'toolTip': "",
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -47,13 +52,15 @@ class _DefaultSettings(object):
         self._grid_options[optname] = optvalue
 
     def set_defaults(self, show_toolbar=None, precision=None,
-                     grid_options=None):
+                     grid_options=None, column_options=None):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
         if precision is not None:
             self._precision = precision
         if grid_options is not None:
             self._grid_options = grid_options
+        if column_options is not None:
+            self._column_options = column_options
 
     @property
     def show_toolbar(self):
@@ -67,11 +74,15 @@ class _DefaultSettings(object):
     def precision(self):
         return self._precision or pd.get_option('display.precision') - 1
 
+    @property
+    def column_options(self):
+        return self._column_options
+
 
 defaults = _DefaultSettings()
 
 
-def set_defaults(show_toolbar=None, precision=None, grid_options=None):
+def set_defaults(show_toolbar=None, precision=None, grid_options=None, column_options=None):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
@@ -94,7 +105,7 @@ def set_defaults(show_toolbar=None, precision=None, grid_options=None):
         The widget whose default behavior is changed by ``set_defaults``.
     """
     defaults.set_defaults(show_toolbar=show_toolbar, precision=precision,
-                          grid_options=grid_options)
+                          grid_options=grid_options, column_options=column_options)
 
 
 def set_grid_option(optname, optvalue):
@@ -166,7 +177,9 @@ def disable():
 
 
 def show_grid(data_frame, show_toolbar=None,
-              precision=None, grid_options=None):
+              precision=None, grid_options=None,
+              column_options=None, column_definitions=None,
+              row_edit_conditions=None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -196,6 +209,12 @@ def show_grid(data_frame, show_toolbar=None,
         precision = defaults.precision
     if not isinstance(precision, Integral):
         raise TypeError("precision must be int, not %s" % type(precision))
+    if column_options is None:
+        column_options = defaults.column_options
+    else:
+        options = defaults.column_options.copy()
+        options.update(column_options)
+        column_options = options
     if grid_options is None:
         grid_options = defaults.grid_options
     else:
@@ -215,9 +234,15 @@ def show_grid(data_frame, show_toolbar=None,
             "data_frame must be DataFrame or Series, not %s" % type(data_frame)
         )
 
+    row_edit_conditions = (row_edit_conditions or {})
+    column_definitions = (column_definitions or {})
+
     # create a visualization for the dataframe
     return QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
+                       column_options=column_options,
+                       column_definitions=column_definitions,
+                       row_edit_conditions=row_edit_conditions,
                        show_toolbar=show_toolbar)
 
 
@@ -364,6 +389,9 @@ class QgridWidget(widgets.DOMWidget):
     df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
+    column_options = Dict(sync=True)
+    column_definitions = Dict({})
+    row_edit_conditions = Dict(sync=True)
     show_toolbar = Bool(False, sync=True)
 
     def __init__(self, *args, **kwargs):
@@ -506,6 +534,10 @@ class QgridWidget(widgets.DOMWidget):
 
                 cur_column['position'] = i
                 columns[col_name] = cur_column
+
+                columns[col_name].update(self.column_options)
+                if col_name in self.column_definitions.keys():
+                    columns[col_name].update(self.column_definitions[col_name])
 
             self._columns = columns
 
@@ -1033,6 +1065,45 @@ class QgridWidget(widgets.DOMWidget):
         self._unfiltered_df.loc[last.name] = last.values
         self._update_table(triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(last.name))
+        self._trigger_df_change_event()
+
+    def add_row_internally(self, row):
+        """
+        Append a new row to the end of the dataframe given a list of 2-tuples of (column name, column value).
+        This feature will work for dataframes with arbitrary index types.
+        """
+        df = self._df
+
+        col_names, col_data = zip(*row)
+        col_names = list(col_names)
+        col_data = list(col_data)
+        index_col_val = dict(row)[df.index.name]
+
+        # check that the given column names match what already exists in the dataframe
+        required_cols = set(df.columns.values).union({df.index.name}) - {self._index_col_name}
+        if set(col_names) != required_cols:
+            msg = "Cannot add row -- column names don't match in the existing dataframe"
+            self.send({
+                'type': 'show_error',
+                'error_msg': msg,
+                'triggered_by': 'add_row'
+            })
+            return
+
+        for i, s in enumerate(col_data):
+            if col_names[i] == df.index.name:
+                continue
+
+            df.loc[index_col_val, col_names[i]] = s
+            self._unfiltered_df.loc[index_col_val, col_names[i]] = s
+
+        self._update_table(triggered_by='add_row', scroll_to_row=df.index.get_loc(index_col_val), fire_data_change_event=True)
+        self._trigger_df_change_event()
+
+    def set_value_internally(self, index, column, value):
+        self._df.loc[index, column] = value
+        self._unfiltered_df.loc[index, column] = value
+        self._update_table(triggered_by='cell_change', fire_data_change_event=True)
         self._trigger_df_change_event()
 
     def remove_row(self):

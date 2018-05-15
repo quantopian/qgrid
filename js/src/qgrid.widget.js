@@ -203,6 +203,8 @@ class QgridView extends widgets.DOMWidgetView {
     var columns = this.model.get('_columns');
     this.data_view = this.create_data_view(df_json.data);
     this.grid_options = this.model.get('grid_options');
+    this.column_definitions = this.model.get('column_definitions');
+    this.row_edit_conditions = this.model.get('row_edit_conditions');
     this.index_col_name = this.model.get("_index_col_name");
 
     this.columns = [];
@@ -321,7 +323,8 @@ class QgridView extends widgets.DOMWidgetView {
         id: cur_column.name,
         sortable: false,
         resizable: true,
-        cssClass: cur_column.type
+        cssClass: cur_column.type,
+        toolTip: cur_column.toolTip
       };
 
       Object.assign(slick_column, type_info);
@@ -345,10 +348,17 @@ class QgridView extends widgets.DOMWidgetView {
       // don't allow editing index columns
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
-        slick_column.cssClass += ' idx-col';
+        if (this.grid_options.boldIndex) {
+            slick_column.cssClass += ' idx-col';
+        }
         this.index_columns.push(slick_column);
         continue;
       }
+
+      if ( ! (cur_column.editable) ) {
+        slick_column.editor = null;
+      }
+
       this.columns.push(slick_column);
     }
 
@@ -473,6 +483,60 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     // set up callbacks
+
+    // evaluate conditions under which cells in a row should be disabled (contingent on values of other cells in the same row)
+    var evaluateRowEditConditions = function(current_row, obj) {
+      var result;
+
+      for (var op in obj) {
+        if (op == 'AND') {
+            if (result == null) {
+              result = true;
+            }
+            for (var cond in obj[op]) {
+              if (cond == 'AND' || cond == 'OR' || cond == 'NOT') {
+                result = result && evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
+              } else {
+                result = result && (current_row[cond] == obj[op][cond]);
+              }
+            }
+        } else if (op == 'OR') {
+          if (result == null) {
+            result = false;
+          }
+          var or_result = false;
+          for (var cond in obj[op]) {
+              if (cond == 'AND' || cond == 'OR' || cond == 'NAND' || cond == 'NOR') {
+                result = result || evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
+              } else {
+                result = result || (current_row[cond] == obj[op][cond]);
+              }
+            }
+        } else if (op == 'NAND') {
+            if (result == null) {
+              result = true;
+            }
+            result = result && !evaluateRowEditConditions(current_row, {'AND': obj[op]});
+        } else if (op == 'NOR') {
+            if (result == null) {
+              result = false;
+            }
+            result = result || !evaluateRowEditConditions(current_row, {'OR': obj[op]});
+        } else {
+          alert("Unsupported operation '" + op + "' found in row edit conditions!")
+        }
+      }
+      return result;
+    }
+
+    if ( ! (this.row_edit_conditions == null)) {
+        var conditions = this.row_edit_conditions;
+        var grid = this.slick_grid;
+        this.slick_grid.onBeforeEditCell.subscribe(function(e, args) {
+            return evaluateRowEditConditions(grid.getDataItem(args.row), conditions);
+        });
+    }
+
     this.slick_grid.onCellChange.subscribe((e, args) => {
       var column = this.columns[args.cell].name;
       var data_item = this.slick_grid.getDataItem(args.row);
@@ -675,6 +739,12 @@ class QgridView extends widgets.DOMWidgetView {
           'type': 'selection_change'
         });
       }, 100);
+    } else if (msg.type == 'toggle_editable') {
+        if (this.slick_grid.getOptions().editable == false) {
+          this.slick_grid.setOptions({'editable': true});
+        } else {
+          this.slick_grid.setOptions({'editable': false});
+        }
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
