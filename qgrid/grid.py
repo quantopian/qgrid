@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 
+from types import FunctionType
 from IPython.display import display
 from numbers import Integral
 from traitlets import (
@@ -311,7 +312,7 @@ def disable():
 def show_grid(data_frame, show_toolbar=None,
               precision=None, grid_options=None,
               column_options=None, column_definitions=None,
-              row_edit_conditions=None):
+              row_edit_callback=None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -366,7 +367,6 @@ def show_grid(data_frame, show_toolbar=None,
             "data_frame must be DataFrame or Series, not %s" % type(data_frame)
         )
 
-    row_edit_conditions = (row_edit_conditions or {})
     column_definitions = (column_definitions or {})
 
     # create a visualization for the dataframe
@@ -374,7 +374,7 @@ def show_grid(data_frame, show_toolbar=None,
                        grid_options=grid_options,
                        column_options=column_options,
                        column_definitions=column_definitions,
-                       row_edit_conditions=row_edit_conditions,
+                       row_edit_callback=row_edit_callback,
                        show_toolbar=show_toolbar)
 
 
@@ -508,6 +508,7 @@ class QgridWidget(widgets.DOMWidget):
     _row_styles = Dict({}, sync=True)
     _disable_grouping = Bool(False)
     _columns = Dict({}, sync=True)
+    _editable_rows = Dict({}, sync=True)
     _filter_tables = Dict({})
     _sorted_column_cache = Dict({})
     _interval_columns = List([], sync=True)
@@ -534,7 +535,7 @@ class QgridWidget(widgets.DOMWidget):
     grid_options = Dict(sync=True)
     column_options = Dict(sync=True)
     column_definitions = Dict({})
-    row_edit_conditions = Dict(sync=True)
+    row_edit_callback = Instance(FunctionType, sync=False, allow_none=True)
     show_toolbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
@@ -960,6 +961,13 @@ class QgridWidget(widgets.DOMWidget):
                                       double_precision=self.precision)
 
         self._df_json = df_json
+
+        if self.row_edit_callback is not None:
+            editable_rows = {}
+            for index, row in df.iterrows():
+                editable_rows[int(row[self._index_col_name])] = self.row_edit_callback(row)
+            self._editable_rows = editable_rows
+
         if fire_data_change_event:
             self._notify_listeners({
                 'name': 'json_updated',

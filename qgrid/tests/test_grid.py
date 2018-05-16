@@ -219,6 +219,30 @@ def test_nans():
     })
 
 
+def test_row_edit_callback():
+    sample_df = create_df()
+
+    def can_edit_row(row):
+        return row['E'] == 'train' and row['F'] == 'bar'
+
+    view = QgridWidget(df=sample_df, row_edit_callback=can_edit_row)
+
+    view._handle_qgrid_msg_helper({
+        'type': 'sort_changed',
+        'sort_field': 'index',
+        'sort_ascending': True
+    })
+
+    expected_dict = {
+        0: False,
+        1: True,
+        2: False,
+        3: False
+    }
+
+    assert expected_dict == view._editable_rows
+
+
 def test_period_object_column():
     range_index = pd.period_range(start='2000', periods=10, freq='B')
     df = pd.DataFrame({'a': 5, 'b': range_index}, index=range_index)

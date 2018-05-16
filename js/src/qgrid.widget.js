@@ -204,7 +204,6 @@ class QgridView extends widgets.DOMWidgetView {
     this.data_view = this.create_data_view(df_json.data);
     this.grid_options = this.model.get('grid_options');
     this.column_definitions = this.model.get('column_definitions');
-    this.row_edit_conditions = this.model.get('row_edit_conditions');
     this.index_col_name = this.model.get("_index_col_name");
     this.row_styles = this.model.get("_row_styles");
 
@@ -500,58 +499,12 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     // set up callbacks
-
-    // evaluate conditions under which cells in a row should be disabled (contingent on values of other cells in the same row)
-    var evaluateRowEditConditions = function(current_row, obj) {
-      var result;
-
-      for (var op in obj) {
-        if (op == 'AND') {
-            if (result == null) {
-              result = true;
-            }
-            for (var cond in obj[op]) {
-              if (cond == 'AND' || cond == 'OR' || cond == 'NOT') {
-                result = result && evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
-              } else {
-                result = result && (current_row[cond] == obj[op][cond]);
-              }
-            }
-        } else if (op == 'OR') {
-          if (result == null) {
-            result = false;
-          }
-          var or_result = false;
-          for (var cond in obj[op]) {
-              if (cond == 'AND' || cond == 'OR' || cond == 'NAND' || cond == 'NOR') {
-                result = result || evaluateRowEditConditions(current_row, {[cond]: obj[op][cond]});
-              } else {
-                result = result || (current_row[cond] == obj[op][cond]);
-              }
-            }
-        } else if (op == 'NAND') {
-            if (result == null) {
-              result = true;
-            }
-            result = result && !evaluateRowEditConditions(current_row, {'AND': obj[op]});
-        } else if (op == 'NOR') {
-            if (result == null) {
-              result = false;
-            }
-            result = result || !evaluateRowEditConditions(current_row, {'OR': obj[op]});
-        } else {
-          alert("Unsupported operation '" + op + "' found in row edit conditions!")
-        }
-      }
-      return result;
-    }
-
-    if ( ! (this.row_edit_conditions == null)) {
-        var conditions = this.row_edit_conditions;
-        var grid = this.slick_grid;
-        this.slick_grid.onBeforeEditCell.subscribe(function(e, args) {
-            return evaluateRowEditConditions(grid.getDataItem(args.row), conditions);
-        });
+    let editable_rows = this.model.get('_editable_rows');
+    if (editable_rows && Object.keys(editable_rows).length > 0) {
+      this.slick_grid.onBeforeEditCell.subscribe((e, args) => {
+        editable_rows = this.model.get('_editable_rows');
+        return editable_rows[args.item[this.index_col_name]]
+      });
     }
 
     this.slick_grid.onCellChange.subscribe((e, args) => {
