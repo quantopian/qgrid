@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.2',
-      _view_module_version : '^1.0.2',
+      _model_module_version : '^1.0.3-beta.0',
+      _view_module_version : '^1.0.3-beta.0',
       _df_json: '',
       _columns: {}
     });
@@ -483,7 +483,7 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
-      var msg = {'rows': args.rows, 'type': 'selection_change'};
+      var msg = {'rows': args.rows, 'type': 'selection_changed'};
       this.send(msg);
     });
 
@@ -672,7 +672,7 @@ class QgridView extends widgets.DOMWidgetView {
         });
         this.send({
           'rows': selected_rows,
-          'type': 'selection_change'
+          'type': 'selection_changed'
         });
       }, 100);
     } else if (msg.col_info) {
