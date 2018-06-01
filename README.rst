@@ -11,14 +11,11 @@ Qgrid is a Jupyter notebook widget which uses `SlickGrid <https://github.com/mle
 DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
 filtering controls, as well as edit your DataFrames by double clicking cells.
 
-We originally developed qgrid for use in `Quantopian's hosted research environment
-<https://www.quantopian.com/research?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_ in fall of 2014, but
-had to put it on the backburner for a while so we could focus on higher priority projects.
+What's New in 1.0.3 - Introducing Qgrid Events
+----------------------------------------------
+Qgrid has some new API methods as of version 1.0.3 which can be used to attach event handlers.  Event handlers are callback methods that get called when certain events occur in the qgrid interface.  In qgrid 1.0.3, event handlers can be attached with the ``on`` method and detached with the ``off`` method.  There are ``on`` and ``off`` methods on both the ``qgrid`` module (see `qgrid.on <https://qgrid.readthedocs.io/en/latest/#qgrid.on>`_), and on individual QgridWidget instances (see `qgrid.QgridWidget.on <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.on>`_).
 
-Qgrid development started up again in summer 2017, when we started a major refactoring project to allow qgrid to take
-advantage of the latest advances in ipywidgets (specifically, ipywidget 7.x).  As a part of this refactoring we also
-moved qgrid's sorting, and filtering logic from the client (javascript) to the server (python). This new version is
-called qgrid 1.0, and the instructions that follow are for this new version.
+To get a better idea of how these methods might be used, see the `Events API`_ section below.
 
 Demo
 ----
@@ -199,11 +196,31 @@ read-the-docs page, you can preview your changes locally before submitting a PR 
 This will result in the ``docs/_build/html`` folder being populated with a new version of the read-the-docs site. If
 you open the ``index.html`` file in your browser, you should be able to preview your changes.
 
-Experimental Demo
------------------
-As of qgrid 1.0 there are some interesting ways we can use qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
+Events API
+----------
+As of qgrid 1.0.3 there are new ``on`` and ``off`` methods in qgrid which can be used to attach/detach event handlers. Previously the only way to listen for events was to use undocumented parts of the API.  
 
-Currently these ways of using qgrid are not documented in the API docs or extensively tested, so they're still considered experimental. See the `experimental notebook <https://beta.mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=experimental.ipynb>`_ to learn more.
+Having the ability to attach event handlers allows us to do some interesting things in terms of using qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
+
+If you previously used the ``observe`` method to respond to qgrid events, lets see how your code might be updated to use the new ``on`` method::
+
+    # Before upgrading to 1.0.3
+    def handle_df_change(change):
+        print(change['new'])
+
+    qgrid_widget.observe(handle_df_change, names=['_df'])
+
+When you upgrade to 1.0.3, you have more granular control over which events you do an don't listen to, but you can also replicate the previous behavior of calling ``print`` every time the state of the internal DataFrame is changed. Here's what that would look like using the new ``on`` method::
+
+    # After upgrading to 1.0.3
+    def handle_json_updated(event, qgrid_widget):
+        # exclude 'viewport_changed' events since that doesn't change the DataFrame
+        if (event['triggered_by'] != 'viewport_changed'):
+            print(qgrid_widget.get_changed_df())
+
+    qgrid_widget.on('json_updated', handle_json_updated)
+
+See the `events notebook <https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb>`_ for more examples of using these new API methods.
 
 For people who would rather not go to another page to try out the experimental notebook, here's the tldr; version:
 
