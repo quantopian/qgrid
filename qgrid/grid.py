@@ -172,7 +172,7 @@ def on(names, handler):
 
     The reason it's not available on individual qgrid instances is because
     the only time it fires is when a new instance is created. This means
-    it's already donefiring by the time a user has a chance to hook up any
+    it's already done firing by the time a user has a chance to hook up any
     event listeners.
 
     Here's the full list of events that can be listened for via this
@@ -588,7 +588,9 @@ class QgridWidget(widgets.DOMWidget):
           effect of certain actions such as scrolling, sorting, and filtering.
 
             * **triggered_by** The name of the event that resulted in rows of
-              data being sent down to the browser.
+              data being sent down to the browser.  Possible values are
+              ``viewport_changed``, ``filter_changed``, ``sort_changed``,
+              ``add_row``, and ``remove_row``.
             * **range** A tuple specifying the range of rows that have been
               sent down to the browser.
 
