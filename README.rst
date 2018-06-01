@@ -222,14 +222,26 @@ When you upgrade to 1.0.3, you have more granular control over which events you 
 
 See the `events notebook <https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb>`_ for more examples of using these new API methods.
 
-For people who would rather not go to another page to try out the experimental notebook, here's the tldr; version:
+For people who would rather not go to another page to try out the events notebook, here are a couple of gifs to give you an idea of what you can do with it.
+
+The first gif shows how you can use qgrid to filter the data that's being shown by a matplotlib scatter plot:
 
         .. figure:: docs/images/linked_to_scatter.gif
          :align: left
          :target: docs/images/linked_to_scatter.gif
          :width: 600px
 
-          A brief demo showing filtering, editing, and the `get_changed_df()` method
+          A brief demo showing qgrid hooked up to a matplotlib plot
+          
+The second gif shows how you can move qgrid to a separate view in JupyterLab, which makes it more convenient
+to use in conjunction with other visualizations (in this case, a couple of ``Output`` widgets):
+          
+        .. figure:: docs/images/events_api.gif
+         :align: left
+         :target: docs/images/events_api.gif
+         :width: 600px
+
+          A brief demo showing qgrid's events api
 
 Continuing to use qgrid 0.3.3
 -----------------------------
