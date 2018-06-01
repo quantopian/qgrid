@@ -220,7 +220,7 @@ When you upgrade to 1.0.3, you have more granular control over which events you 
 
     qgrid_widget.on('json_updated', handle_json_updated)
 
-See the `events notebook <https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb>`_ for more examples of using these new API methods.
+See the `events notebook <https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=events.ipynb>`_ for more examples of using these new API methods.
 
 For people who would rather not go to another page to try out the events notebook, here are a couple of gifs to give you an idea of what you can do with it.
 
