@@ -985,7 +985,7 @@ class QgridWidget(widgets.DOMWidget):
             return
         else:
             if col_info['type'] == 'any':
-                unique_list = col_series.dtype.categories
+                unique_list = col_series.cat.categories
             else:
                 if col_name in self._sorted_column_cache:
                     unique_list = self._sorted_column_cache[col_name]
