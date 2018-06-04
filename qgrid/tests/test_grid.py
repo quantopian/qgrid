@@ -74,6 +74,20 @@ def test_edit_date():
                        "2013-01-16T00:00:00.000Z")
 
 
+def test_edit_multi_index_df():
+    df_multi = create_multi_index_df()
+    view = QgridWidget(df=df_multi)
+    old_val = df_multi.loc[('bar', 'two'), 1]
+
+    check_edit_success(view,
+                       1,
+                       1,
+                       old_val,
+                       round(old_val, pd.get_option('display.precision') - 1),
+                       3.45678,
+                       3.45678)
+
+
 def check_edit_success(widget,
                        col_name,
                        row_index,
@@ -85,7 +99,7 @@ def check_edit_success(widget,
     event_history = init_event_history('cell_edited', widget)
 
     grid_data = json.loads(widget._df_json)['data']
-    assert grid_data[row_index][col_name] == old_val_json
+    assert grid_data[row_index][str(col_name)] == old_val_json
 
     widget._handle_qgrid_msg_helper({
         'column': col_name,
@@ -95,9 +109,10 @@ def check_edit_success(widget,
         'value': new_val_json
     })
 
+    expected_index_val = widget._df.index[row_index]
     assert event_history == [{
         'name':  'cell_edited',
-        'index':  row_index,
+        'index':  expected_index_val,
         'column': col_name,
         'old': old_val_obj,
         'new': new_val_obj
@@ -107,7 +122,7 @@ def check_edit_success(widget,
     # call _update_table so the widget updates _df_json
     widget._update_table(fire_data_change_event=False)
     grid_data = json.loads(widget._df_json)['data']
-    assert grid_data[row_index][col_name] == new_val_json
+    assert grid_data[row_index][str(col_name)] == new_val_json
 
 
 def test_edit_number():
