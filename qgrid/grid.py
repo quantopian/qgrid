@@ -464,8 +464,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.3').tag(sync=True)
-    _model_module_version = Unicode('1.0.3').tag(sync=True)
+    _view_module_version = Unicode('1.0.5').tag(sync=True)
+    _model_module_version = Unicode('1.0.5').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -1220,8 +1220,9 @@ class QgridWidget(widgets.DOMWidget):
                 if col_info['type'] == 'datetime':
                     val_to_set = pd.to_datetime(val_to_set)
 
-                old_value = self._df.at[location]
-                self._df.at[location] = val_to_set
+                old_value = self._df.loc[location]
+                self._df.loc[location] = val_to_set
+
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
