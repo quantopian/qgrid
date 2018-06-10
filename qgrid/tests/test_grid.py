@@ -76,6 +76,7 @@ def test_edit_date():
 
 def test_edit_multi_index_df():
     df_multi = create_multi_index_df()
+    df_multi.index.set_names('first', level=0, inplace=True)
     view = QgridWidget(df=df_multi)
     old_val = df_multi.loc[('bar', 'two'), 1]
 
@@ -493,7 +494,7 @@ my_object_vals = [MyObject(MyObject(None)), MyObject(None)]
 
 
 def test_object_dtype():
-    df = pd.DataFrame({'a': my_object_vals})
+    df = pd.DataFrame({'a': my_object_vals}, index=my_object_vals)
     widget = QgridWidget(df=df)
     grid_data = json.loads(widget._df_json)['data']
 
@@ -519,6 +520,20 @@ def test_object_dtype():
 
     assert not isinstance(grid_data[0]['a'], dict)
     assert not isinstance(grid_data[1]['a'], dict)
+
+    assert not isinstance(grid_data[0]['index'], dict)
+    assert not isinstance(grid_data[1]['index'], dict)
+
+
+def test_index_categorical():
+    df = pd.DataFrame({'foo': np.random.randn(3), 'future_index': [22, 13, 87]})
+    df['future_index'] = df['future_index'].astype('category')
+    df = df.set_index('future_index')
+    widget = QgridWidget(df=df)
+    grid_data = json.loads(widget._df_json)['data']
+
+    assert not isinstance(grid_data[0]['future_index'], dict)
+    assert not isinstance(grid_data[1]['future_index'], dict)
 
 
 def test_object_dtype_categorical():

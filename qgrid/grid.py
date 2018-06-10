@@ -748,15 +748,35 @@ class QgridWidget(widgets.DOMWidget):
 
         self._row_count = len(self._df.index)
 
-        if type(df.index) == pd.core.index.MultiIndex:
-            self._multi_index = True
-        else:
-            self._multi_index = False
-
         if update_columns:
             self._string_columns = list(df.select_dtypes(
                 include=[np.dtype('O'), 'category']
             ).columns.values)
+
+            def should_be_stringified(col_series):
+                return col_series.dtype == np.dtype('O') or \
+                       hasattr(col_series, 'cat')
+
+            if type(df.index) == pd.core.index.MultiIndex:
+                self._multi_index = True
+                for idx, cur_level in enumerate(df.index.levels):
+                    if cur_level.name:
+                        col_name = cur_level.name
+                    else:
+                        col_name = 'level_%s' % idx
+                    self._primary_key.append(col_name)
+                    if should_be_stringified(cur_level):
+                        self._string_columns.append(col_name)
+            else:
+                self._multi_index = False
+                if df.index.name:
+                    col_name = df.index.name
+                else:
+                    col_name = 'index'
+                self._primary_key = [col_name]
+
+                if should_be_stringified(df.index):
+                    self._string_columns.append(col_name)
 
         # call map(str) for all columns identified as string columns, in
         # case any are not strings already
@@ -1102,7 +1122,7 @@ class QgridWidget(widgets.DOMWidget):
         if col_name in self._primary_key:
             if len(self._primary_key) > 1:
                 key_index = self._primary_key.index(col_name)
-                return df.index.get_level_values(level=key_index)
+                return df.index.levels[key_index]
             else:
                 return df.index
         else:
