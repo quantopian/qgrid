@@ -383,6 +383,17 @@ def test_multi_index():
     })
 
     widget._handle_qgrid_msg_helper({
+        'type': 'filter_changed',
+        'field': 'level_1',
+        'filter_info': {
+            'field': 'level_1',
+            'type': 'text',
+            'selected': [0],
+            'excluded': []
+        }
+    })
+
+    widget._handle_qgrid_msg_helper({
         'type': 'sort_changed',
         'sort_field': 3,
         'sort_ascending': True
@@ -410,6 +421,10 @@ def test_multi_index():
         {
             'name': 'filter_changed',
             'column': 3
+        },
+        {
+            'name': 'filter_changed',
+            'column': 'level_1'
         },
         {
             'name': 'sort_changed',

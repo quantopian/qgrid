@@ -322,11 +322,56 @@
 
 .q-grid .slick-cell.idx-col {
   font-weight: bold;
+  border-right: 1px solid rgb(225, 232, 237);
+  margin-right: 3px;
+}
+
+.q-grid .idx-col.group-top {
+  border-bottom-color: transparent;
+  background-color: #FFF;
+}
+
+.q-grid .idx-col.group-middle {
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  color: transparent;
+  background-color: #FFF;
+}
+
+.q-grid .idx-col.group-bottom {
+  border-top-color: transparent;
+  color: transparent;
+  background-color: #FFF;
+}
+
+.q-grid .idx-col.group-single {
+  background-color: transparent;
 }
 
 .q-grid .slick-cell.l0.r0 {
   border-left: none;
   padding-left: 6px;
+  z-index: 90;
+}
+
+.q-grid .slick-cell.l1.r1 {
+  z-index: 89;
+}
+
+.q-grid .slick-cell.l2.r2 {
+  z-index: 88;
+}
+
+.q-grid .slick-cell.l3.r3 {
+  z-index: 87;
+}
+
+.q-grid .slick-cell.l4.r4 {
+  z-index: 86;
+}
+
+.q-grid .slick-cell.l5.r5 {
+  z-index: 85;
 }
 
 .q-grid .slick-cell.selected {
@@ -641,5 +686,6 @@ input.bool-filter-radio {
 }
 
 .slick-row .slick-cell:not(:first-child) {
-  padding-left: 4px;
+  padding-left: 5px;
+  margin-left: -4px;
 }

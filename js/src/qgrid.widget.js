@@ -204,6 +204,7 @@ class QgridView extends widgets.DOMWidgetView {
     this.data_view = this.create_data_view(df_json.data);
     this.grid_options = this.model.get('grid_options');
     this.index_col_name = this.model.get("_index_col_name");
+    this.row_styles = this.model.get("_row_styles");
 
     this.columns = [];
     this.index_columns = [];
@@ -346,6 +347,8 @@ class QgridView extends widgets.DOMWidgetView {
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
         slick_column.cssClass += ' idx-col';
+        slick_column.name = cur_column.index_display_text;
+        slick_column.level = cur_column.level;
         this.index_columns.push(slick_column);
         continue;
       }
@@ -386,6 +389,7 @@ class QgridView extends widgets.DOMWidgetView {
     }, 1);
 
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel());
+    this.slick_grid.setCellCssStyles("grouping", this.row_styles);
     this.slick_grid.render();
 
     var render_header_cell = (e, args) => {
@@ -469,7 +473,7 @@ class QgridView extends widgets.DOMWidgetView {
         };
         this.send(msg);
         this.viewport_timeout = null;
-      }, 100);
+      }, 10);
     });
 
     // set up callbacks
@@ -631,6 +635,7 @@ class QgridView extends widgets.DOMWidgetView {
       }
       this.update_timeout = setTimeout(() => {
         var df_json = JSON.parse(this.model.get('_df_json'));
+        this.row_styles = this.model.get("_row_styles");
         var data_view = this.create_data_view(df_json.data);
 
         if (msg.triggered_by == 'sort_changed' && this.sort_indicator){
@@ -649,6 +654,7 @@ class QgridView extends widgets.DOMWidgetView {
         }
 
         this.set_data_view(data_view);
+        this.slick_grid.setCellCssStyles("grouping", this.row_styles);
         this.slick_grid.render();
 
         if ((msg.triggered_by == 'add_row' ||
@@ -674,7 +680,7 @@ class QgridView extends widgets.DOMWidgetView {
           'rows': selected_rows,
           'type': 'selection_changed'
         });
-      }, 100);
+      }, 10);
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
