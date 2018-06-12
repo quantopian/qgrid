@@ -286,12 +286,12 @@
 .q-grid .slick-cell {
   border-bottom: 1px solid #e1e8ed;
   border-right: none;
-  border-top: 1px solid transparent;
   border-left: 1px solid transparent;
   font-size: 13px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  padding-top: 3px;
   padding-left: 0px;
+  padding-top: 4px;
+  border-top: none;
 }
 
 .q-grid.highlight-selected-row .slick-cell.selected {
@@ -322,7 +322,16 @@
 
 .q-grid .slick-cell.idx-col {
   font-weight: bold;
+  margin-right: 3px;
+}
+
+.q-grid .slick-cell.idx-col.last-idx-col {
   border-right: 1px solid rgb(225, 232, 237);
+}
+
+.q-grid .slick-cell.idx-col:not(.first-idx-col) {
+  font-weight: bold;
+  border-left: 1px solid rgb(225, 232, 237);
   margin-right: 3px;
 }
 
@@ -351,27 +360,27 @@
 .q-grid .slick-cell.l0.r0 {
   border-left: none;
   padding-left: 6px;
-  z-index: 90;
+  z-index: 85;
 }
 
 .q-grid .slick-cell.l1.r1 {
-  z-index: 89;
-}
-
-.q-grid .slick-cell.l2.r2 {
-  z-index: 88;
-}
-
-.q-grid .slick-cell.l3.r3 {
-  z-index: 87;
-}
-
-.q-grid .slick-cell.l4.r4 {
   z-index: 86;
 }
 
+.q-grid .slick-cell.l2.r2 {
+  z-index: 87;
+}
+
+.q-grid .slick-cell.l3.r3 {
+  z-index: 88;
+}
+
+.q-grid .slick-cell.l4.r4 {
+  z-index: 89;
+}
+
 .q-grid .slick-cell.l5.r5 {
-  z-index: 85;
+  z-index: 90;
 }
 
 .q-grid .slick-cell.selected {

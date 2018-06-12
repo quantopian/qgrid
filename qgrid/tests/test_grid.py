@@ -541,7 +541,10 @@ def test_object_dtype():
 
 
 def test_index_categorical():
-    df = pd.DataFrame({'foo': np.random.randn(3), 'future_index': [22, 13, 87]})
+    df = pd.DataFrame({
+        'foo': np.random.randn(3),
+        'future_index': [22, 13, 87]
+    })
     df['future_index'] = df['future_index'].astype('category')
     df = df.set_index('future_index')
     widget = QgridWidget(df=df)

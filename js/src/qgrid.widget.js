@@ -347,6 +347,13 @@ class QgridView extends widgets.DOMWidgetView {
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
         slick_column.cssClass += ' idx-col';
+        if (cur_column.first_index){
+          slick_column.cssClass += ' first-idx-col';
+        }
+        if (cur_column.last_index){
+          slick_column.cssClass += ' last-idx-col';
+        }
+
         slick_column.name = cur_column.index_display_text;
         slick_column.level = cur_column.level;
         this.index_columns.push(slick_column);

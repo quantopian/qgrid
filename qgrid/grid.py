@@ -19,6 +19,7 @@ from traitlets import (
 )
 from itertools import chain
 from uuid import uuid4
+from six import string_types
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -352,6 +353,13 @@ def show_grid(data_frame, show_toolbar=None,
 
 
 PAGE_SIZE = 100
+
+
+def stringify(x):
+    if isinstance(x, string_types):
+        return x
+    else:
+        return str(x)
 
 
 @widgets.register()
@@ -794,7 +802,7 @@ class QgridWidget(widgets.DOMWidget):
             else:
                 series_to_set = self._get_col_series_from_df(
                     col_name, df, level_vals=True
-                ).map(str)
+                ).map(stringify)
             self._set_col_series_on_df(col_name, df, series_to_set)
 
         if type(df.index) == pd.core.index.MultiIndex and \
@@ -809,7 +817,7 @@ class QgridWidget(widgets.DOMWidget):
                 prev_idx = row_loc - 1
                 for idx, index_val in enumerate(index):
                     col_name = self._primary_key[idx]
-                    if previous_value == None:
+                    if previous_value is None:
                         row_style[col_name] = 'group-top'
                         continue
                     elif index_val == previous_value[idx]:
@@ -823,11 +831,16 @@ class QgridWidget(widgets.DOMWidget):
                         else:
                             row_style[col_name] = 'group-middle'
                     else:
-                        row_style[col_name] = 'single' if last_row else 'group-top'
+                        if last_row:
+                            row_style[col_name] = 'single'
+                        else:
+                            row_style[col_name] = 'group-top'
                         if prev_idx >= 0:
-                            if row_styles[prev_idx][col_name] == 'group-middle':
+                            if row_styles[prev_idx][col_name] == \
+                                    'group-middle':
                                 row_styles[prev_idx][col_name] = 'group-bottom'
-                            elif row_styles[prev_idx][col_name] == 'group-top':
+                            elif row_styles[prev_idx][col_name] == \
+                                    'group-top':
                                 row_styles[prev_idx][col_name] = 'group-single'
                 previous_value = index
                 row_styles[row_loc] = row_style
@@ -855,9 +868,13 @@ class QgridWidget(widgets.DOMWidget):
             if ('primaryKey' in df_schema):
                 self._primary_key = df_schema['primaryKey']
             else:
-                # for some reason, 'primaryKey' isn't set when the index is
-                # a single interval column. that's why this case is here.
-                self._primary_key = [df.index.name]
+                # for some reason, 'primaryKey' isn't set in certain cases,
+                # like when we have an interval index. that's why this case
+                # is here.
+                if df.index.name is not None:
+                    self._primary_key = [df.index.name]
+                else:
+                    self._primary_key = ['index']
 
             columns = {}
             for i, cur_column in enumerate(df_schema['fields']):
@@ -876,6 +893,11 @@ class QgridWidget(widgets.DOMWidget):
                         self._primary_key_display[col_name]
                     if len(self._primary_key) > 0:
                         cur_column['level'] = self._primary_key.index(col_name)
+                    level = self._primary_key.index(col_name)
+                    if level == 0:
+                        cur_column['first_index'] = True
+                    if level == (len(self._primary_key) - 1):
+                        cur_column['last_index'] = True
 
                 cur_column['position'] = i
                 columns[col_name] = cur_column
