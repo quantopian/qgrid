@@ -186,7 +186,8 @@
   border-right: none;
 }
 
-.q-grid .slick-header-columns {
+.q-grid .slick-header-columns,
+.text-filter-grid .slick-header-columns {
   background: none;
   background-color: rgb(245, 245, 245);
   border-bottom: none;
@@ -654,6 +655,7 @@
   text-indent: 0px;
   margin-left: -4px;
   margin-top: -6px;
+  background-image: none;
 }
 
 #ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-w:before {

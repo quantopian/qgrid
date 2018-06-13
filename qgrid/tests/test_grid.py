@@ -152,7 +152,7 @@ def test_add_row():
     # expected values
     added_index = event_history[0]['index']
     expected_values = np.array(
-        [4, 1.0, 1.0, 3, pd.Timestamp('2013-01-02 00:00:00'), 'bar', 'fox'],
+        [4, 1.0, pd.Timestamp('2013-01-02 00:00:00'), 1.0, 3, 'bar', 'fox'],
         dtype=object
     )
     assert (widget._df.loc[added_index].values == expected_values).all()
