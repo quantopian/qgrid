@@ -635,13 +635,33 @@
   z-index: 9999 !important;
 }
 
-#ui-datepicker-div .ui-datepicker {
+#ui-datepicker-div.ui-datepicker {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   /*@include box-shadow(0 5px 10px rgba(0, 0, 0, 0.2))*/
   z-index: 99 !important;
   padding: 0 !important;
   background-color: white;
   border: 1px solid gray;
+}
+
+#ui-datepicker-div.ui-datepicker .ui-icon {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-indent: 0px;
+  margin-left: -4px;
+  margin-top: -6px;
+}
+
+#ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-w:before {
+    content: "\f053";
+}
+
+#ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-e:before {
+    content: "\f054";
 }
 
 

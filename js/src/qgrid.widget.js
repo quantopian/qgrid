@@ -302,7 +302,9 @@ class QgridView extends widgets.DOMWidgetView {
     $.datepicker.setDefaults({
       gotoCurrent: true,
       dateFormat: $.datepicker.ISO_8601,
-      constrainInput: false
+      constrainInput: false,
+      "prevText": "",
+      "nextText": ""
     });
 
     var sorted_columns = Object.values(columns).sort(
