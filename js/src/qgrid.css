@@ -383,6 +383,10 @@
   z-index: 90;
 }
 
+.q-grid .slick-cell.editable {
+  z-index: 91 !important;
+}
+
 .q-grid .slick-cell.selected {
   background-color: transparent;
 }
