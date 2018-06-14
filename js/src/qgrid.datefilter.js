@@ -83,14 +83,14 @@ class DateFilter extends filter_base.FilterBase {
         var end_date_string = this.end_date_control.val();
 
         var start_date = new Date(start_date_string);
+        var end_date = new Date(end_date_string);
 
-        // use the last millisecond of the end_date (1000ms * 60s * 60m * 24h)
-        var end_date = new Date(
-            (new Date(end_date_string).getTime()) + (1000 * 60 * 60 * 24) - 1
-        );
+        start_date = Date.UTC(start_date.getUTCFullYear(), start_date.getUTCMonth(), start_date.getUTCDate());
+        end_date = Date.UTC(end_date.getUTCFullYear(), end_date.getUTCMonth(), end_date.getUTCDate());
+        end_date += (1000 * 60 * 60 * 24) - 1;
 
-        this.filter_start_date = start_date.getTime();
-        this.filter_end_date = end_date.getTime();
+        this.filter_start_date = start_date;
+        this.filter_end_date = end_date;
 
         this.send_filter_changed();
 
@@ -112,8 +112,22 @@ class DateFilter extends filter_base.FilterBase {
 
     this.filter_elem.find(".datepicker").datepicker(date_options);
 
-    this.start_date_control.datepicker("setDate", this.min_date);
-    this.end_date_control.datepicker("setDate", this.max_date);
+    if (this.filter_start_date != null){
+      this.start_date_control.datepicker("setDate", this.get_utc_date(this.filter_start_date));
+    } else {
+      this.start_date_control.datepicker("setDate", this.min_date);
+    }
+
+    if (this.filter_end_date != null){
+      this.end_date_control.datepicker("setDate", this.get_utc_date(this.filter_end_date));
+    } else {
+      this.end_date_control.datepicker("setDate", this.max_date);
+    }
+  }
+
+  get_utc_date(date_ms) {
+    var date = new Date(date_ms);
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   }
 
   get_filter_info() {

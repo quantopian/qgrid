@@ -186,7 +186,8 @@
   border-right: none;
 }
 
-.q-grid .slick-header-columns {
+.q-grid .slick-header-columns,
+.text-filter-grid .slick-header-columns {
   background: none;
   background-color: rgb(245, 245, 245);
   border-bottom: none;
@@ -286,12 +287,12 @@
 .q-grid .slick-cell {
   border-bottom: 1px solid #e1e8ed;
   border-right: none;
-  border-top: 1px solid transparent;
   border-left: 1px solid transparent;
   font-size: 13px;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  padding-top: 3px;
   padding-left: 0px;
+  padding-top: 4px;
+  border-top: none;
 }
 
 .q-grid.highlight-selected-row .slick-cell.selected {
@@ -322,11 +323,69 @@
 
 .q-grid .slick-cell.idx-col {
   font-weight: bold;
+  margin-right: 3px;
+}
+
+.q-grid .slick-cell.idx-col.last-idx-col {
+  border-right: 1px solid rgb(225, 232, 237);
+}
+
+.q-grid .slick-cell.idx-col:not(.first-idx-col) {
+  font-weight: bold;
+  border-left: 1px solid rgb(225, 232, 237);
+  margin-right: 3px;
+}
+
+.q-grid .idx-col.group-top {
+  border-bottom-color: transparent;
+  background-color: #FFF;
+}
+
+.q-grid .idx-col.group-middle {
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  color: transparent;
+  background-color: #FFF;
+}
+
+.q-grid .idx-col.group-bottom {
+  border-top-color: transparent;
+  color: transparent;
+  background-color: #FFF;
+}
+
+.q-grid .idx-col.group-single {
+  background-color: transparent;
 }
 
 .q-grid .slick-cell.l0.r0 {
   border-left: none;
   padding-left: 6px;
+  z-index: 85;
+}
+
+.q-grid .slick-cell.l1.r1 {
+  z-index: 86;
+}
+
+.q-grid .slick-cell.l2.r2 {
+  z-index: 87;
+}
+
+.q-grid .slick-cell.l3.r3 {
+  z-index: 88;
+}
+
+.q-grid .slick-cell.l4.r4 {
+  z-index: 89;
+}
+
+.q-grid .slick-cell.l5.r5 {
+  z-index: 90;
+}
+
+.q-grid .slick-cell.editable {
+  z-index: 91 !important;
 }
 
 .q-grid .slick-cell.selected {
@@ -577,13 +636,34 @@
   z-index: 9999 !important;
 }
 
-#ui-datepicker-div .ui-datepicker {
+#ui-datepicker-div.ui-datepicker {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   /*@include box-shadow(0 5px 10px rgba(0, 0, 0, 0.2))*/
   z-index: 99 !important;
   padding: 0 !important;
   background-color: white;
   border: 1px solid gray;
+}
+
+#ui-datepicker-div.ui-datepicker .ui-icon {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-indent: 0px;
+  margin-left: -4px;
+  margin-top: -6px;
+  background-image: none;
+}
+
+#ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-w:before {
+    content: "\f053";
+}
+
+#ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-e:before {
+    content: "\f054";
 }
 
 
@@ -641,5 +721,6 @@ input.bool-filter-radio {
 }
 
 .slick-row .slick-cell:not(:first-child) {
-  padding-left: 4px;
+  padding-left: 5px;
+  margin-left: -4px;
 }

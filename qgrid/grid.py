@@ -19,6 +19,7 @@ from traitlets import (
 )
 from itertools import chain
 from uuid import uuid4
+from six import string_types
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -354,6 +355,13 @@ def show_grid(data_frame, show_toolbar=None,
 PAGE_SIZE = 100
 
 
+def stringify(x):
+    if isinstance(x, string_types):
+        return x
+    else:
+        return str(x)
+
+
 @widgets.register()
 class QgridWidget(widgets.DOMWidget):
     """
@@ -464,12 +472,15 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.5').tag(sync=True)
-    _model_module_version = Unicode('1.0.5').tag(sync=True)
+    _view_module_version = Unicode('1.0.6-beta.6').tag(sync=True)
+    _model_module_version = Unicode('1.0.6-beta.6').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
     _primary_key = List()
+    _primary_key_display = Dict({})
+    _row_styles = Dict({}, sync=True)
+    _disable_grouping = Bool(False)
     _columns = Dict({}, sync=True)
     _filter_tables = Dict({})
     _sorted_column_cache = Dict({})
@@ -482,7 +493,7 @@ class QgridWidget(widgets.DOMWidget):
     _unfiltered_df = Instance(pd.DataFrame)
     _index_col_name = Unicode('qgrid_unfiltered_index', sync=True)
     _sort_col_suffix = Unicode('_qgrid_sort_column')
-    _multi_index = Bool(False)
+    _multi_index = Bool(False, sync=True)
     _edited = Bool(False)
     _selected_rows = List([])
     _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
@@ -748,15 +759,40 @@ class QgridWidget(widgets.DOMWidget):
 
         self._row_count = len(self._df.index)
 
-        if type(df.index) == pd.core.index.MultiIndex:
-            self._multi_index = True
-        else:
-            self._multi_index = False
-
         if update_columns:
             self._string_columns = list(df.select_dtypes(
                 include=[np.dtype('O'), 'category']
             ).columns.values)
+
+            def should_be_stringified(col_series):
+                return col_series.dtype == np.dtype('O') or \
+                       hasattr(col_series, 'cat') or \
+                       isinstance(col_series, pd.PeriodIndex)
+
+            if type(df.index) == pd.core.index.MultiIndex:
+                self._multi_index = True
+                for idx, cur_level in enumerate(df.index.levels):
+                    if cur_level.name:
+                        col_name = cur_level.name
+                        self._primary_key_display[col_name] = col_name
+                    else:
+                        col_name = 'level_%s' % idx
+                        self._primary_key_display[col_name] = ""
+                    self._primary_key.append(col_name)
+                    if should_be_stringified(cur_level):
+                        self._string_columns.append(col_name)
+            else:
+                self._multi_index = False
+                if df.index.name:
+                    col_name = df.index.name
+                    self._primary_key_display[col_name] = col_name
+                else:
+                    col_name = 'index'
+                    self._primary_key_display[col_name] = ""
+                self._primary_key = [col_name]
+
+                if should_be_stringified(df.index):
+                    self._string_columns.append(col_name)
 
         # call map(str) for all columns identified as string columns, in
         # case any are not strings already
@@ -766,9 +802,53 @@ class QgridWidget(widgets.DOMWidget):
                 series_to_set = df[sort_column_name]
             else:
                 series_to_set = self._get_col_series_from_df(
-                    col_name, df
-                ).map(str)
+                    col_name, df, level_vals=True
+                ).map(stringify)
             self._set_col_series_on_df(col_name, df, series_to_set)
+
+        if type(df.index) == pd.core.index.MultiIndex and \
+                not self._disable_grouping:
+            previous_value = None
+            row_styles = {}
+            row_loc = from_index
+            for index, row in df.iterrows():
+                row_style = {}
+                last_row = row_loc == (len(self._df) - 1)
+                prev_idx = row_loc - 1
+                for idx, index_val in enumerate(index):
+                    col_name = self._primary_key[idx]
+                    if previous_value is None:
+                        row_style[col_name] = 'group-top'
+                        continue
+                    elif index_val == previous_value[idx]:
+                        if prev_idx < 0:
+                            row_style[col_name] = 'group-top'
+                            continue
+                        if row_styles[prev_idx][col_name] == 'group-top':
+                            row_style[col_name] = 'group-middle'
+                        elif row_styles[prev_idx][col_name] == 'group-bottom':
+                            row_style[col_name] = 'group-top'
+                        else:
+                            row_style[col_name] = 'group-middle'
+                    else:
+                        if last_row:
+                            row_style[col_name] = 'single'
+                        else:
+                            row_style[col_name] = 'group-top'
+                        if prev_idx >= 0:
+                            if row_styles[prev_idx][col_name] == \
+                                    'group-middle':
+                                row_styles[prev_idx][col_name] = 'group-bottom'
+                            elif row_styles[prev_idx][col_name] == \
+                                    'group-top':
+                                row_styles[prev_idx][col_name] = 'group-single'
+                previous_value = index
+                row_styles[row_loc] = row_style
+                row_loc += 1
+
+            self._row_styles = row_styles
+        else:
+            self._row_styles = {}
 
         df_json = pd_json.to_json(None, df,
                                   orient='table',
@@ -785,13 +865,6 @@ class QgridWidget(widgets.DOMWidget):
             parsed_json = json.loads(df_json)
             df_schema = parsed_json['schema']
 
-            if ('primaryKey' in df_schema):
-                self._primary_key = df_schema['primaryKey']
-            else:
-                # for some reason, 'primaryKey' isn't set when the index is
-                # a single interval column. that's why this case is here.
-                self._primary_key = [df.index.name]
-
             columns = {}
             for i, cur_column in enumerate(df_schema['fields']):
                 col_name = cur_column['name']
@@ -805,6 +878,15 @@ class QgridWidget(widgets.DOMWidget):
 
                 if col_name in self._primary_key:
                     cur_column['is_index'] = True
+                    cur_column['index_display_text'] = \
+                        self._primary_key_display[col_name]
+                    if len(self._primary_key) > 0:
+                        cur_column['level'] = self._primary_key.index(col_name)
+                    level = self._primary_key.index(col_name)
+                    if level == 0:
+                        cur_column['first_index'] = True
+                    if self._multi_index and level == (len(self._primary_key) - 1):
+                        cur_column['last_index'] = True
 
                 cur_column['position'] = i
                 columns[col_name] = cur_column
@@ -816,7 +898,9 @@ class QgridWidget(widgets.DOMWidget):
         # json that has interval columns replaced with text columns
         if len(self._interval_columns) > 0:
             for col_name in self._interval_columns:
-                col_series = self._get_col_series_from_df(col_name, df)
+                col_series = self._get_col_series_from_df(col_name,
+                                                          df,
+                                                          level_vals=True)
                 col_series_as_strings = col_series.map(lambda x: str(x))
                 self._set_col_series_on_df(col_name, df,
                                            col_series_as_strings)
@@ -830,7 +914,7 @@ class QgridWidget(widgets.DOMWidget):
                     series_to_set = df[sort_column_name]
                 else:
                     series_to_set = self._get_col_series_from_df(
-                        col_name, df
+                        col_name, df, level_vals=True
                     ).to_timestamp()
                 self._set_col_series_on_df(col_name, df, series_to_set)
 
@@ -862,6 +946,7 @@ class QgridWidget(widgets.DOMWidget):
         try:
             if self._sort_field is None:
                 return
+            self._disable_grouping = False
             if self._sort_field in self._primary_key:
                 if len(self._primary_key) == 1:
                     self._df.sort_index(
@@ -869,20 +954,21 @@ class QgridWidget(widgets.DOMWidget):
                         inplace=True
                     )
                 else:
-                    level_id = self._sort_field
-                    if self._sort_field.startswith('level_'):
-                        level_id = int(self._sort_field[6:])
+                    level_index = self._primary_key.index(self._sort_field)
                     self._df.sort_index(
-                        level=level_id,
+                        level=level_index,
                         ascending=self._sort_ascending,
                         inplace=True
                     )
+                    if level_index > 0:
+                        self._disable_grouping = True
             else:
                 self._df.sort_values(
                     self._sort_field,
                     ascending=self._sort_ascending,
                     inplace=True
                 )
+                self._disable_grouping = True
         except TypeError:
             self.log.info('TypeError occurred, assuming mixed data type '
                           'column')
@@ -1094,7 +1180,7 @@ class QgridWidget(widgets.DOMWidget):
                 })
 
     # get any column from a dataframe, including index columns
-    def _get_col_series_from_df(self, col_name, df):
+    def _get_col_series_from_df(self, col_name, df, level_vals=False):
         sort_column_name = self._sort_helper_columns.get(col_name)
         if sort_column_name:
             return df[sort_column_name]
@@ -1102,7 +1188,10 @@ class QgridWidget(widgets.DOMWidget):
         if col_name in self._primary_key:
             if len(self._primary_key) > 1:
                 key_index = self._primary_key.index(col_name)
-                return df.index.get_level_values(level=key_index)
+                if level_vals:
+                    return df.index.levels[key_index]
+
+                return df.index.get_level_values(key_index)
             else:
                 return df.index
         else:
@@ -1110,12 +1199,15 @@ class QgridWidget(widgets.DOMWidget):
 
     def _set_col_series_on_df(self, col_name, df, col_series):
         if col_name in self._primary_key:
-            col_series.name = col_name
             if len(self._primary_key) > 1:
                 key_index = self._primary_key.index(col_name)
+                prev_name = df.index.levels[key_index].name
                 df.index.set_levels(col_series, level=key_index, inplace=True)
+                df.index.rename(prev_name, level=key_index, inplace=True)
             else:
+                prev_name = df.index.name
                 df.set_index(col_series, inplace=True)
+                df.index.rename(prev_name)
         else:
             df[col_name] = col_series
 
