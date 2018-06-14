@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.6-beta.3',
-      _view_module_version : '^1.0.6-beta.3',
+      _model_module_version : '^1.0.6-beta.6',
+      _view_module_version : '^1.0.6-beta.6',
       _df_json: '',
       _columns: {}
     });
