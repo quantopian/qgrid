@@ -11,25 +11,43 @@ Qgrid is a Jupyter notebook widget which uses `SlickGrid <https://github.com/mle
 DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
 filtering controls, as well as edit your DataFrames by double clicking cells.
 
-What's New in 1.0.3 - Introducing Qgrid Events
-----------------------------------------------
-Qgrid has some new API methods as of version 1.0.3 which can be used to attach event handlers.  Event handlers are callback methods that get called when certain events occur in the qgrid interface.  In qgrid 1.0.3, event handlers can be attached with the ``on`` method and detached with the ``off`` method.  There are ``on`` and ``off`` methods on both the ``qgrid`` module (see `qgrid.on <https://qgrid.readthedocs.io/en/latest/#qgrid.on>`_), and on individual QgridWidget instances (see `qgrid.QgridWidget.on <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.on>`_).
+Qgrid was developed for use in `Quantopian's hosted research environment <https://www.quantopian.com/notebooks/survey?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_ and is available for use in that environment as of June 2018.
+
+What's New
+----------
+**Improved MultiIndex Support (as of 1.0.6-beta.6)**:
+Qgrid now displays multi-indexed DataFrames with some of the index cells merged for readability, as is normally done when viewing DataFrames as a static html table.  The following image shows qgrid displaying a multi-indexed DataFrame that was returned from Quantopian's `Pipeline API <https://www.quantopian.com/tutorials/pipeline?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_:
+
+.. figure:: https://s3.amazonaws.com/quantopian-forums/pipeline_with_qgrid.png
+         :align: left
+         :target: https://s3.amazonaws.com/quantopian-forums/pipeline_with_qgrid.png
+         :width: 100px
+
+**Qgrid Events (as of 1.0.3)**:
+Qgrid has some new API methods which can be used to attach event handlers.  Event handlers are callback methods that get called when certain events occur in the qgrid interface.  In qgrid 1.0.3, event handlers can be attached with the ``on`` method and detached with the ``off`` method.  There are ``on`` and ``off`` methods on both the ``qgrid`` module (see `qgrid.on <https://qgrid.readthedocs.io/en/latest/#qgrid.on>`_), and on individual QgridWidget instances (see `qgrid.QgridWidget.on <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.on>`_).
 
 To get a better idea of how these methods might be used, see the `Events API`_ section below.
 
 Demo
 ----
-Click the badge below to try out qgrid in a live sample notebook:
+Click the badge below to try out the latest beta of qgrid in Quantopian's hosted research environment. If you're already signed into Quantopian you'll be brought directly to the demo notebook. Otherwise you'll be prompted to register (it's free):
 
-.. image:: https://beta.mybinder.org/badge.svg 
+.. image:: https://img.shields.io/badge/launch-quantopian-red.svg?colorB=d33015
+    :target: https://www.quantopian.com/clone_notebook?id=5ae9cff15230100046c3958d&utm_source=github&utm_medium=web&utm_campaign=qgrid-repo
+|
+Click the badge below to try out qgrid using binder:
+
+.. image:: https://beta.mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
 |
-Click the following badge to try out qgrid in Jupyterlab:
+Click the following badge to try out qgrid in Jupyterlab, also using binder:
 
-.. image:: https://mybinder.org/badge.svg 
+.. image:: https://mybinder.org/badge.svg
     :target: https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?urlpath=lab
 |
 *For both binder links, you'll see a brief loading screen while a server is being created for you in the cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
+
+*The binder demos generally will be using the most recent stable release of qgrid, so features that were added in a recent beta version may not be available in those demos.*
 
 For people who would rather not go to another page to try out qgrid for real, here's the tldr; version:
 
