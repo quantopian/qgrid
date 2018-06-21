@@ -11,7 +11,9 @@ Qgrid is a Jupyter notebook widget which uses `SlickGrid <https://github.com/mle
 DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
 filtering controls, as well as edit your DataFrames by double clicking cells.
 
-Qgrid was developed for use in `Quantopian's hosted research environment <https://www.quantopian.com/notebooks/survey?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_ and is available for use in that environment as of June 2018.
+Qgrid was developed for use in `Quantopian's hosted research environment
+<https://www.quantopian.com/posts/qgrid-now-available-in-research-an-interactive-grid-for-sorting-and-filtering-dataframes?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_
+and is available for use in that environment as of June 2018.
 
 What's New
 ----------
@@ -33,7 +35,7 @@ Demo
 Click the badge below to try out the latest beta of qgrid in Quantopian's hosted research environment. If you're already signed into Quantopian you'll be brought directly to the demo notebook. Otherwise you'll be prompted to register (it's free):
 
 .. image:: https://img.shields.io/badge/launch-quantopian-red.svg?colorB=d33015
-    :target: https://www.quantopian.com/clone_notebook?id=5ae9cff15230100046c3958d&utm_source=github&utm_medium=web&utm_campaign=qgrid-repo
+    :target: https://www.quantopian.com/clone_notebook?id=5b2baee1b3d6870048620188&utm_source=github&utm_medium=web&utm_campaign=qgrid-repo
 |
 Click the badge below to try out qgrid using binder:
 
