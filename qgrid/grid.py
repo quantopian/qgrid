@@ -57,7 +57,14 @@ class _DefaultSettings(object):
         }
         self._column_options = {
             'editable': True,
+            # the following options are supported by SlickGrid
+            'defaultSortAsc': True,
+            'maxWidth': None,
+            'minWidth': 30,
+            'resizable': True,
+            'sortable': True,
             'toolTip': "",
+            'width': None
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -125,7 +132,10 @@ defaults = _DefaultSettings()
 handlers = _EventHandlers()
 
 
-def set_defaults(show_toolbar=None, precision=None, grid_options=None, column_options=None):
+def set_defaults(show_toolbar=None,
+                 precision=None,
+                 grid_options=None,
+                 column_options=None):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
@@ -919,6 +929,10 @@ class QgridWidget(widgets.DOMWidget):
                         cur_column['last_index'] = True
 
                 cur_column['position'] = i
+                cur_column['field'] = col_name
+                cur_column['id'] = col_name
+                cur_column['cssClass'] = cur_column['type']
+
                 columns[col_name] = cur_column
 
                 columns[col_name].update(self.column_options)
@@ -965,7 +979,8 @@ class QgridWidget(widgets.DOMWidget):
         if self.row_edit_callback is not None:
             editable_rows = {}
             for index, row in df.iterrows():
-                editable_rows[int(row[self._index_col_name])] = self.row_edit_callback(row)
+                editable_rows[int(row[self._index_col_name])] = \
+                    self.row_edit_callback(row)
             self._editable_rows = editable_rows
 
         if fire_data_change_event:
