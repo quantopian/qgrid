@@ -203,7 +203,6 @@ class QgridView extends widgets.DOMWidgetView {
     var columns = this.model.get('_columns');
     this.data_view = this.create_data_view(df_json.data);
     this.grid_options = this.model.get('grid_options');
-    this.column_definitions = this.model.get('column_definitions');
     this.index_col_name = this.model.get("_index_col_name");
     this.row_styles = this.model.get("_row_styles");
 
@@ -319,7 +318,7 @@ class QgridView extends widgets.DOMWidgetView {
 
       var type_info = this.type_infos[cur_column.type] || {};
 
-      var slick_column = cur_column
+      var slick_column = cur_column;
 
       Object.assign(slick_column, type_info);
 
@@ -337,6 +336,10 @@ class QgridView extends widgets.DOMWidgetView {
         );
         this.filters[slick_column.id] = cur_filter;
         this.filter_list.push(cur_filter);
+      }
+
+      if (cur_column.width == null){
+        delete slick_column.width;
       }
 
       // don't allow editing index columns
@@ -366,9 +369,6 @@ class QgridView extends widgets.DOMWidgetView {
         slick_column.editor = null;
       }
 
-      if (cur_column.width == null){
-        delete slick_column.width;
-      }
 
       this.columns.push(slick_column);
     }
@@ -517,7 +517,7 @@ class QgridView extends widgets.DOMWidgetView {
       var data_item = this.slick_grid.getDataItem(args.row);
       var msg = {'row_index': data_item.row_index, 'column': column,
                  'unfiltered_index': data_item[this.index_col_name],
-                 'value': args.item[column], 'type': 'cell_change'};
+                 'value': args.item[column], 'type': 'edit_cell'};
       this.send(msg);
     });
 

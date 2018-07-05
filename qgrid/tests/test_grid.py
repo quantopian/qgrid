@@ -105,7 +105,7 @@ def check_edit_success(widget,
     widget._handle_qgrid_msg_helper({
         'column': col_name,
         'row_index': row_index,
-        'type': "cell_change",
+        'type': "edit_cell",
         'unfiltered_index': row_index,
         'value': new_val_json
     })
@@ -116,7 +116,8 @@ def check_edit_success(widget,
         'index':  expected_index_val,
         'column': col_name,
         'old': old_val_obj,
-        'new': new_val_obj
+        'new': new_val_obj,
+        'source': 'gui'
     }]
     assert widget._df[col_name][row_index] == new_val_obj
 
@@ -734,12 +735,29 @@ def test_add_row_internally():
     assert q._df.loc[42, 'foo'] == 'hello'
 
 
-def test_set_value_internally():
+def test_edit_cell_via_api():
     df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
     df.set_index('baz', inplace=True, drop=True)
 
     q = QgridWidget(df=df)
+    event_history = init_event_history(All)
 
-    q.set_value_internally(42, 'foo', 'hola')
+    q.edit_cell(42, 'foo', 'hola')
 
     assert q._df.loc[42, 'foo'] == 'hola'
+
+    assert event_history == [
+        {
+            'name': 'json_updated',
+            'range': (0, 100),
+            'triggered_by': 'edit_cell'
+        },
+        {
+            'name': 'cell_edited',
+            'index': 42,
+            'column': 'foo',
+            'old': 'hello',
+            'new': 'hola',
+            'source': 'api'
+        }
+    ]
