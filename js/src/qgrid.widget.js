@@ -476,7 +476,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.grid_elem.find('.slick-sort-indicator').removeClass(all_classes);
       this.sort_indicator.addClass(`fa fa-spinner fa-spin`);
       var msg = {
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': this.sorted_column.field,
         'sort_ascending': this.sort_ascending
       };
@@ -494,7 +494,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.viewport_timeout = setTimeout(() => {
         this.last_vp = this.slick_grid.getViewport();
         var msg = {
-          'type': 'viewport_changed',
+          'type': 'change_viewport',
           'top': this.last_vp.top,
           'bottom': this.last_vp.bottom
         };
@@ -522,7 +522,7 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
-      var msg = {'rows': args.rows, 'type': 'selection_changed'};
+      var msg = {'rows': args.rows, 'type': 'change_selection'};
       this.send(msg);
     });
 
@@ -674,7 +674,7 @@ class QgridView extends widgets.DOMWidgetView {
         this.multi_index = this.model.get("_multi_index");
         var data_view = this.create_data_view(df_json.data);
 
-        if (msg.triggered_by == 'sort_changed' && this.sort_indicator){
+        if (msg.triggered_by == 'change_sort' && this.sort_indicator){
           var asc = this.model.get('_sort_ascending');
           this.sort_indicator.removeClass(
               'fa-spinner fa-spin fa-sort-asc fa-sort-desc'
@@ -720,7 +720,7 @@ class QgridView extends widgets.DOMWidgetView {
         } else if (msg.triggered_by === 'add_row') {
           this.slick_grid.scrollRowIntoView(msg.scroll_to_row);
           this.slick_grid.setSelectedRows([msg.scroll_to_row]);
-        } else if (msg.triggered_by === 'viewport_changed' &&
+        } else if (msg.triggered_by === 'change_viewport' &&
             this.last_vp.bottom >= this.df_length) {
           this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
         }
@@ -730,7 +730,7 @@ class QgridView extends widgets.DOMWidgetView {
         });
         this.send({
           'rows': selected_rows,
-          'type': 'selection_changed'
+          'type': 'change_selection'
         });
       }, 100);
     } else if (msg.type == 'toggle_editable') {

@@ -638,10 +638,10 @@ class QgridWidget(widgets.DOMWidget):
           data (in json format) down to the browser. This happens as a side
           effect of certain actions such as scrolling, sorting, and filtering.
 
-            * **triggered_by** The name of the event that resulted in rows of
-              data being sent down to the browser.  Possible values are
-              ``viewport_changed``, ``filter_changed``, ``sort_changed``,
-              ``add_row``, and ``remove_row``.
+            * **triggered_by** The name of the event that resulted in
+              rows of data being sent down to the browser.  Possible values
+              are ``change_viewport``, ``change_filter``, ``change_sort``,
+              ``add_row``, ``remove_row``, and ``edit_cell``.
             * **range** A tuple specifying the range of rows that have been
               sent down to the browser.
 
@@ -1064,7 +1064,7 @@ class QgridWidget(widgets.DOMWidget):
         self._sort_helper_columns[col_name] = sort_column_name
         return sort_column_name
 
-    def _handle_get_column_min_max(self, content):
+    def _handle_show_filter_dropdown(self, content):
         col_name = content['field']
         col_info = self._columns[col_name]
         if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
@@ -1310,7 +1310,7 @@ class QgridWidget(widgets.DOMWidget):
                 )
                 conditions.append(col_series.isin(selected_values))
 
-    def _handle_filter_changed(self, content):
+    def _handle_change_filter(self, content):
         col_name = content['field']
         columns = self._columns.copy()
         col_info = columns[col_name]
@@ -1343,7 +1343,7 @@ class QgridWidget(widgets.DOMWidget):
 
         self._sorted_column_cache = {}
         self._update_sort()
-        self._update_table(triggered_by='filter_changed')
+        self._update_table(triggered_by='change_filter')
         self._ignore_df_changed = False
 
     def _handle_qgrid_msg(self, widget, content, buffers=None):
@@ -1394,7 +1394,7 @@ class QgridWidget(widgets.DOMWidget):
                     'triggered_by': 'add_row'
                 })
                 return
-        elif content['type'] == 'selection_changed':
+        elif content['type'] == 'change_selection':
             old_selection = self._selected_rows
             self._selected_rows = content['rows']
 
@@ -1408,10 +1408,10 @@ class QgridWidget(widgets.DOMWidget):
                 'old': old_selection,
                 'new': self._selected_rows
             })
-        elif content['type'] == 'viewport_changed':
+        elif content['type'] == 'change_viewport':
             old_viewport_range = self._viewport_range
             self._viewport_range = (content['top'], content['bottom'])
-            self._update_table(triggered_by='viewport_changed')
+            self._update_table(triggered_by='change_viewport')
             self._notify_listeners({
                 'name': 'viewport_changed',
                 'old': old_viewport_range,
@@ -1430,7 +1430,7 @@ class QgridWidget(widgets.DOMWidget):
                 'name': 'row_removed',
                 'indices': removed_indices
             })
-        elif content['type'] == 'viewport_changed_filter':
+        elif content['type'] == 'change_filter_viewport':
             col_name = content['field']
             col_info = self._columns[col_name]
             col_filter_table = self._filter_tables[col_name]
@@ -1455,14 +1455,14 @@ class QgridWidget(widgets.DOMWidget):
                 'old': old_viewport_range,
                 'new': col_info['viewport_range']
             })
-        elif content['type'] == 'sort_changed':
+        elif content['type'] == 'change_sort':
             old_column = self._sort_field
             old_ascending = self._sort_ascending
             self._sort_field = content['sort_field']
             self._sort_ascending = content['sort_ascending']
             self._sorted_column_cache = {}
             self._update_sort()
-            self._update_table(triggered_by='sort_changed')
+            self._update_table(triggered_by='change_sort')
             self._notify_listeners({
                 'name': 'sort_changed',
                 'old': {
@@ -1474,14 +1474,14 @@ class QgridWidget(widgets.DOMWidget):
                     'ascending': self._sort_ascending
                 }
             })
-        elif content['type'] == 'get_column_min_max':
-            self._handle_get_column_min_max(content)
+        elif content['type'] == 'show_filter_dropdown':
+            self._handle_show_filter_dropdown(content)
             self._notify_listeners({
                 'name': 'filter_dropdown_shown',
                 'column': content['field']
             })
-        elif content['type'] == 'filter_changed':
-            self._handle_filter_changed(content)
+        elif content['type'] == 'change_filter':
+            self._handle_change_filter(content)
             self._notify_listeners({
                 'name': 'filter_changed',
                 'column': content['field']

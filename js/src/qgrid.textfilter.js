@@ -201,7 +201,7 @@ class TextFilter extends filter_base.FilterBase {
         this.viewport_timeout = setTimeout(() => {
           var vp = args.grid.getViewport();
           var msg = {
-            'type': 'viewport_changed_filter',
+            'type': 'change_filter_viewport',
             'field': this.field,
             'top': vp.top,
             'bottom': vp.bottom
@@ -311,7 +311,7 @@ class TextFilter extends filter_base.FilterBase {
     this.search_string = this.security_search.val();
     if (old_search_string != this.search_string) {
       var msg = {
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': this.field,
         'search_val': this.search_string
       };
@@ -363,7 +363,7 @@ class TextFilter extends filter_base.FilterBase {
     this.filter_list = null;
     this.send_filter_changed();
     var msg = {
-      'type': 'get_column_min_max',
+      'type': 'show_filter_dropdown',
       'field': this.field,
       'search_val': this.search_string
     };

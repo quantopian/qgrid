@@ -89,7 +89,7 @@ class FilterBase {
     this.filter_btn.addClass('disabled');
 
     var msg = {
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': this.field,
         'search_val': null
     };
@@ -173,7 +173,7 @@ class FilterBase {
     }
 
     var msg = {
-      'type': 'filter_changed',
+      'type': 'change_filter',
       'field': this.field,
       'filter_info': this.get_filter_info()
     };
