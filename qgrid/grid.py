@@ -925,7 +925,8 @@ class QgridWidget(widgets.DOMWidget):
                     level = self._primary_key.index(col_name)
                     if level == 0:
                         cur_column['first_index'] = True
-                    if self._multi_index and level == (len(self._primary_key) - 1):
+                    if self._multi_index and \
+                       level == (len(self._primary_key) - 1):
                         cur_column['last_index'] = True
 
                 cur_column['position'] = i
@@ -1561,8 +1562,9 @@ class QgridWidget(widgets.DOMWidget):
 
     def add_row_internally(self, row):
         """
-        Append a new row to the end of the dataframe given a list of 2-tuples of (column name, column value).
-        This feature will work for dataframes with arbitrary index types.
+        Append a new row to the end of the dataframe given a list of 2-tuples
+        of (column name, column value). This feature will work for dataframes
+        with arbitrary index types.
         """
         df = self._df
 
@@ -1571,10 +1573,13 @@ class QgridWidget(widgets.DOMWidget):
         col_data = list(col_data)
         index_col_val = dict(row)[df.index.name]
 
-        # check that the given column names match what already exists in the dataframe
-        required_cols = set(df.columns.values).union({df.index.name}) - {self._index_col_name}
+        # check that the given column names match what
+        # already exists in the dataframe
+        required_cols = set(df.columns.values).union({df.index.name}) - \
+            {self._index_col_name}
         if set(col_names) != required_cols:
-            msg = "Cannot add row -- column names don't match in the existing dataframe"
+            msg = "Cannot add row -- column names don't match in "\
+                  "the existing dataframe"
             self.send({
                 'type': 'show_error',
                 'error_msg': msg,
@@ -1589,7 +1594,9 @@ class QgridWidget(widgets.DOMWidget):
             df.loc[index_col_val, col_names[i]] = s
             self._unfiltered_df.loc[index_col_val, col_names[i]] = s
 
-        self._update_table(triggered_by='add_row', scroll_to_row=df.index.get_loc(index_col_val), fire_data_change_event=True)
+        self._update_table(triggered_by='add_row',
+                           scroll_to_row=df.index.get_loc(index_col_val),
+                           fire_data_change_event=True)
         self._notify_listeners({
             'name': 'row_added',
             'index': index_col_val
