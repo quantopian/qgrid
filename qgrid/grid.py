@@ -1411,6 +1411,11 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'change_viewport':
             old_viewport_range = self._viewport_range
             self._viewport_range = (content['top'], content['bottom'])
+
+            # if the viewport didn't change, do nothing
+            if old_viewport_range == self._viewport_range:
+                return
+
             self._update_table(triggered_by='change_viewport')
             self._notify_listeners({
                 'name': 'viewport_changed',
