@@ -724,3 +724,8 @@ input.bool-filter-radio {
   padding-left: 5px;
   margin-left: -4px;
 }
+
+.q-grid .slick-sort-indicator-desc,
+.q-grid .slick-sort-indicator-asc {
+  background-image: none;
+}
