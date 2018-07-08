@@ -136,7 +136,7 @@ def test_edit_number():
         old_val = idx
 
 
-def test_add_row():
+def test_add_row_button():
     widget = QgridWidget(df=create_df())
     event_history = init_event_history('row_added', widget=widget)
 
@@ -146,7 +146,8 @@ def test_add_row():
 
     assert event_history == [{
         'name': 'row_added',
-        'index': 4
+        'index': 4,
+        'source': 'gui'
     }]
 
     # make sure the added row in the internal dataframe contains the
@@ -159,7 +160,7 @@ def test_add_row():
     assert (widget._df.loc[added_index].values == expected_values).all()
 
 
-def test_remove_row():
+def test_remove_row_button():
     widget = QgridWidget(df=create_df())
     event_history = init_event_history(['row_removed', 'selection_changed'],
                                        widget=widget)
@@ -182,7 +183,8 @@ def test_remove_row():
         },
         {
             'name': 'row_removed',
-            'indices': selected_rows
+            'indices': selected_rows,
+            'source': 'gui'
         }
     ]
 
@@ -716,7 +718,8 @@ def test_instance_created():
     assert qgrid_widget.id
 
 
-def test_add_row_internally():
+def test_add_row():
+    event_history = init_event_history(All)
     df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
     df.set_index('baz', inplace=True, drop=True)
 
@@ -729,13 +732,52 @@ def test_add_row_internally():
         ('foo', "new foo")
     ]
 
-    q.add_row_internally(new_row)
+    q.add_row(new_row)
 
     assert q._df.loc[43, 'foo'] == 'new foo'
     assert q._df.loc[42, 'foo'] == 'hello'
 
+    assert event_history == [
+        {'name': 'instance_created'},
+        {
+            'name': 'json_updated',
+            'range': (0, 100),
+            'triggered_by': 'add_row'
+        },
+        {
+            'name': 'row_added',
+            'index': 43,
+            'source': 'api'
+        }
+    ]
 
-def test_edit_cell_via_api():
+
+def test_remove_row():
+    event_history = init_event_history(All)
+    df = create_df()
+
+    widget = QgridWidget(df=df)
+    widget.remove_row(rows=[2])
+
+    assert 2 not in widget._df.index
+    assert len(widget._df) == 3
+
+    assert event_history == [
+        {'name': 'instance_created'},
+        {
+            'name': 'json_updated',
+            'range': (0, 100),
+            'triggered_by': 'remove_row'
+        },
+        {
+            'name': 'row_removed',
+            'indices': [2],
+            'source': 'api'
+        }
+    ]
+
+
+def test_edit_cell():
     df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
     df.set_index('baz', inplace=True, drop=True)
 

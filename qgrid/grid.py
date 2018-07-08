@@ -1425,16 +1425,18 @@ class QgridWidget(widgets.DOMWidget):
             })
 
         elif content['type'] == 'add_row':
-            row_index = self.add_row()
+            row_index = self._duplicate_last_row()
             self._notify_listeners({
                 'name': 'row_added',
-                'index': row_index
+                'index': row_index,
+                'source': 'gui'
             })
         elif content['type'] == 'remove_row':
-            removed_indices = self.remove_row()
+            removed_indices = self._remove_rows()
             self._notify_listeners({
                 'name': 'row_removed',
-                'indices': removed_indices
+                'indices': removed_indices,
+                'source': 'gui'
             })
         elif content['type'] == 'change_filter_viewport':
             col_name = content['field']
@@ -1533,10 +1535,41 @@ class QgridWidget(widgets.DOMWidget):
         """
         return self._selected_rows
 
-    def add_row(self):
+    def add_row(self, row=None):
         """
-        Append a row at the end of the dataframe by duplicating the
-        last row and incrementing it's index by 1. The feature is only
+        Append a row at the end of the DataFrame.  Values for the new row
+        can be provided via the ``row`` argument, which is optional for
+        DataFrames that have an integer index, and required otherwise.
+        If the ``row`` argument is not provided, the last row will be
+        duplicated and the index of the new row will be the index of
+        the last row plus one.
+
+        Parameters
+        ----------
+        row : list (default: None)
+            A list of 2-tuples of (column name, column value) that specifies
+            the values for the new row.
+
+        See Also
+        --------
+        QgridWidget.remove_rows:
+            The method for removing a row (or rows).
+        """
+        if row is None:
+            added_index = self._duplicate_last_row()
+        else:
+            added_index = self._add_row(row)
+
+        self._notify_listeners({
+            'name': 'row_added',
+            'index': added_index,
+            'source': 'api'
+        })
+
+    def _duplicate_last_row(self):
+        """
+        Append a row at the end of the DataFrame by duplicating the
+        last row and incrementing it's index by 1. The method is only
         available for DataFrames that have an integer index.
         """
         df = self._df
@@ -1560,10 +1593,10 @@ class QgridWidget(widgets.DOMWidget):
                            scroll_to_row=df.index.get_loc(last.name))
         return last.name
 
-    def add_row_internally(self, row):
+    def _add_row(self, row):
         """
-        Append a new row to the end of the dataframe given a list of 2-tuples
-        of (column name, column value). This feature will work for dataframes
+        Append a new row to the end of the DataFrame given a list of 2-tuples
+        of (column name, column value). This method will work for DataFrames
         with arbitrary index types.
         """
         df = self._df
@@ -1597,10 +1630,8 @@ class QgridWidget(widgets.DOMWidget):
         self._update_table(triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(index_col_val),
                            fire_data_change_event=True)
-        self._notify_listeners({
-            'name': 'row_added',
-            'index': index_col_val
-        })
+
+        return index_col_val
 
     def edit_cell(self, index, column, value):
         old_value = self._df.loc[index, column]
@@ -1618,20 +1649,50 @@ class QgridWidget(widgets.DOMWidget):
             'source': 'api'
         })
 
-    def remove_row(self):
+    def remove_rows(self, rows=None):
         """
-        Remove the currently selected row (or rows) from the table.
+        Remove a row (or rows) from the DataFrame.  The indices of the
+        rows to remove can be provided via the optional ``rows`` argument.
+        If the ``rows`` argument is not provided, the row (or rows) that are
+        currently selected in the UI will be removed.
+
+        Parameters
+        ----------
+        rows : list (default: None)
+            A list of indices of the rows to remove from the DataFrame. For
+            a multi-indexed DataFrame, each index in the list should be a
+            tuple, with each value in each tuple corresponding to a level of
+            the MultiIndex.
+
+        See Also
+        --------
+        QgridWidget.add_row:
+            The method for adding a row.
+        QgridWidget.remove_row:
+            Alias for this method.
         """
-        if self._multi_index:
-            msg = "Cannot remove a row from a table with a multi index"
-            self.send({
-                'type': 'show_error',
-                'error_msg': msg,
-                'triggered_by': 'remove_row'
-            })
-            return
-        selected_names = \
-            list(map(lambda x: self._df.iloc[x].name, self._selected_rows))
+        row_indices = self._remove_rows(rows=rows)
+        self._notify_listeners({
+            'name': 'row_removed',
+            'indices': row_indices,
+            'source': 'api'
+        })
+        return row_indices
+
+    def remove_row(self, rows=None):
+        """
+        Alias for ``remove_rows``, which is provided for convenience
+        because this was the previous name of that method.
+        """
+        return self.remove_rows(rows)
+
+    def _remove_rows(self, rows=None):
+        if rows is not None:
+            selected_names = rows
+        else:
+            selected_names = \
+                list(map(lambda x: self._df.iloc[x].name, self._selected_rows))
+
         self._df.drop(selected_names, inplace=True)
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
