@@ -215,6 +215,7 @@ class QgridView extends widgets.DOMWidgetView {
     this.sort_in_progress = false;
     this.sort_indicator = null;
     this.resizing_column = false;
+    this.ignore_selection_changed = false;
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
@@ -340,6 +341,10 @@ class QgridView extends widgets.DOMWidgetView {
 
       if (cur_column.width == null){
         delete slick_column.width;
+      }
+
+      if (cur_column.maxWidth == null){
+        delete slick_column.maxWidth;
       }
 
       // don't allow editing index columns
@@ -522,8 +527,10 @@ class QgridView extends widgets.DOMWidgetView {
     });
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
-      var msg = {'rows': args.rows, 'type': 'change_selection'};
-      this.send(msg);
+      if (!this.ignore_selection_changed) {
+        var msg = {'rows': args.rows, 'type': 'change_selection'};
+        this.send(msg);
+      }
     });
 
     setTimeout(() => {
@@ -739,6 +746,13 @@ class QgridView extends widgets.DOMWidgetView {
         } else {
           this.slick_grid.setOptions({'editable': false});
         }
+    } else if (msg.type == 'change_selection') {
+        this.ignore_selection_changed = true;
+        this.slick_grid.setSelectedRows(msg.rows);
+        if (msg.rows && msg.rows.length > 0) {
+          this.slick_grid.scrollRowIntoView(msg.rows[0]);
+        }
+        this.ignore_selection_changed = false;
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);

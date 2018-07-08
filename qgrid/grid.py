@@ -1396,19 +1396,7 @@ class QgridWidget(widgets.DOMWidget):
                 })
                 return
         elif content['type'] == 'change_selection':
-            old_selection = self._selected_rows
-            self._selected_rows = content['rows']
-
-            # if the selection didn't change, just return without firing
-            # the event
-            if old_selection == self._selected_rows:
-                return
-
-            self._notify_listeners({
-                'name': 'selection_changed',
-                'old': old_selection,
-                'new': self._selected_rows
-            })
+            self._change_selection(content['rows'], 'gui')
         elif content['type'] == 'change_viewport':
             old_viewport_range = self._viewport_range
             self._viewport_range = (content['top'], content['bottom'])
@@ -1699,6 +1687,47 @@ class QgridWidget(widgets.DOMWidget):
         self._update_table(triggered_by='remove_row')
         return selected_names
 
+    def change_selection(self, rows=[]):
+        """
+        Select a row (or rows) in the UI.  The indices of the
+        rows to select are provided via the optional ``rows`` argument.
+
+        Parameters
+        ----------
+        rows : list (default: [])
+            A list of indices of the rows to select. For a multi-indexed
+            DataFrame, each index in the list should be a tuple, with each
+            value in each tuple corresponding to a level of the MultiIndex.
+            The default value of ``[]`` results in the no rows being
+            selected (i.e. it clears the selection).
+        """
+        new_selection = \
+            list(map(lambda x: self._df.index.get_loc(x), rows))
+
+        self._change_selection(new_selection, 'api', send_msg_to_js=True)
+
+    def _change_selection(self, rows, source, send_msg_to_js=False):
+        old_selection = self._selected_rows
+        self._selected_rows = rows
+
+        # if the selection didn't change, just return without firing
+        # the event
+        if old_selection == self._selected_rows:
+            return
+
+        if send_msg_to_js:
+            data_to_send = {
+                'type': 'change_selection',
+                'rows': rows
+            }
+            self.send(data_to_send)
+
+        self._notify_listeners({
+            'name': 'selection_changed',
+            'old': old_selection,
+            'new': self._selected_rows,
+            'source': source
+        })
 
 # Alias for legacy support, since we changed the capitalization
 QGridWidget = QgridWidget
