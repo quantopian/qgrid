@@ -216,6 +216,8 @@ class QgridView extends widgets.DOMWidgetView {
     this.sort_indicator = null;
     this.resizing_column = false;
     this.ignore_selection_changed = false;
+    this.vp_response_expected = false;
+    this.next_viewport_msg = null;
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
@@ -374,7 +376,6 @@ class QgridView extends widgets.DOMWidgetView {
         slick_column.editor = null;
       }
 
-
       this.columns.push(slick_column);
     }
 
@@ -498,14 +499,23 @@ class QgridView extends widgets.DOMWidgetView {
       }
       this.viewport_timeout = setTimeout(() => {
         this.last_vp = this.slick_grid.getViewport();
-        var msg = {
-          'type': 'change_viewport',
-          'top': this.last_vp.top,
-          'bottom': this.last_vp.bottom
-        };
-        this.send(msg);
+        var cur_range = this.model.get('_viewport_range');
+
+        if (this.last_vp.top != cur_range[0] || this.last_vp.bottom != cur_range[1]) {
+          var msg = {
+            'type': 'change_viewport',
+            'top': this.last_vp.top,
+            'bottom': this.last_vp.bottom
+          };
+          if (this.vp_response_expected){
+            this.next_viewport_msg = msg
+          } else {
+            this.vp_response_expected = true;
+            this.send(msg);
+          }
+        }
         this.viewport_timeout = null;
-      }, 10);
+      }, 100);
     });
 
     // set up callbacks
@@ -680,6 +690,16 @@ class QgridView extends widgets.DOMWidgetView {
         this.row_styles = this.model.get("_row_styles");
         this.multi_index = this.model.get("_multi_index");
         var data_view = this.create_data_view(df_json.data);
+
+        if (msg.triggered_by === 'change_viewport'){
+          if (this.next_viewport_msg) {
+            this.send(this.next_viewport_msg);
+            this.next_viewport_msg = null;
+            return;
+          } else {
+            this.vp_response_expected = false;
+          }
+        }
 
         if (msg.triggered_by == 'change_sort' && this.sort_indicator){
           var asc = this.model.get('_sort_ascending');

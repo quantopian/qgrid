@@ -586,7 +586,10 @@ class QgridWidget(widgets.DOMWidget):
     _multi_index = Bool(False, sync=True)
     _edited = Bool(False)
     _selected_rows = List([])
-    _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
+    _viewport_range = Tuple(Integer(),
+                            Integer(),
+                            default_value=(0, 100),
+                            sync=True)
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
     _row_count = Integer(0, sync=True)
     _sort_field = Any(None, sync=True)
