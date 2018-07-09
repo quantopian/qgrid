@@ -319,9 +319,12 @@ def disable():
     enable(dataframe=False, series=False)
 
 
-def show_grid(data_frame, show_toolbar=None,
-              precision=None, grid_options=None,
-              column_options=None, column_definitions=None,
+def show_grid(data_frame,
+              show_toolbar=None,
+              precision=None,
+              grid_options=None,
+              column_options=None,
+              column_definitions=None,
               row_edit_callback=None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
@@ -428,6 +431,26 @@ class QgridWidget(widgets.DOMWidget):
         Whether to show a toolbar with options for adding/removing rows.
         Adding/removing rows is an experimental feature which only works
         with DataFrames that have an integer index.
+    column_options : dict
+        Column options that are to be applied to every column. See the
+        Notes section below for more information on the available options,
+        as well as the default options that this widget uses.
+    column_definitions : dict
+        Column options that are to be applied to individual
+        columns. The keys of the dict should be the column names, and each
+        value should be the column options for a particular column,
+        represented as a dict. The available options for each column are the
+        same options that are available to be set for all columns via the
+        ``column_options`` parameter. See the Notes section below for more
+        information on those options.
+    row_edit_callback : callable
+        A callable that is called to determine whether a particular row
+        should be editable or not. Its signature should be
+        ``callable(row)``, where ``row`` is a dictionary which contains a
+        particular row's values, keyed by column name. The callback should
+        return True if the provided row should be editable, and False
+        otherwise.
+
 
     Notes
     -----
@@ -435,6 +458,7 @@ class QgridWidget(widgets.DOMWidget):
     provided explicitly::
 
         {
+            # SlickGrid options
             'fullWidthRows': True,
             'syncColumnCellResize': True,
             'forceFitColumns': True,
@@ -445,6 +469,8 @@ class QgridWidget(widgets.DOMWidget):
             'editable': True,
             'autoEdit': False,
             'explicitInitialization': True,
+
+            # Qgrid options
             'maxVisibleRows': 15,
             'minVisibleRows': 8,
             'sortable': True,
@@ -453,37 +479,59 @@ class QgridWidget(widgets.DOMWidget):
             'highlightSelectedRow': True
         }
 
-    Most of these options are SlickGrid options which are described
-    in the `SlickGrid documentation
-    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_. The
-    exceptions are the last 6 options listed, which are options that were
-    added specifically for Qgrid and therefore are not documented in the
-    SlickGrid documentation.
+    The first group of options are SlickGrid "grid options" which are
+    described in the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_.
 
-    The first two, `maxVisibleRows` and `minVisibleRows`, allow you to set
-    an upper and lower bound on the height of your Qgrid widget in terms of
-    number of rows that are visible.
+    The second group of option are options that were added specifically
+    for Qgrid and therefore are not documented in the SlickGrid documentation.
+    The following bullet points describe these options.
 
-    The next two, `sortable` and `filterable`, control whether qgrid will
-    allow the user to sort and filter, respectively. If you set `sortable` to
-    False nothing will happen when the column headers are clicked.
-    If you set `filterable` to False, the filter icons won't be shown for any
-    columns.
+    * **maxVisibleRows** The maximum number of rows that Qgrid will show.
+    * **minVisibleRows** The minimum number of rows that Qgrid will show
+    * **sortable** Whether the Qgrid instance will allow the user to sort
+      columns by clicking the column headers. When this is set to ``False``,
+      nothing will happen when users click the column headers.
+    * **filterable** Whether the Qgrid instance will allow the user to filter
+      the grid. When this is set to ``False`` the filter icons won't be shown
+      for any columns.
+    * **highlightSelectedCell** If you set this to True, the selected cell
+      will be given a light blue border.
+    * **highlightSelectedRow** If you set this to False, the light blue
+      background that's shown by default for selected rows will be hidden.
 
-    The last two, `highlightSelectedCell` and `highlightSelectedRow`, control
-    how the styling of qgrid changes when a cell is selected. If you set
-    `highlightSelectedCell` to True, the selected cell will be given
-    a light blue border. If you set `highlightSelectedRow` to False, the
-    light blue background that's shown by default for selected rows will be
-    hidden.
+    The following dictionary is used for ``column_options`` if none are
+    provided explicitly::
+
+        {
+            # SlickGrid column options
+            'defaultSortAsc': True,
+            'maxWidth': None,
+            'minWidth': 30,
+            'resizable': True,
+            'sortable': True,
+            'toolTip': "",
+            'width': None
+
+            # Qgrid column options
+            'editable': True,
+        }
+
+    The first group of options are SlickGrid "column options" which are
+    described in the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Column-Options>`_.
+
+    The ``editable`` option was added specifically for Qgrid and therefore is
+    not documented in the SlickGrid documentation.  This option specifies
+    whether a column should be editable or not.
 
     See Also
     --------
     set_defaults : Permanently set global defaults for the parameters
                    of the QgridWidget constructor, with the exception of
-                   the ``df`` parameter.
+                   the ``df`` and the ``column_definitions`` parameter.
     set_grid_option : Permanently set global defaults for individual
-                      SlickGrid options.  Does so by changing the default
+                      grid options.  Does so by changing the default
                       for the ``grid_options`` parameter of the QgridWidget
                       constructor.
 
@@ -496,11 +544,16 @@ class QgridWidget(widgets.DOMWidget):
         does reflect sorting/filtering/editing changes, use the
         ``get_changed_df()`` method.
     grid_options : dict
-        Get/set the SlickGrid options being used by the current instance.
+        Get/set the grid options being used by the current instance.
     precision : integer
         Get/set the precision options being used by the current instance.
     show_toolbar : bool
         Get/set the show_toolbar option being used by the current instance.
+    column_options : bool
+        Get/set the column options being used by the current instance.
+    column_definitions : bool
+        Get/set the column definitions (column-specific options)
+        being used by the current instance.
 
     """
 
@@ -543,7 +596,7 @@ class QgridWidget(widgets.DOMWidget):
     df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
-    column_options = Dict(sync=True)
+    column_options = Dict({})
     column_definitions = Dict({})
     row_edit_callback = Instance(FunctionType, sync=False, allow_none=True)
     show_toolbar = Bool(False, sync=True)
@@ -649,12 +702,16 @@ class QgridWidget(widgets.DOMWidget):
           in the grid toolbar.
 
             * **index** The index of the newly added row.
+            * **source** The source of this event.  Possible values are
+              ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **row_removed** The user added removed one or more rows using the
           "Remove Row" button in the grid toolbar.
 
             * **indices** The indices of the removed rows, specified as an
               array of integers.
+            * **source** The source of this event.  Possible values are
+              ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **selection_changed** The user changed which rows were highlighted
           in the grid.
@@ -663,6 +720,8 @@ class QgridWidget(widgets.DOMWidget):
               selected rows.
             * **new** The indices of the rows that are now selected, again
               specified as an array.
+            * **source** The source of this event.  Possible values are
+              ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **sort_changed** The user changed the sort setting for the grid.
 
