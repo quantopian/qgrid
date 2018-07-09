@@ -63,11 +63,17 @@ class SelectEditor {
     }
     
     var option_str = "";
+
+    this.elem = $("<SELECT tabIndex='0' class='editor-select'>");
+
     for (var i in this.options) {
       var opt = $.trim(this.options[i]); // remove any white space including spaces after comma
-      option_str += "<OPTION value='" + opt + "'>" + opt + "</OPTION>";
+      var opt_elem = $("<OPTION>");
+      opt_elem.val(opt);
+      opt_elem.text(opt);
+      opt_elem.appendTo(this.elem);
     }
-    this.elem = $("<SELECT tabIndex='0' class='editor-select'>" + option_str + "</SELECT>");
+
     this.elem.appendTo(args.container);
     this.elem.focus();
   }
