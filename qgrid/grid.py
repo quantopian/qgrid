@@ -338,84 +338,11 @@ def show_grid(data_frame,
     DataFrame before being passed in to the QgridWidget constructor as the
     ``df`` kwarg.
 
-    See the ``QgridWidget`` documentation for descriptions of all of
-    the options that can be set via it's constructor.
-
     :rtype: QgridWidget
-
-    See Also
-    --------
-    QgridWidget : The widget class that is instantiated and returned by this
-                  function.
-    """
-
-    if show_toolbar is None:
-        show_toolbar = defaults.show_toolbar
-    if precision is None:
-        precision = defaults.precision
-    if not isinstance(precision, Integral):
-        raise TypeError("precision must be int, not %s" % type(precision))
-    if column_options is None:
-        column_options = defaults.column_options
-    else:
-        options = defaults.column_options.copy()
-        options.update(column_options)
-        column_options = options
-    if grid_options is None:
-        grid_options = defaults.grid_options
-    else:
-        options = defaults.grid_options.copy()
-        options.update(grid_options)
-        grid_options = options
-    if not isinstance(grid_options, dict):
-        raise TypeError(
-            "grid_options must be dict, not %s" % type(grid_options)
-        )
-
-    # if a Series is passed in, convert it to a DataFrame
-    if isinstance(data_frame, pd.Series):
-        data_frame = pd.DataFrame(data_frame)
-    elif not isinstance(data_frame, pd.DataFrame):
-        raise TypeError(
-            "data_frame must be DataFrame or Series, not %s" % type(data_frame)
-        )
-
-    column_definitions = (column_definitions or {})
-
-    # create a visualization for the dataframe
-    return QgridWidget(df=data_frame, precision=precision,
-                       grid_options=grid_options,
-                       column_options=column_options,
-                       column_definitions=column_definitions,
-                       row_edit_callback=row_edit_callback,
-                       show_toolbar=show_toolbar)
-
-
-PAGE_SIZE = 100
-
-
-def stringify(x):
-    if isinstance(x, string_types):
-        return x
-    else:
-        return str(x)
-
-
-@widgets.register()
-class QgridWidget(widgets.DOMWidget):
-    """
-    The widget class which is instantiated by the 'show_grid' method, and
-    can also be constructed directly.  All of the parameters listed below
-    can be read/updated after instantiation via attributes of the same name
-    as the parameter (since they're implemented as traitlets).
-
-    When new values are set for any of these options after instantiation
-    (such as df, grid_options, etc), the change takes effect immediately by
-    regenerating the SlickGrid control.
 
     Parameters
     ----------
-    df : DataFrame
+    data_frame : DataFrame
         The DataFrame that will be displayed by this instance of
         QgridWidget.
     grid_options : dict
@@ -528,12 +455,90 @@ class QgridWidget(widgets.DOMWidget):
     See Also
     --------
     set_defaults : Permanently set global defaults for the parameters
-                   of the QgridWidget constructor, with the exception of
-                   the ``df`` and the ``column_definitions`` parameter.
+                   of ``show_grid``, with the exception of the ``data_frame``
+                   and ``column_definitions`` parameters, since those
+                   depend on the particular set of data being shown by an
+                   instance, and therefore aren't parameters we would want
+                   to set for all QgridWidet instances.
     set_grid_option : Permanently set global defaults for individual
-                      grid options.  Does so by changing the default
-                      for the ``grid_options`` parameter of the QgridWidget
-                      constructor.
+                      grid options.  Does so by changing the defaults
+                      that the ``show_grid`` method uses for the
+                      ``grid_options`` parameter.
+    QgridWidget : The widget class that is instantiated and returned by this
+                  method.
+
+    """
+
+    if show_toolbar is None:
+        show_toolbar = defaults.show_toolbar
+    if precision is None:
+        precision = defaults.precision
+    if not isinstance(precision, Integral):
+        raise TypeError("precision must be int, not %s" % type(precision))
+    if column_options is None:
+        column_options = defaults.column_options
+    else:
+        options = defaults.column_options.copy()
+        options.update(column_options)
+        column_options = options
+    if grid_options is None:
+        grid_options = defaults.grid_options
+    else:
+        options = defaults.grid_options.copy()
+        options.update(grid_options)
+        grid_options = options
+    if not isinstance(grid_options, dict):
+        raise TypeError(
+            "grid_options must be dict, not %s" % type(grid_options)
+        )
+
+    # if a Series is passed in, convert it to a DataFrame
+    if isinstance(data_frame, pd.Series):
+        data_frame = pd.DataFrame(data_frame)
+    elif not isinstance(data_frame, pd.DataFrame):
+        raise TypeError(
+            "data_frame must be DataFrame or Series, not %s" % type(data_frame)
+        )
+
+    column_definitions = (column_definitions or {})
+
+    # create a visualization for the dataframe
+    return QgridWidget(df=data_frame, precision=precision,
+                       grid_options=grid_options,
+                       column_options=column_options,
+                       column_definitions=column_definitions,
+                       row_edit_callback=row_edit_callback,
+                       show_toolbar=show_toolbar)
+
+
+PAGE_SIZE = 100
+
+
+def stringify(x):
+    if isinstance(x, string_types):
+        return x
+    else:
+        return str(x)
+
+
+@widgets.register()
+class QgridWidget(widgets.DOMWidget):
+    """
+    The widget class which is instantiated by the ``show_grid`` method. This
+    class can be constructed directly but that's not recommended because
+    then default options have to be specified explicitly (since default
+    options are normally provided by the ``show_grid`` method).
+
+    The constructor for this class takes all the same parameters as
+    ``show_grid``, with one exception, which is that the required
+    ``data_frame`` parameter is replaced by an optional keyword argument
+    called ``df``.
+
+    See Also
+    --------
+    show_grid : The method that should be used to construct QgridWidget
+                instances, because it provides reasonable defaults for all
+                of the qgrid options.
 
     Attributes
     ----------
