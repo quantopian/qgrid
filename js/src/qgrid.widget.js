@@ -760,12 +760,13 @@ class QgridView extends widgets.DOMWidgetView {
           'type': 'change_selection'
         });
       }, 100);
-    } else if (msg.type == 'toggle_editable') {
-        if (this.slick_grid.getOptions().editable == false) {
-          this.slick_grid.setOptions({'editable': true});
-        } else {
-          this.slick_grid.setOptions({'editable': false});
-        }
+    } else if (msg.type == 'change_grid_option') {
+      var opt_name = msg.option_name;
+      var opt_val = msg.option_value;
+      if (this.slick_grid.getOptions()[opt_name] != opt_val) {
+        this.slick_grid.setOptions({[opt_name]: opt_val});
+        this.slick_grid.resizeCanvas();
+      }
     } else if (msg.type == 'change_selection') {
         this.ignore_selection_changed = true;
         this.slick_grid.setSelectedRows(msg.rows);

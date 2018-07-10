@@ -1796,5 +1796,32 @@ class QgridWidget(widgets.DOMWidget):
             'source': source
         })
 
+    def toggle_editable(self):
+        """
+        Change whether the grid is editable or not, without rebuilding
+        the entire grid widget.
+        """
+        self.change_grid_option('editable', not self.grid_options['editable'])
+
+    def change_grid_option(self, option_name, option_value):
+        """
+        Change a SlickGrid grid option without rebuilding the entire grid
+        widget.
+
+        Parameters
+        ----------
+        option_name : str
+            The name of the grid option to be changed.
+        option_value : str
+            The new value for the grid option.
+        """
+        self.grid_options[option_name] = option_value
+        self.send({
+            'type': 'change_grid_option',
+            'option_name': option_name,
+            'option_value': option_value
+        })
+
+
 # Alias for legacy support, since we changed the capitalization
 QGridWidget = QgridWidget
