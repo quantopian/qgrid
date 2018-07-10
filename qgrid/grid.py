@@ -1806,7 +1806,8 @@ class QgridWidget(widgets.DOMWidget):
     def change_grid_option(self, option_name, option_value):
         """
         Change a SlickGrid grid option without rebuilding the entire grid
-        widget.
+        widget. Not all options are supported at this point so this
+        method should be considered experimental.
 
         Parameters
         ----------
