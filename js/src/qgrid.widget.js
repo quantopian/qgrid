@@ -352,8 +352,7 @@ class QgridView extends widgets.DOMWidgetView {
       // don't allow editing index columns
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
-
-        slick_column.cssClass += ' idx-col';
+        
         if (cur_column.first_index){
           slick_column.cssClass += ' first-idx-col';
         }
