@@ -15,21 +15,6 @@ Qgrid was developed for use in `Quantopian's hosted research environment
 <https://www.quantopian.com/posts/qgrid-now-available-in-research-an-interactive-grid-for-sorting-and-filtering-dataframes?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_
 and is available for use in that environment as of June 2018.
 
-What's New
-----------
-**Improved MultiIndex Support (as of 1.0.6-beta.6)**:
-Qgrid now displays multi-indexed DataFrames with some of the index cells merged for readability, as is normally done when viewing DataFrames as a static html table.  The following image shows qgrid displaying a multi-indexed DataFrame that was returned from Quantopian's `Pipeline API <https://www.quantopian.com/tutorials/pipeline?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_:
-
-.. figure:: https://s3.amazonaws.com/quantopian-forums/pipeline_with_qgrid.png
-         :align: left
-         :target: https://s3.amazonaws.com/quantopian-forums/pipeline_with_qgrid.png
-         :width: 100px
-
-**Qgrid Events (as of 1.0.3)**:
-Qgrid has some new API methods which can be used to attach event handlers.  Event handlers are callback methods that get called when certain events occur in the qgrid interface.  In qgrid 1.0.3, event handlers can be attached with the ``on`` method and detached with the ``off`` method.  There are ``on`` and ``off`` methods on both the ``qgrid`` module (see `qgrid.on <https://qgrid.readthedocs.io/en/latest/#qgrid.on>`_), and on individual QgridWidget instances (see `qgrid.QgridWidget.on <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.on>`_).
-
-To get a better idea of how these methods might be used, see the `Events API`_ section below.
-
 Demo
 ----
 Click the badge below to try out the latest beta of qgrid in Quantopian's hosted research environment. If you're already signed into Quantopian you'll be brought directly to the demo notebook. Otherwise you'll be prompted to register (it's free):
@@ -71,7 +56,7 @@ Installing with pip::
 
   pip install qgrid
   jupyter nbextension enable --py --sys-prefix qgrid
-  
+
   # only required if you have not enabled the ipywidgets nbextension yet
   jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
@@ -79,7 +64,7 @@ Installing with conda::
 
   # only required if you have not added conda-forge to your channels yet
   conda config --add channels conda-forge
-  
+
   conda install qgrid
 
 Jupyterlab Installation
@@ -101,6 +86,40 @@ able to use qgrid in notebooks as you normally would.
 *Please Note: Jupyterlab support has been tested with jupyterlab 0.30.5 and jupyterlab-manager 0.31.3, so if you're
 having trouble, try installing those versions. Feel free to file an issue if you find that qgrid isn't working
 with a newer version of either dependency.*
+
+What's New
+----------
+**Column-specific options (as of 1.1.0)**:
+Thanks to a significant `PR from the community <https://github.com/quantopian/qgrid/pull/191>`_, Qgrid users now have the ability to set a number of options on a per column basis.  This allows you to do things like explicitly specify which column should be sortable, filterable, editable, etc.  For example, if you wanted to prevent filtering on all columns except for a column named `'A'`, you could do the following::
+
+    col_opts = { 'filterable': False }
+    col_defs = { 'A': { 'filterable': True } }
+    qgrid.show_grid(df, column_options=col_opts, column_definitions=col_defs)
+
+See the updated `show_grid <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.show_grid>`_ documentation for more information.
+
+**Disable editing on a per-row basis (as of 1.1.0)**:
+This feature can be thought of as the first row-specific option that qgrid supports.  In particular it allows a user to specify, using python code, whether or not a particular row should be editable. For example, to make it so only rows in the grid where the `'status'` column is set to `'active'` are editable, you might use the following code::
+
+    def can_edit_row(row):
+        return row['status'] == 'active'
+        
+    qgrid.show_grid(df, row_edit_callback=can_edit_row)
+
+**New API methods for dynamically updating an existing qgrid widget (as of 1.1.0)**:
+Adds the following new methods, which can be used to update the state of an existing Qgrid widget without having to call `show_grid` to completely rebuild the widget:
+
+    - `change_selection <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.QgridWidget.change_selection>`_
+    - `toggle_editable <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.QgridWidget.toggle_editable>`_
+    - `change_grid_option <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.QgridWidget.change_grid_option>`_ (experimental)
+
+**Improved MultiIndex Support (as of 1.0.6-beta.6)**:
+Qgrid now displays multi-indexed DataFrames with some of the index cells merged for readability, as is normally done when viewing DataFrames as a static html table.  The following image shows qgrid displaying a multi-indexed DataFrame that was returned from Quantopian's `Pipeline API <https://www.quantopian.com/tutorials/pipeline?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_:
+
+.. figure:: https://s3.amazonaws.com/quantopian-forums/pipeline_with_qgrid.png
+         :align: left
+         :target: https://s3.amazonaws.com/quantopian-forums/pipeline_with_qgrid.png
+         :width: 100px
 
 Dependencies
 ------------
@@ -218,7 +237,7 @@ you open the ``index.html`` file in your browser, you should be able to preview 
 
 Events API
 ----------
-As of qgrid 1.0.3 there are new ``on`` and ``off`` methods in qgrid which can be used to attach/detach event handlers. Previously the only way to listen for events was to use undocumented parts of the API.  
+As of qgrid 1.0.3 there are new ``on`` and ``off`` methods in qgrid which can be used to attach/detach event handlers. They're available on both the ``qgrid`` module (see `qgrid.on <https://qgrid.readthedocs.io/en/latest/#qgrid.on>`_), and on individual QgridWidget instances (see `qgrid.QgridWidget.on <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.on>`_). Previously the only way to listen for events was to use undocumented parts of the API.  
 
 Having the ability to attach event handlers allows us to do some interesting things in terms of using qgrid in conjunction with other widgets/visualizations. One example is using qgrid to filter a DataFrame that's also being displayed by another visualization.
 
@@ -252,10 +271,10 @@ The first gif shows how you can use qgrid to filter the data that's being shown 
          :width: 600px
 
           A brief demo showing qgrid hooked up to a matplotlib plot
-          
+
 The second gif shows how you can move qgrid to a separate view in JupyterLab, which makes it more convenient
 to use in conjunction with other visualizations (in this case, a couple of ``Output`` widgets):
-          
+
         .. figure:: docs/images/events_api.gif
          :align: left
          :target: docs/images/events_api.gif
