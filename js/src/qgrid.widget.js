@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.0.6-beta.6',
-      _view_module_version : '^1.0.6-beta.6',
+      _model_module_version : '^1.1.0-beta.0',
+      _view_module_version : '^1.1.0-beta.0',
       _df_json: '',
       _columns: {}
     });
@@ -215,6 +215,9 @@ class QgridView extends widgets.DOMWidgetView {
     this.sort_in_progress = false;
     this.sort_indicator = null;
     this.resizing_column = false;
+    this.ignore_selection_changed = false;
+    this.vp_response_expected = false;
+    this.next_viewport_msg = null;
 
     var number_type_info = {
       filter: slider_filter.SliderFilter,
@@ -318,14 +321,7 @@ class QgridView extends widgets.DOMWidgetView {
 
       var type_info = this.type_infos[cur_column.type] || {};
 
-      var slick_column = {
-        name: cur_column.name,
-        field: cur_column.name,
-        id: cur_column.name,
-        sortable: false,
-        resizable: true,
-        cssClass: cur_column.type
-      };
+      var slick_column = cur_column;
 
       Object.assign(slick_column, type_info);
 
@@ -345,9 +341,18 @@ class QgridView extends widgets.DOMWidgetView {
         this.filter_list.push(cur_filter);
       }
 
+      if (cur_column.width == null){
+        delete slick_column.width;
+      }
+
+      if (cur_column.maxWidth == null){
+        delete slick_column.maxWidth;
+      }
+
       // don't allow editing index columns
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
+
         slick_column.cssClass += ' idx-col';
         if (cur_column.first_index){
           slick_column.cssClass += ' first-idx-col';
@@ -358,9 +363,19 @@ class QgridView extends widgets.DOMWidgetView {
 
         slick_column.name = cur_column.index_display_text;
         slick_column.level = cur_column.level;
+
+        if (this.grid_options.boldIndex) {
+            slick_column.cssClass += ' idx-col';
+        }
+
         this.index_columns.push(slick_column);
         continue;
       }
+
+      if (cur_column.editable == false) {
+        slick_column.editor = null;
+      }
+
       this.columns.push(slick_column);
     }
 
@@ -431,7 +446,6 @@ class QgridView extends widgets.DOMWidgetView {
       if (this.sort_in_progress){
         return;
       }
-      this.sort_in_progress = true;
 
       var col_header = $(e.target).closest(".slick-header-column");
       if (!col_header.length) {
@@ -439,11 +453,21 @@ class QgridView extends widgets.DOMWidgetView {
       }
 
       var column = col_header.data("column");
+      if (column.sortable == false){
+        return;
+      }
+
+      this.sort_in_progress = true;
+
       if (this.sorted_column == column){
         this.sort_ascending = !this.sort_ascending;
       } else {
         this.sorted_column = column;
-        this.sort_ascending = true;
+        if ('defaultSortAsc' in column) {
+          this.sort_ascending = column.defaultSortAsc;
+        } else{
+          this.sort_ascending = true;
+        }
       }
 
       var all_classes = 'fa-sort-asc fa-sort-desc fa fa-spin fa-spinner';
@@ -458,7 +482,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.grid_elem.find('.slick-sort-indicator').removeClass(all_classes);
       this.sort_indicator.addClass(`fa fa-spinner fa-spin`);
       var msg = {
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': this.sorted_column.field,
         'sort_ascending': this.sort_ascending
       };
@@ -475,29 +499,48 @@ class QgridView extends widgets.DOMWidgetView {
       }
       this.viewport_timeout = setTimeout(() => {
         this.last_vp = this.slick_grid.getViewport();
-        var msg = {
-          'type': 'viewport_changed',
-          'top': this.last_vp.top,
-          'bottom': this.last_vp.bottom
-        };
-        this.send(msg);
+        var cur_range = this.model.get('_viewport_range');
+
+        if (this.last_vp.top != cur_range[0] || this.last_vp.bottom != cur_range[1]) {
+          var msg = {
+            'type': 'change_viewport',
+            'top': this.last_vp.top,
+            'bottom': this.last_vp.bottom
+          };
+          if (this.vp_response_expected){
+            this.next_viewport_msg = msg
+          } else {
+            this.vp_response_expected = true;
+            this.send(msg);
+          }
+        }
         this.viewport_timeout = null;
-      }, 10);
+      }, 100);
     });
 
     // set up callbacks
+    let editable_rows = this.model.get('_editable_rows');
+    if (editable_rows && Object.keys(editable_rows).length > 0) {
+      this.slick_grid.onBeforeEditCell.subscribe((e, args) => {
+        editable_rows = this.model.get('_editable_rows');
+        return editable_rows[args.item[this.index_col_name]]
+      });
+    }
+
     this.slick_grid.onCellChange.subscribe((e, args) => {
       var column = this.columns[args.cell].name;
       var data_item = this.slick_grid.getDataItem(args.row);
       var msg = {'row_index': data_item.row_index, 'column': column,
                  'unfiltered_index': data_item[this.index_col_name],
-                 'value': args.item[column], 'type': 'cell_change'};
+                 'value': args.item[column], 'type': 'edit_cell'};
       this.send(msg);
     });
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
-      var msg = {'rows': args.rows, 'type': 'selection_changed'};
-      this.send(msg);
+      if (!this.ignore_selection_changed) {
+        var msg = {'rows': args.rows, 'type': 'change_selection'};
+        this.send(msg);
+      }
     });
 
     setTimeout(() => {
@@ -648,7 +691,17 @@ class QgridView extends widgets.DOMWidgetView {
         this.multi_index = this.model.get("_multi_index");
         var data_view = this.create_data_view(df_json.data);
 
-        if (msg.triggered_by == 'sort_changed' && this.sort_indicator){
+        if (msg.triggered_by === 'change_viewport'){
+          if (this.next_viewport_msg) {
+            this.send(this.next_viewport_msg);
+            this.next_viewport_msg = null;
+            return;
+          } else {
+            this.vp_response_expected = false;
+          }
+        }
+
+        if (msg.triggered_by == 'change_sort' && this.sort_indicator){
           var asc = this.model.get('_sort_ascending');
           this.sort_indicator.removeClass(
               'fa-spinner fa-spin fa-sort-asc fa-sort-desc'
@@ -694,7 +747,7 @@ class QgridView extends widgets.DOMWidgetView {
         } else if (msg.triggered_by === 'add_row') {
           this.slick_grid.scrollRowIntoView(msg.scroll_to_row);
           this.slick_grid.setSelectedRows([msg.scroll_to_row]);
-        } else if (msg.triggered_by === 'viewport_changed' &&
+        } else if (msg.triggered_by === 'change_viewport' &&
             this.last_vp.bottom >= this.df_length) {
           this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
         }
@@ -704,9 +757,22 @@ class QgridView extends widgets.DOMWidgetView {
         });
         this.send({
           'rows': selected_rows,
-          'type': 'selection_changed'
+          'type': 'change_selection'
         });
-      }, 10);
+      }, 100);
+    } else if (msg.type == 'toggle_editable') {
+        if (this.slick_grid.getOptions().editable == false) {
+          this.slick_grid.setOptions({'editable': true});
+        } else {
+          this.slick_grid.setOptions({'editable': false});
+        }
+    } else if (msg.type == 'change_selection') {
+        this.ignore_selection_changed = true;
+        this.slick_grid.setSelectedRows(msg.rows);
+        if (msg.rows && msg.rows.length > 0) {
+          this.slick_grid.scrollRowIntoView(msg.rows[0]);
+        }
+        this.ignore_selection_changed = false;
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);

@@ -21,8 +21,8 @@ def create_df():
     })
 
 
-def create_large_df():
-    large_df = pd.DataFrame(np.random.randn(10000, 4), columns=list('ABCD'))
+def create_large_df(size=10000):
+    large_df = pd.DataFrame(np.random.randn(size, 4), columns=list('ABCD'))
     large_df['B (as str)'] = large_df['B'].map(lambda x: str(x))
     return large_df
 
@@ -105,7 +105,7 @@ def check_edit_success(widget,
     widget._handle_qgrid_msg_helper({
         'column': col_name,
         'row_index': row_index,
-        'type': "cell_change",
+        'type': 'edit_cell',
         'unfiltered_index': row_index,
         'value': new_val_json
     })
@@ -116,7 +116,8 @@ def check_edit_success(widget,
         'index':  expected_index_val,
         'column': col_name,
         'old': old_val_obj,
-        'new': new_val_obj
+        'new': new_val_obj,
+        'source': 'gui'
     }]
     assert widget._df[col_name][row_index] == new_val_obj
 
@@ -135,7 +136,7 @@ def test_edit_number():
         old_val = idx
 
 
-def test_add_row():
+def test_add_row_button():
     widget = QgridWidget(df=create_df())
     event_history = init_event_history('row_added', widget=widget)
 
@@ -145,7 +146,8 @@ def test_add_row():
 
     assert event_history == [{
         'name': 'row_added',
-        'index': 4
+        'index': 4,
+        'source': 'gui'
     }]
 
     # make sure the added row in the internal dataframe contains the
@@ -158,7 +160,7 @@ def test_add_row():
     assert (widget._df.loc[added_index].values == expected_values).all()
 
 
-def test_remove_row():
+def test_remove_row_button():
     widget = QgridWidget(df=create_df())
     event_history = init_event_history(['row_removed', 'selection_changed'],
                                        widget=widget)
@@ -166,7 +168,7 @@ def test_remove_row():
     selected_rows = [1, 2]
     widget._handle_qgrid_msg_helper({
         'rows': selected_rows,
-        'type': "selection_changed"
+        'type': "change_selection"
     })
 
     widget._handle_qgrid_msg_helper({
@@ -177,11 +179,13 @@ def test_remove_row():
         {
             'name': 'selection_changed',
             'old': [],
-            'new': selected_rows
+            'new': selected_rows,
+            'source': 'gui'
         },
         {
             'name': 'row_removed',
-            'indices': selected_rows
+            'indices': selected_rows,
+            'source': 'gui'
         }
     ]
 
@@ -191,12 +195,12 @@ def test_mixed_type_column():
     df = df.set_index(pd.Index(['yz', 7, 3.2]))
     view = QgridWidget(df=df)
     view._handle_qgrid_msg_helper({
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': 'A',
         'sort_ascending': True
     })
     view._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'A',
         'search_val': None
     })
@@ -208,15 +212,39 @@ def test_nans():
                        ('foo', 'bar')])
     view = QgridWidget(df=df)
     view._handle_qgrid_msg_helper({
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': 1,
         'sort_ascending': True
     })
     view._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 1,
         'search_val': None
     })
+
+
+def test_row_edit_callback():
+    sample_df = create_df()
+
+    def can_edit_row(row):
+        return row['E'] == 'train' and row['F'] == 'bar'
+
+    view = QgridWidget(df=sample_df, row_edit_callback=can_edit_row)
+
+    view._handle_qgrid_msg_helper({
+        'type': 'change_sort',
+        'sort_field': 'index',
+        'sort_ascending': True
+    })
+
+    expected_dict = {
+        0: False,
+        1: True,
+        2: False,
+        3: False
+    }
+
+    assert expected_dict == view._editable_rows
 
 
 def test_period_object_column():
@@ -224,22 +252,22 @@ def test_period_object_column():
     df = pd.DataFrame({'a': 5, 'b': range_index}, index=range_index)
     view = QgridWidget(df=df)
     view._handle_qgrid_msg_helper({
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': 'index',
         'sort_ascending': True
     })
     view._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'index',
         'search_val': None
     })
     view._handle_qgrid_msg_helper({
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': 'b',
         'sort_ascending': True
     })
     view._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'b',
         'search_val': None
     })
@@ -251,7 +279,7 @@ def test_get_selected_df():
     view = QgridWidget(df=sample_df)
     view._handle_qgrid_msg_helper({
         'rows': selected_rows,
-        'type': "selection_changed"
+        'type': "change_selection"
     })
     selected_df = view.get_selected_df()
     assert len(selected_df) == 2
@@ -268,7 +296,7 @@ def test_integer_index_filter():
             'min': 2,
             'type': "slider"
         },
-        'type': "filter_changed"
+        'type': "change_filter"
     })
     filtered_df = view.get_changed_df()
     assert len(filtered_df) == 2
@@ -277,7 +305,7 @@ def test_integer_index_filter():
 def test_series_of_text_filters():
     view = QgridWidget(df=create_df())
     view._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'E',
         'search_val': None
     })
@@ -289,7 +317,7 @@ def test_series_of_text_filters():
             'type': "text",
             'excluded': []
         },
-        'type': "filter_changed"
+        'type': "change_filter"
     })
     filtered_df = view.get_changed_df()
     assert len(filtered_df) == 2
@@ -303,12 +331,12 @@ def test_series_of_text_filters():
             'type': "text",
             'excluded': []
         },
-        'type': "filter_changed"
+        'type': "change_filter"
     })
 
     # ...and apply a text filter on a different column
     view._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'F',
         'search_val': None
     })
@@ -320,7 +348,7 @@ def test_series_of_text_filters():
             'type': "text",
             'excluded': []
         },
-        'type': "filter_changed"
+        'type': "change_filter"
     })
     filtered_df = view.get_changed_df()
     assert len(filtered_df) == 2
@@ -331,7 +359,7 @@ def test_date_index():
     df.set_index('Date', inplace=True)
     view = QgridWidget(df=df)
     view._handle_qgrid_msg_helper({
-        'type': 'filter_changed',
+        'type': 'change_filter',
         'field': 'A',
         'filter_info': {
             'field': 'A',
@@ -349,19 +377,19 @@ def test_multi_index():
                                         'sort_changed'], widget=widget)
 
     widget._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'level_0',
         'search_val': None
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 3,
         'search_val': None
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'filter_changed',
+        'type': 'change_filter',
         'field': 3,
         'filter_info': {
             'field': 3,
@@ -372,7 +400,7 @@ def test_multi_index():
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'filter_changed',
+        'type': 'change_filter',
         'field': 3,
         'filter_info': {
             'field': 3,
@@ -383,7 +411,7 @@ def test_multi_index():
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'filter_changed',
+        'type': 'change_filter',
         'field': 'level_1',
         'filter_info': {
             'field': 'level_1',
@@ -394,13 +422,13 @@ def test_multi_index():
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': 3,
         'sort_ascending': True
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'sort_changed',
+        'type': 'change_sort',
         'sort_field': 'level_0',
         'sort_ascending': True
     })
@@ -514,7 +542,7 @@ def test_object_dtype():
     grid_data = json.loads(widget._df_json)['data']
 
     widget._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'a',
         'search_val': None
     })
@@ -526,7 +554,7 @@ def test_object_dtype():
             'type': "text",
             'excluded': []
         },
-        'type': "filter_changed"
+        'type': "change_filter"
     })
 
     filter_table = widget._filter_tables['a']
@@ -565,7 +593,7 @@ def test_object_dtype_categorical():
     assert not isinstance(constraints_enum[1], dict)
 
     widget._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 0,
         'search_val': None
     })
@@ -577,18 +605,18 @@ def test_object_dtype_categorical():
             'type': "text",
             'excluded': []
         },
-        'type': "filter_changed"
+        'type': "change_filter"
     })
     assert len(widget._df) == 1
     assert widget._df[0][0] == cat_series[0]
 
 
-def test_viewport_changed():
+def test_change_viewport():
     widget = QgridWidget(df=create_large_df())
     event_history = init_event_history(All)
 
     widget._handle_qgrid_msg_helper({
-        'type': 'viewport_changed',
+        'type': 'change_viewport',
         'top': 7124,
         'bottom': 7136
     })
@@ -596,7 +624,7 @@ def test_viewport_changed():
     assert event_history == [
         {
             'name': 'json_updated',
-            'triggered_by': 'viewport_changed',
+            'triggered_by': 'change_viewport',
             'range': (7024, 7224)
         },
         {
@@ -607,25 +635,25 @@ def test_viewport_changed():
     ]
 
 
-def test_viewport_changed_filter():
+def test_change_filter_viewport():
     widget = QgridWidget(df=create_large_df())
     event_history = init_event_history(All)
 
     widget._handle_qgrid_msg_helper({
-        'type': 'get_column_min_max',
+        'type': 'show_filter_dropdown',
         'field': 'B (as str)',
         'search_val': None
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'viewport_changed_filter',
+        'type': 'change_filter_viewport',
         'field': 'B (as str)',
         'top': 556,
         'bottom': 568
     })
 
     widget._handle_qgrid_msg_helper({
-        'type': 'viewport_changed_filter',
+        'type': 'change_filter_viewport',
         'field': 'B (as str)',
         'top': 302,
         'bottom': 314
@@ -651,30 +679,52 @@ def test_viewport_changed_filter():
     ]
 
 
-def test_selection_changed():
-    widget = QgridWidget(df=create_df())
+def test_change_selection():
+    widget = QgridWidget(df=create_large_df(size=10))
     event_history = init_event_history('selection_changed', widget=widget)
 
     widget._handle_qgrid_msg_helper({
-        'type': 'selection_changed',
+        'type': 'change_selection',
         'rows': [5]
     })
+    assert widget._selected_rows == [5]
 
     widget._handle_qgrid_msg_helper({
-        'type': 'selection_changed',
+        'type': 'change_selection',
         'rows': [7, 8]
     })
+    assert widget._selected_rows == [7, 8]
+
+    widget.change_selection([3, 5, 6])
+    assert widget._selected_rows == [3, 5, 6]
+
+    widget.change_selection()
+    assert widget._selected_rows == []
 
     assert event_history == [
         {
             'name': 'selection_changed',
             'old': [],
-            'new': [5]
+            'new': [5],
+            'source': 'gui'
         },
         {
             'name': 'selection_changed',
             'old': [5],
-            'new': [7, 8]
+            'new': [7, 8],
+            'source': 'gui'
+        },
+        {
+            'name': 'selection_changed',
+            'old': [7, 8],
+            'new': [3, 5, 6],
+            'source': 'api'
+        },
+        {
+            'name': 'selection_changed',
+            'old': [3, 5, 6],
+            'new': [],
+            'source': 'api'
         },
     ]
 
@@ -689,3 +739,90 @@ def test_instance_created():
         }
     ]
     assert qgrid_widget.id
+
+
+def test_add_row():
+    event_history = init_event_history(All)
+    df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
+    df.set_index('baz', inplace=True, drop=True)
+
+    q = QgridWidget(df=df)
+
+    new_row = [
+        ('baz', 43),
+        ('bar', "new bar"),
+        ('boo', 58),
+        ('foo', "new foo")
+    ]
+
+    q.add_row(new_row)
+
+    assert q._df.loc[43, 'foo'] == 'new foo'
+    assert q._df.loc[42, 'foo'] == 'hello'
+
+    assert event_history == [
+        {'name': 'instance_created'},
+        {
+            'name': 'json_updated',
+            'range': (0, 100),
+            'triggered_by': 'add_row'
+        },
+        {
+            'name': 'row_added',
+            'index': 43,
+            'source': 'api'
+        }
+    ]
+
+
+def test_remove_row():
+    event_history = init_event_history(All)
+    df = create_df()
+
+    widget = QgridWidget(df=df)
+    widget.remove_row(rows=[2])
+
+    assert 2 not in widget._df.index
+    assert len(widget._df) == 3
+
+    assert event_history == [
+        {'name': 'instance_created'},
+        {
+            'name': 'json_updated',
+            'range': (0, 100),
+            'triggered_by': 'remove_row'
+        },
+        {
+            'name': 'row_removed',
+            'indices': [2],
+            'source': 'api'
+        }
+    ]
+
+
+def test_edit_cell():
+    df = pd.DataFrame({'foo': ['hello'], 'bar': ['world'], 'baz': [42], 'boo': [57]})
+    df.set_index('baz', inplace=True, drop=True)
+
+    q = QgridWidget(df=df)
+    event_history = init_event_history(All)
+
+    q.edit_cell(42, 'foo', 'hola')
+
+    assert q._df.loc[42, 'foo'] == 'hola'
+
+    assert event_history == [
+        {
+            'name': 'json_updated',
+            'range': (0, 100),
+            'triggered_by': 'edit_cell'
+        },
+        {
+            'name': 'cell_edited',
+            'index': 42,
+            'column': 'foo',
+            'old': 'hello',
+            'new': 'hola',
+            'source': 'api'
+        }
+    ]

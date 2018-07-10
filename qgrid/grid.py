@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 
+from types import FunctionType
 from IPython.display import display
 from numbers import Integral
 from traitlets import (
@@ -51,7 +52,19 @@ class _DefaultSettings(object):
             'sortable': True,
             'filterable': True,
             'highlightSelectedCell': False,
-            'highlightSelectedRow': True
+            'highlightSelectedRow': True,
+            'boldIndex': True
+        }
+        self._column_options = {
+            'editable': True,
+            # the following options are supported by SlickGrid
+            'defaultSortAsc': True,
+            'maxWidth': None,
+            'minWidth': 30,
+            'resizable': True,
+            'sortable': True,
+            'toolTip': "",
+            'width': None
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -60,13 +73,15 @@ class _DefaultSettings(object):
         self._grid_options[optname] = optvalue
 
     def set_defaults(self, show_toolbar=None, precision=None,
-                     grid_options=None):
+                     grid_options=None, column_options=None):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
         if precision is not None:
             self._precision = precision
         if grid_options is not None:
             self._grid_options = grid_options
+        if column_options is not None:
+            self._column_options = column_options
 
     @property
     def show_toolbar(self):
@@ -79,6 +94,10 @@ class _DefaultSettings(object):
     @property
     def precision(self):
         return self._precision or pd.get_option('display.precision') - 1
+
+    @property
+    def column_options(self):
+        return self._column_options
 
 
 class _EventHandlers(object):
@@ -113,7 +132,10 @@ defaults = _DefaultSettings()
 handlers = _EventHandlers()
 
 
-def set_defaults(show_toolbar=None, precision=None, grid_options=None):
+def set_defaults(show_toolbar=None,
+                 precision=None,
+                 grid_options=None,
+                 column_options=None):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
@@ -137,7 +159,8 @@ def set_defaults(show_toolbar=None, precision=None, grid_options=None):
     """
     defaults.set_defaults(show_toolbar=show_toolbar,
                           precision=precision,
-                          grid_options=grid_options)
+                          grid_options=grid_options,
+                          column_options=column_options)
 
 
 def on(names, handler):
@@ -296,8 +319,13 @@ def disable():
     enable(dataframe=False, series=False)
 
 
-def show_grid(data_frame, show_toolbar=None,
-              precision=None, grid_options=None):
+def show_grid(data_frame,
+              show_toolbar=None,
+              precision=None,
+              grid_options=None,
+              column_options=None,
+              column_definitions=None,
+              row_edit_callback=None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -310,15 +338,135 @@ def show_grid(data_frame, show_toolbar=None,
     DataFrame before being passed in to the QgridWidget constructor as the
     ``df`` kwarg.
 
-    See the ``QgridWidget`` documentation for descriptions of all of
-    the options that can be set via it's constructor.
-
     :rtype: QgridWidget
+
+    Parameters
+    ----------
+    data_frame : DataFrame
+        The DataFrame that will be displayed by this instance of
+        QgridWidget.
+    grid_options : dict
+        Options to use when creating the SlickGrid control (i.e. the
+        interactive grid).  See the Notes section below for more information
+        on the available options, as well as the default options that this
+        widget uses.
+    precision : integer
+        The number of digits of precision to display for floating-point
+        values.  If unset, we use the value of
+        `pandas.get_option('display.precision')`.
+    show_toolbar : bool
+        Whether to show a toolbar with options for adding/removing rows.
+        Adding/removing rows is an experimental feature which only works
+        with DataFrames that have an integer index.
+    column_options : dict
+        Column options that are to be applied to every column. See the
+        Notes section below for more information on the available options,
+        as well as the default options that this widget uses.
+    column_definitions : dict
+        Column options that are to be applied to individual
+        columns. The keys of the dict should be the column names, and each
+        value should be the column options for a particular column,
+        represented as a dict. The available options for each column are the
+        same options that are available to be set for all columns via the
+        ``column_options`` parameter. See the Notes section below for more
+        information on those options.
+    row_edit_callback : callable
+        A callable that is called to determine whether a particular row
+        should be editable or not. Its signature should be
+        ``callable(row)``, where ``row`` is a dictionary which contains a
+        particular row's values, keyed by column name. The callback should
+        return True if the provided row should be editable, and False
+        otherwise.
+
+
+    Notes
+    -----
+    The following dictionary is used for ``grid_options`` if none are
+    provided explicitly::
+
+        {
+            # SlickGrid options
+            'fullWidthRows': True,
+            'syncColumnCellResize': True,
+            'forceFitColumns': True,
+            'defaultColumnWidth': 150,
+            'rowHeight': 28,
+            'enableColumnReorder': False,
+            'enableTextSelectionOnCells': True,
+            'editable': True,
+            'autoEdit': False,
+            'explicitInitialization': True,
+
+            # Qgrid options
+            'maxVisibleRows': 15,
+            'minVisibleRows': 8,
+            'sortable': True,
+            'filterable': True,
+            'highlightSelectedCell': False,
+            'highlightSelectedRow': True
+        }
+
+    The first group of options are SlickGrid "grid options" which are
+    described in the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_.
+
+    The second group of option are options that were added specifically
+    for Qgrid and therefore are not documented in the SlickGrid documentation.
+    The following bullet points describe these options.
+
+    * **maxVisibleRows** The maximum number of rows that Qgrid will show.
+    * **minVisibleRows** The minimum number of rows that Qgrid will show
+    * **sortable** Whether the Qgrid instance will allow the user to sort
+      columns by clicking the column headers. When this is set to ``False``,
+      nothing will happen when users click the column headers.
+    * **filterable** Whether the Qgrid instance will allow the user to filter
+      the grid. When this is set to ``False`` the filter icons won't be shown
+      for any columns.
+    * **highlightSelectedCell** If you set this to True, the selected cell
+      will be given a light blue border.
+    * **highlightSelectedRow** If you set this to False, the light blue
+      background that's shown by default for selected rows will be hidden.
+
+    The following dictionary is used for ``column_options`` if none are
+    provided explicitly::
+
+        {
+            # SlickGrid column options
+            'defaultSortAsc': True,
+            'maxWidth': None,
+            'minWidth': 30,
+            'resizable': True,
+            'sortable': True,
+            'toolTip': "",
+            'width': None
+
+            # Qgrid column options
+            'editable': True,
+        }
+
+    The first group of options are SlickGrid "column options" which are
+    described in the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Column-Options>`_.
+
+    The ``editable`` option was added specifically for Qgrid and therefore is
+    not documented in the SlickGrid documentation.  This option specifies
+    whether a column should be editable or not.
 
     See Also
     --------
+    set_defaults : Permanently set global defaults for the parameters
+                   of ``show_grid``, with the exception of the ``data_frame``
+                   and ``column_definitions`` parameters, since those
+                   depend on the particular set of data being shown by an
+                   instance, and therefore aren't parameters we would want
+                   to set for all QgridWidet instances.
+    set_grid_option : Permanently set global defaults for individual
+                      grid options.  Does so by changing the defaults
+                      that the ``show_grid`` method uses for the
+                      ``grid_options`` parameter.
     QgridWidget : The widget class that is instantiated and returned by this
-                  function.
+                  method.
+
     """
 
     if show_toolbar is None:
@@ -327,6 +475,12 @@ def show_grid(data_frame, show_toolbar=None,
         precision = defaults.precision
     if not isinstance(precision, Integral):
         raise TypeError("precision must be int, not %s" % type(precision))
+    if column_options is None:
+        column_options = defaults.column_options
+    else:
+        options = defaults.column_options.copy()
+        options.update(column_options)
+        column_options = options
     if grid_options is None:
         grid_options = defaults.grid_options
     else:
@@ -346,9 +500,14 @@ def show_grid(data_frame, show_toolbar=None,
             "data_frame must be DataFrame or Series, not %s" % type(data_frame)
         )
 
+    column_definitions = (column_definitions or {})
+
     # create a visualization for the dataframe
     return QgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
+                       column_options=column_options,
+                       column_definitions=column_definitions,
+                       row_edit_callback=row_edit_callback,
                        show_toolbar=show_toolbar)
 
 
@@ -365,91 +524,21 @@ def stringify(x):
 @widgets.register()
 class QgridWidget(widgets.DOMWidget):
     """
-    The widget class which is instantiated by the 'show_grid' method, and
-    can also be constructed directly.  All of the parameters listed below
-    can be read/updated after instantiation via attributes of the same name
-    as the parameter (since they're implemented as traitlets).
+    The widget class which is instantiated by the ``show_grid`` method. This
+    class can be constructed directly but that's not recommended because
+    then default options have to be specified explicitly (since default
+    options are normally provided by the ``show_grid`` method).
 
-    When new values are set for any of these options after instantiation
-    (such as df, grid_options, etc), the change takes effect immediately by
-    regenerating the SlickGrid control.
-
-    Parameters
-    ----------
-    df : DataFrame
-        The DataFrame that will be displayed by this instance of
-        QgridWidget.
-    grid_options : dict
-        Options to use when creating the SlickGrid control (i.e. the
-        interactive grid).  See the Notes section below for more information
-        on the available options, as well as the default options that this
-        widget uses.
-    precision : integer
-        The number of digits of precision to display for floating-point
-        values.  If unset, we use the value of
-        `pandas.get_option('display.precision')`.
-    show_toolbar : bool
-        Whether to show a toolbar with options for adding/removing rows.
-        Adding/removing rows is an experimental feature which only works
-        with DataFrames that have an integer index.
-
-    Notes
-    -----
-    The following dictionary is used for ``grid_options`` if none are
-    provided explicitly::
-
-        {
-            'fullWidthRows': True,
-            'syncColumnCellResize': True,
-            'forceFitColumns': True,
-            'defaultColumnWidth': 150,
-            'rowHeight': 28,
-            'enableColumnReorder': False,
-            'enableTextSelectionOnCells': True,
-            'editable': True,
-            'autoEdit': False,
-            'explicitInitialization': True,
-            'maxVisibleRows': 15,
-            'minVisibleRows': 8,
-            'sortable': True,
-            'filterable': True,
-            'highlightSelectedCell': False,
-            'highlightSelectedRow': True
-        }
-
-    Most of these options are SlickGrid options which are described
-    in the `SlickGrid documentation
-    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_. The
-    exceptions are the last 6 options listed, which are options that were
-    added specifically for Qgrid and therefore are not documented in the
-    SlickGrid documentation.
-
-    The first two, `maxVisibleRows` and `minVisibleRows`, allow you to set
-    an upper and lower bound on the height of your Qgrid widget in terms of
-    number of rows that are visible.
-
-    The next two, `sortable` and `filterable`, control whether qgrid will
-    allow the user to sort and filter, respectively. If you set `sortable` to
-    False nothing will happen when the column headers are clicked.
-    If you set `filterable` to False, the filter icons won't be shown for any
-    columns.
-
-    The last two, `highlightSelectedCell` and `highlightSelectedRow`, control
-    how the styling of qgrid changes when a cell is selected. If you set
-    `highlightSelectedCell` to True, the selected cell will be given
-    a light blue border. If you set `highlightSelectedRow` to False, the
-    light blue background that's shown by default for selected rows will be
-    hidden.
+    The constructor for this class takes all the same parameters as
+    ``show_grid``, with one exception, which is that the required
+    ``data_frame`` parameter is replaced by an optional keyword argument
+    called ``df``.
 
     See Also
     --------
-    set_defaults : Permanently set global defaults for the parameters
-                   of the QgridWidget constructor, with the exception of
-                   the ``df`` parameter.
-    set_grid_option : Permanently set global defaults for individual
-                      SlickGrid options.  Does so by changing the default
-                      for the ``grid_options`` parameter of the QgridWidget
-                      constructor.
+    show_grid : The method that should be used to construct QgridWidget
+                instances, because it provides reasonable defaults for all
+                of the qgrid options.
 
     Attributes
     ----------
@@ -460,11 +549,16 @@ class QgridWidget(widgets.DOMWidget):
         does reflect sorting/filtering/editing changes, use the
         ``get_changed_df()`` method.
     grid_options : dict
-        Get/set the SlickGrid options being used by the current instance.
+        Get/set the grid options being used by the current instance.
     precision : integer
         Get/set the precision options being used by the current instance.
     show_toolbar : bool
         Get/set the show_toolbar option being used by the current instance.
+    column_options : bool
+        Get/set the column options being used by the current instance.
+    column_definitions : bool
+        Get/set the column definitions (column-specific options)
+        being used by the current instance.
 
     """
 
@@ -472,8 +566,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.0.6-beta.6').tag(sync=True)
-    _model_module_version = Unicode('1.0.6-beta.6').tag(sync=True)
+    _view_module_version = Unicode('1.1.0-beta.0').tag(sync=True)
+    _model_module_version = Unicode('1.1.0-beta.0').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -482,6 +576,7 @@ class QgridWidget(widgets.DOMWidget):
     _row_styles = Dict({}, sync=True)
     _disable_grouping = Bool(False)
     _columns = Dict({}, sync=True)
+    _editable_rows = Dict({}, sync=True)
     _filter_tables = Dict({})
     _sorted_column_cache = Dict({})
     _interval_columns = List([], sync=True)
@@ -496,7 +591,10 @@ class QgridWidget(widgets.DOMWidget):
     _multi_index = Bool(False, sync=True)
     _edited = Bool(False)
     _selected_rows = List([])
-    _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100))
+    _viewport_range = Tuple(Integer(),
+                            Integer(),
+                            default_value=(0, 100),
+                            sync=True)
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
     _row_count = Integer(0, sync=True)
     _sort_field = Any(None, sync=True)
@@ -506,6 +604,9 @@ class QgridWidget(widgets.DOMWidget):
     df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
+    column_options = Dict({})
+    column_definitions = Dict({})
+    row_edit_callback = Instance(FunctionType, sync=False, allow_none=True)
     show_toolbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
@@ -598,10 +699,10 @@ class QgridWidget(widgets.DOMWidget):
           data (in json format) down to the browser. This happens as a side
           effect of certain actions such as scrolling, sorting, and filtering.
 
-            * **triggered_by** The name of the event that resulted in rows of
-              data being sent down to the browser.  Possible values are
-              ``viewport_changed``, ``filter_changed``, ``sort_changed``,
-              ``add_row``, and ``remove_row``.
+            * **triggered_by** The name of the event that resulted in
+              rows of data being sent down to the browser.  Possible values
+              are ``change_viewport``, ``change_filter``, ``change_sort``,
+              ``add_row``, ``remove_row``, and ``edit_cell``.
             * **range** A tuple specifying the range of rows that have been
               sent down to the browser.
 
@@ -609,12 +710,16 @@ class QgridWidget(widgets.DOMWidget):
           in the grid toolbar.
 
             * **index** The index of the newly added row.
+            * **source** The source of this event.  Possible values are
+              ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **row_removed** The user added removed one or more rows using the
           "Remove Row" button in the grid toolbar.
 
             * **indices** The indices of the removed rows, specified as an
               array of integers.
+            * **source** The source of this event.  Possible values are
+              ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **selection_changed** The user changed which rows were highlighted
           in the grid.
@@ -623,6 +728,8 @@ class QgridWidget(widgets.DOMWidget):
               selected rows.
             * **new** The indices of the rows that are now selected, again
               specified as an array.
+            * **source** The source of this event.  Possible values are
+              ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **sort_changed** The user changed the sort setting for the grid.
 
@@ -885,11 +992,20 @@ class QgridWidget(widgets.DOMWidget):
                     level = self._primary_key.index(col_name)
                     if level == 0:
                         cur_column['first_index'] = True
-                    if self._multi_index and level == (len(self._primary_key) - 1):
+                    if self._multi_index and \
+                       level == (len(self._primary_key) - 1):
                         cur_column['last_index'] = True
 
                 cur_column['position'] = i
+                cur_column['field'] = col_name
+                cur_column['id'] = col_name
+                cur_column['cssClass'] = cur_column['type']
+
                 columns[col_name] = cur_column
+
+                columns[col_name].update(self.column_options)
+                if col_name in self.column_definitions.keys():
+                    columns[col_name].update(self.column_definitions[col_name])
 
             self._columns = columns
 
@@ -927,6 +1043,14 @@ class QgridWidget(widgets.DOMWidget):
                                       double_precision=self.precision)
 
         self._df_json = df_json
+
+        if self.row_edit_callback is not None:
+            editable_rows = {}
+            for index, row in df.iterrows():
+                editable_rows[int(row[self._index_col_name])] = \
+                    self.row_edit_callback(row)
+            self._editable_rows = editable_rows
+
         if fire_data_change_event:
             self._notify_listeners({
                 'name': 'json_updated',
@@ -1008,7 +1132,7 @@ class QgridWidget(widgets.DOMWidget):
         self._sort_helper_columns[col_name] = sort_column_name
         return sort_column_name
 
-    def _handle_get_column_min_max(self, content):
+    def _handle_show_filter_dropdown(self, content):
         col_name = content['field']
         col_info = self._columns[col_name]
         if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
@@ -1254,7 +1378,7 @@ class QgridWidget(widgets.DOMWidget):
                 )
                 conditions.append(col_series.isin(selected_values))
 
-    def _handle_filter_changed(self, content):
+    def _handle_change_filter(self, content):
         col_name = content['field']
         columns = self._columns.copy()
         col_info = columns[col_name]
@@ -1287,7 +1411,7 @@ class QgridWidget(widgets.DOMWidget):
 
         self._sorted_column_cache = {}
         self._update_sort()
-        self._update_table(triggered_by='filter_changed')
+        self._update_table(triggered_by='change_filter')
         self._ignore_df_changed = False
 
     def _handle_qgrid_msg(self, widget, content, buffers=None):
@@ -1302,7 +1426,7 @@ class QgridWidget(widgets.DOMWidget):
         if 'type' not in content:
             return
 
-        if content['type'] == 'cell_change':
+        if content['type'] == 'edit_cell':
             col_info = self._columns[content['column']]
             try:
                 location = (self._df.index[content['row_index']],
@@ -1323,7 +1447,8 @@ class QgridWidget(widgets.DOMWidget):
                     'index': location[0],
                     'column': location[1],
                     'old': old_value,
-                    'new': val_to_set
+                    'new': val_to_set,
+                    'source': 'gui'
                 })
 
             except (ValueError, TypeError):
@@ -1337,24 +1462,17 @@ class QgridWidget(widgets.DOMWidget):
                     'triggered_by': 'add_row'
                 })
                 return
-        elif content['type'] == 'selection_changed':
-            old_selection = self._selected_rows
-            self._selected_rows = content['rows']
-
-            # if the selection didn't change, just return without firing
-            # the event
-            if old_selection == self._selected_rows:
-                return
-
-            self._notify_listeners({
-                'name': 'selection_changed',
-                'old': old_selection,
-                'new': self._selected_rows
-            })
-        elif content['type'] == 'viewport_changed':
+        elif content['type'] == 'change_selection':
+            self._change_selection(content['rows'], 'gui')
+        elif content['type'] == 'change_viewport':
             old_viewport_range = self._viewport_range
             self._viewport_range = (content['top'], content['bottom'])
-            self._update_table(triggered_by='viewport_changed')
+
+            # if the viewport didn't change, do nothing
+            if old_viewport_range == self._viewport_range:
+                return
+
+            self._update_table(triggered_by='change_viewport')
             self._notify_listeners({
                 'name': 'viewport_changed',
                 'old': old_viewport_range,
@@ -1362,18 +1480,20 @@ class QgridWidget(widgets.DOMWidget):
             })
 
         elif content['type'] == 'add_row':
-            row_index = self.add_row()
+            row_index = self._duplicate_last_row()
             self._notify_listeners({
                 'name': 'row_added',
-                'index': row_index
+                'index': row_index,
+                'source': 'gui'
             })
         elif content['type'] == 'remove_row':
-            removed_indices = self.remove_row()
+            removed_indices = self._remove_rows()
             self._notify_listeners({
                 'name': 'row_removed',
-                'indices': removed_indices
+                'indices': removed_indices,
+                'source': 'gui'
             })
-        elif content['type'] == 'viewport_changed_filter':
+        elif content['type'] == 'change_filter_viewport':
             col_name = content['field']
             col_info = self._columns[col_name]
             col_filter_table = self._filter_tables[col_name]
@@ -1398,14 +1518,14 @@ class QgridWidget(widgets.DOMWidget):
                 'old': old_viewport_range,
                 'new': col_info['viewport_range']
             })
-        elif content['type'] == 'sort_changed':
+        elif content['type'] == 'change_sort':
             old_column = self._sort_field
             old_ascending = self._sort_ascending
             self._sort_field = content['sort_field']
             self._sort_ascending = content['sort_ascending']
             self._sorted_column_cache = {}
             self._update_sort()
-            self._update_table(triggered_by='sort_changed')
+            self._update_table(triggered_by='change_sort')
             self._notify_listeners({
                 'name': 'sort_changed',
                 'old': {
@@ -1417,14 +1537,14 @@ class QgridWidget(widgets.DOMWidget):
                     'ascending': self._sort_ascending
                 }
             })
-        elif content['type'] == 'get_column_min_max':
-            self._handle_get_column_min_max(content)
+        elif content['type'] == 'show_filter_dropdown':
+            self._handle_show_filter_dropdown(content)
             self._notify_listeners({
                 'name': 'filter_dropdown_shown',
                 'column': content['field']
             })
-        elif content['type'] == 'filter_changed':
-            self._handle_filter_changed(content)
+        elif content['type'] == 'change_filter':
+            self._handle_change_filter(content)
             self._notify_listeners({
                 'name': 'filter_changed',
                 'column': content['field']
@@ -1470,10 +1590,41 @@ class QgridWidget(widgets.DOMWidget):
         """
         return self._selected_rows
 
-    def add_row(self):
+    def add_row(self, row=None):
         """
-        Append a row at the end of the dataframe by duplicating the
-        last row and incrementing it's index by 1. The feature is only
+        Append a row at the end of the DataFrame.  Values for the new row
+        can be provided via the ``row`` argument, which is optional for
+        DataFrames that have an integer index, and required otherwise.
+        If the ``row`` argument is not provided, the last row will be
+        duplicated and the index of the new row will be the index of
+        the last row plus one.
+
+        Parameters
+        ----------
+        row : list (default: None)
+            A list of 2-tuples of (column name, column value) that specifies
+            the values for the new row.
+
+        See Also
+        --------
+        QgridWidget.remove_rows:
+            The method for removing a row (or rows).
+        """
+        if row is None:
+            added_index = self._duplicate_last_row()
+        else:
+            added_index = self._add_row(row)
+
+        self._notify_listeners({
+            'name': 'row_added',
+            'index': added_index,
+            'source': 'api'
+        })
+
+    def _duplicate_last_row(self):
+        """
+        Append a row at the end of the DataFrame by duplicating the
+        last row and incrementing it's index by 1. The method is only
         available for DataFrames that have an integer index.
         """
         df = self._df
@@ -1497,26 +1648,153 @@ class QgridWidget(widgets.DOMWidget):
                            scroll_to_row=df.index.get_loc(last.name))
         return last.name
 
-    def remove_row(self):
+    def _add_row(self, row):
         """
-        Remove the currently selected row (or rows) from the table.
+        Append a new row to the end of the DataFrame given a list of 2-tuples
+        of (column name, column value). This method will work for DataFrames
+        with arbitrary index types.
         """
-        if self._multi_index:
-            msg = "Cannot remove a row from a table with a multi index"
+        df = self._df
+
+        col_names, col_data = zip(*row)
+        col_names = list(col_names)
+        col_data = list(col_data)
+        index_col_val = dict(row)[df.index.name]
+
+        # check that the given column names match what
+        # already exists in the dataframe
+        required_cols = set(df.columns.values).union({df.index.name}) - \
+            {self._index_col_name}
+        if set(col_names) != required_cols:
+            msg = "Cannot add row -- column names don't match in "\
+                  "the existing dataframe"
             self.send({
                 'type': 'show_error',
                 'error_msg': msg,
-                'triggered_by': 'remove_row'
+                'triggered_by': 'add_row'
             })
             return
-        selected_names = \
-            list(map(lambda x: self._df.iloc[x].name, self._selected_rows))
+
+        for i, s in enumerate(col_data):
+            if col_names[i] == df.index.name:
+                continue
+
+            df.loc[index_col_val, col_names[i]] = s
+            self._unfiltered_df.loc[index_col_val, col_names[i]] = s
+
+        self._update_table(triggered_by='add_row',
+                           scroll_to_row=df.index.get_loc(index_col_val),
+                           fire_data_change_event=True)
+
+        return index_col_val
+
+    def edit_cell(self, index, column, value):
+        old_value = self._df.loc[index, column]
+        self._df.loc[index, column] = value
+        self._unfiltered_df.loc[index, column] = value
+        self._update_table(triggered_by='edit_cell',
+                           fire_data_change_event=True)
+
+        self._notify_listeners({
+            'name': 'cell_edited',
+            'index': index,
+            'column': column,
+            'old': old_value,
+            'new': value,
+            'source': 'api'
+        })
+
+    def remove_rows(self, rows=None):
+        """
+        Remove a row (or rows) from the DataFrame.  The indices of the
+        rows to remove can be provided via the optional ``rows`` argument.
+        If the ``rows`` argument is not provided, the row (or rows) that are
+        currently selected in the UI will be removed.
+
+        Parameters
+        ----------
+        rows : list (default: None)
+            A list of indices of the rows to remove from the DataFrame. For
+            a multi-indexed DataFrame, each index in the list should be a
+            tuple, with each value in each tuple corresponding to a level of
+            the MultiIndex.
+
+        See Also
+        --------
+        QgridWidget.add_row:
+            The method for adding a row.
+        QgridWidget.remove_row:
+            Alias for this method.
+        """
+        row_indices = self._remove_rows(rows=rows)
+        self._notify_listeners({
+            'name': 'row_removed',
+            'indices': row_indices,
+            'source': 'api'
+        })
+        return row_indices
+
+    def remove_row(self, rows=None):
+        """
+        Alias for ``remove_rows``, which is provided for convenience
+        because this was the previous name of that method.
+        """
+        return self.remove_rows(rows)
+
+    def _remove_rows(self, rows=None):
+        if rows is not None:
+            selected_names = rows
+        else:
+            selected_names = \
+                list(map(lambda x: self._df.iloc[x].name, self._selected_rows))
+
         self._df.drop(selected_names, inplace=True)
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
         self._update_table(triggered_by='remove_row')
         return selected_names
 
+    def change_selection(self, rows=[]):
+        """
+        Select a row (or rows) in the UI.  The indices of the
+        rows to select are provided via the optional ``rows`` argument.
+
+        Parameters
+        ----------
+        rows : list (default: [])
+            A list of indices of the rows to select. For a multi-indexed
+            DataFrame, each index in the list should be a tuple, with each
+            value in each tuple corresponding to a level of the MultiIndex.
+            The default value of ``[]`` results in the no rows being
+            selected (i.e. it clears the selection).
+        """
+        new_selection = \
+            list(map(lambda x: self._df.index.get_loc(x), rows))
+
+        self._change_selection(new_selection, 'api', send_msg_to_js=True)
+
+    def _change_selection(self, rows, source, send_msg_to_js=False):
+        old_selection = self._selected_rows
+        self._selected_rows = rows
+
+        # if the selection didn't change, just return without firing
+        # the event
+        if old_selection == self._selected_rows:
+            return
+
+        if send_msg_to_js:
+            data_to_send = {
+                'type': 'change_selection',
+                'rows': rows
+            }
+            self.send(data_to_send)
+
+        self._notify_listeners({
+            'name': 'selection_changed',
+            'old': old_selection,
+            'new': self._selected_rows,
+            'source': source
+        })
 
 # Alias for legacy support, since we changed the capitalization
 QGridWidget = QgridWidget
