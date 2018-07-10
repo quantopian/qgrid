@@ -566,8 +566,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.1.0-beta.0').tag(sync=True)
-    _model_module_version = Unicode('1.1.0-beta.0').tag(sync=True)
+    _view_module_version = Unicode('1.1.0-beta.1').tag(sync=True)
+    _model_module_version = Unicode('1.1.0-beta.1').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -1795,6 +1795,34 @@ class QgridWidget(widgets.DOMWidget):
             'new': self._selected_rows,
             'source': source
         })
+
+    def toggle_editable(self):
+        """
+        Change whether the grid is editable or not, without rebuilding
+        the entire grid widget.
+        """
+        self.change_grid_option('editable', not self.grid_options['editable'])
+
+    def change_grid_option(self, option_name, option_value):
+        """
+        Change a SlickGrid grid option without rebuilding the entire grid
+        widget. Not all options are supported at this point so this
+        method should be considered experimental.
+
+        Parameters
+        ----------
+        option_name : str
+            The name of the grid option to be changed.
+        option_value : str
+            The new value for the grid option.
+        """
+        self.grid_options[option_name] = option_value
+        self.send({
+            'type': 'change_grid_option',
+            'option_name': option_name,
+            'option_value': option_value
+        })
+
 
 # Alias for legacy support, since we changed the capitalization
 QGridWidget = QgridWidget

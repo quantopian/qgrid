@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.1.0-beta.0',
-      _view_module_version : '^1.1.0-beta.0',
+      _model_module_version : '^1.1.0-beta.1',
+      _view_module_version : '^1.1.0-beta.1',
       _df_json: '',
       _columns: {}
     });
@@ -352,8 +352,7 @@ class QgridView extends widgets.DOMWidgetView {
       // don't allow editing index columns
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
-
-        slick_column.cssClass += ' idx-col';
+        
         if (cur_column.first_index){
           slick_column.cssClass += ' first-idx-col';
         }
@@ -682,7 +681,7 @@ class QgridView extends widgets.DOMWidgetView {
           this.buttons.tooltip('disable');
         }
       }
-      if (this.update_timeout){
+      if (this.update_timeout) {
         clearTimeout(this.update_timeout);
       }
       this.update_timeout = setTimeout(() => {
@@ -691,7 +690,7 @@ class QgridView extends widgets.DOMWidgetView {
         this.multi_index = this.model.get("_multi_index");
         var data_view = this.create_data_view(df_json.data);
 
-        if (msg.triggered_by === 'change_viewport'){
+        if (msg.triggered_by === 'change_viewport') {
           if (this.next_viewport_msg) {
             this.send(this.next_viewport_msg);
             this.next_viewport_msg = null;
@@ -701,7 +700,7 @@ class QgridView extends widgets.DOMWidgetView {
           }
         }
 
-        if (msg.triggered_by == 'change_sort' && this.sort_indicator){
+        if (msg.triggered_by == 'change_sort' && this.sort_indicator) {
           var asc = this.model.get('_sort_ascending');
           this.sort_indicator.removeClass(
               'fa-spinner fa-spin fa-sort-asc fa-sort-desc'
@@ -712,7 +711,7 @@ class QgridView extends widgets.DOMWidgetView {
         }
 
         let top_row = null;
-        if (msg.triggered_by === 'remove_row'){
+        if (msg.triggered_by === 'remove_row') {
           top_row = this.slick_grid.getViewport().top;
         }
 
@@ -720,7 +719,7 @@ class QgridView extends widgets.DOMWidgetView {
 
         var skip_grouping = false;
         if (this.multi_index) {
-          for (var i=1; i < this.filter_list.length; i++) {
+          for (var i = 1; i < this.filter_list.length; i++) {
             var cur_filter = this.filter_list[i];
             if (cur_filter.is_active()) {
               skip_grouping = true;
@@ -737,7 +736,7 @@ class QgridView extends widgets.DOMWidgetView {
         this.slick_grid.render();
 
         if ((msg.triggered_by == 'add_row' ||
-          msg.triggered_by == 'remove_row') && !this.has_active_filter()) {
+            msg.triggered_by == 'remove_row') && !this.has_active_filter()) {
           this.update_size();
         }
         this.update_timeout = null;
@@ -760,19 +759,20 @@ class QgridView extends widgets.DOMWidgetView {
           'type': 'change_selection'
         });
       }, 100);
-    } else if (msg.type == 'toggle_editable') {
-        if (this.slick_grid.getOptions().editable == false) {
-          this.slick_grid.setOptions({'editable': true});
-        } else {
-          this.slick_grid.setOptions({'editable': false});
-        }
+    } else if (msg.type == 'change_grid_option') {
+      var opt_name = msg.option_name;
+      var opt_val = msg.option_value;
+      if (this.slick_grid.getOptions()[opt_name] != opt_val) {
+        this.slick_grid.setOptions({[opt_name]: opt_val});
+        this.slick_grid.resizeCanvas();
+      }
     } else if (msg.type == 'change_selection') {
-        this.ignore_selection_changed = true;
-        this.slick_grid.setSelectedRows(msg.rows);
-        if (msg.rows && msg.rows.length > 0) {
-          this.slick_grid.scrollRowIntoView(msg.rows[0]);
-        }
-        this.ignore_selection_changed = false;
+      this.ignore_selection_changed = true;
+      this.slick_grid.setSelectedRows(msg.rows);
+      if (msg.rows && msg.rows.length > 0) {
+        this.slick_grid.scrollRowIntoView(msg.rows[0]);
+      }
+      this.ignore_selection_changed = false;
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
