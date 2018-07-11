@@ -90,10 +90,10 @@ with a newer version of either dependency.*
 What's New
 ----------
 **Column-specific options (as of 1.1.0)**:
-Thanks to a significant `PR from the community <https://github.com/quantopian/qgrid/pull/191>`_, Qgrid users now have the ability to set a number of options on a per column basis.  This allows you to do things like explicitly specify which column should be sortable, filterable, editable, etc.  For example, if you wanted to prevent filtering on all columns except for a column named `'A'`, you could do the following::
+Thanks to a significant `PR from the community <https://github.com/quantopian/qgrid/pull/191>`_, Qgrid users now have the ability to set a number of options on a per column basis.  This allows you to do things like explicitly specify which column should be sortable, filterable, editable, etc.  For example, if you wanted to prevent editing on all columns except for a column named `'A'`, you could do the following::
 
-    col_opts = { 'filterable': False }
-    col_defs = { 'A': { 'filterable': True } }
+    col_opts = { 'editable': False }
+    col_defs = { 'A': { 'editable': True } }
     qgrid.show_grid(df, column_options=col_opts, column_definitions=col_defs)
 
 See the updated `show_grid <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.show_grid>`_ documentation for more information.
