@@ -843,7 +843,7 @@ class QgridWidget(widgets.DOMWidget):
     def _show_toolbar_changed(self):
         if not self._initialized:
             return
-        self._rebuild_widget()
+        self.send({'type': 'change_show_toolbar'})
 
     def _update_table(self,
                       update_columns=False,
