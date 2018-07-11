@@ -109,9 +109,10 @@ This feature can be thought of as the first row-specific option that qgrid suppo
 **New API methods for dynamically updating an existing qgrid widget (as of 1.1.0)**:
 Adds the following new methods, which can be used to update the state of an existing Qgrid widget without having to call `show_grid` to completely rebuild the widget:
 
-    - `change_selection <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.QgridWidget.change_selection>`_
-    - `toggle_editable <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.QgridWidget.toggle_editable>`_
-    - `change_grid_option <https://qgrid.readthedocs.io/en/v1.1.0/#qgrid.QgridWidget.change_grid_option>`_ (experimental)
+    - `edit_cell <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.edit_cell>`_
+    - `change_selection <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.change_selection>`_
+    - `toggle_editable <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.toggle_editable>`_
+    - `change_grid_option <https://qgrid.readthedocs.io/en/latest/#qgrid.QgridWidget.change_grid_option>`_ (experimental)
 
 **Improved MultiIndex Support (as of 1.0.6-beta.6)**:
 Qgrid now displays multi-indexed DataFrames with some of the index cells merged for readability, as is normally done when viewing DataFrames as a static html table.  The following image shows qgrid displaying a multi-indexed DataFrame that was returned from Quantopian's `Pipeline API <https://www.quantopian.com/tutorials/pipeline?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_:
