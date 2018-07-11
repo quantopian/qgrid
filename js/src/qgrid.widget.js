@@ -36,8 +36,8 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.1.0',
-      _view_module_version : '^1.1.0',
+      _model_module_version : '^1.1.1',
+      _view_module_version : '^1.1.1',
       _df_json: '',
       _columns: {}
     });
@@ -62,16 +62,21 @@ class QgridView extends widgets.DOMWidgetView {
     if (!this.$el.hasClass('q-grid-container')){
       this.$el.addClass('q-grid-container');
     }
-
-    if (this.model.get('show_toolbar')) {
-      this.initialize_toolbar();
-    }
-
+    this.initialize_toolbar();
     this.initialize_slick_grid();
   }
 
   initialize_toolbar() {
-    this.$el.addClass('show-toolbar');
+    if (!this.model.get('show_toolbar')){
+      this.$el.removeClass('show-toolbar');
+    } else {
+      this.$el.addClass('show-toolbar');
+    }
+
+    if (this.toolbar){
+      return;
+    }
+
     this.toolbar = $("<div class='q-grid-toolbar'>").appendTo(this.$el);
 
     let append_btn = (btn_info) => {
@@ -196,7 +201,10 @@ class QgridView extends widgets.DOMWidgetView {
    * type of data in the columns of the DataFrame provided by the user.
    */
   initialize_slick_grid() {
-    this.grid_elem = $("<div class='q-grid'>").appendTo(this.$el);
+
+    if (!this.grid_elem) {
+      this.grid_elem = $("<div class='q-grid'>").appendTo(this.$el);
+    }
 
     // create the table
     var df_json = JSON.parse(this.model.get('_df_json'));
@@ -391,6 +399,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.columns,
       this.grid_options
     );
+    this.grid_elem.data('slickgrid', this.slick_grid);
 
     if (this.grid_options.forceFitColumns){
       this.grid_elem.addClass('force-fit-columns');
@@ -414,6 +423,8 @@ class QgridView extends widgets.DOMWidgetView {
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel());
     this.slick_grid.setCellCssStyles("grouping", this.row_styles);
     this.slick_grid.render();
+    
+    this.update_size();
 
     var render_header_cell = (e, args) => {
       var cur_filter = this.filters[args.column.id];
@@ -664,7 +675,7 @@ class QgridView extends widgets.DOMWidgetView {
    */
   handle_msg(msg) {
     if (msg.type === 'draw_table') {
-      this.initialize_qgrid();
+      this.initialize_slick_grid();
     } else if (msg.type == 'show_error') {
       alert(msg.error_msg);
       if (msg.triggered_by == 'add_row' ||
@@ -773,6 +784,8 @@ class QgridView extends widgets.DOMWidgetView {
         this.slick_grid.scrollRowIntoView(msg.rows[0]);
       }
       this.ignore_selection_changed = false;
+    } else if (msg.type == 'change_show_toolbar') {
+      this.initialize_toolbar();
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);

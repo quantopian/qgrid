@@ -566,8 +566,8 @@ class QgridWidget(widgets.DOMWidget):
     _model_name = Unicode('QgridModel').tag(sync=True)
     _view_module = Unicode('qgrid').tag(sync=True)
     _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('1.1.0').tag(sync=True)
-    _model_module_version = Unicode('1.1.0').tag(sync=True)
+    _view_module_version = Unicode('1.1.1').tag(sync=True)
+    _model_module_version = Unicode('1.1.1').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -843,7 +843,7 @@ class QgridWidget(widgets.DOMWidget):
     def _show_toolbar_changed(self):
         if not self._initialized:
             return
-        self._rebuild_widget()
+        self.send({'type': 'change_show_toolbar'})
 
     def _update_table(self,
                       update_columns=False,
@@ -1689,6 +1689,20 @@ class QgridWidget(widgets.DOMWidget):
         return index_col_val
 
     def edit_cell(self, index, column, value):
+        """
+        Edit a cell of the grid, given the index and column of the cell
+        to edit, as well as the new value of the cell. Results in a
+        ``cell_edited`` event being fired.
+
+        Parameters
+        ----------
+        index : object
+            The index of the row containing the cell that is to be edited.
+        column : str
+            The name of the column containing the cell that is to be edited.
+        value : object
+            The new value for the cell.
+        """
         old_value = self._df.loc[index, column]
         self._df.loc[index, column] = value
         self._unfiltered_df.loc[index, column] = value

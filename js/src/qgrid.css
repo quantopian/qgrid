@@ -155,6 +155,14 @@
   height: 315px !important;
 }
 
+.q-grid-toolbar {
+  display: none;
+}
+
+.show-toolbar .q-grid-toolbar {
+  display: block;
+}
+
 .output_scroll .show-toolbar .q-grid {
   height: 284px !important;
 }
