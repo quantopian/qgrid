@@ -399,6 +399,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.columns,
       this.grid_options
     );
+    this.grid_elem.data('slickgrid', this.slick_grid);
 
     if (this.grid_options.forceFitColumns){
       this.grid_elem.addClass('force-fit-columns');
