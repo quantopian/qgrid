@@ -15,6 +15,12 @@ Qgrid was developed for use in `Quantopian's hosted research environment
 <https://www.quantopian.com/posts/qgrid-now-available-in-research-an-interactive-grid-for-sorting-and-filtering-dataframes?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_
 and is available for use in that environment as of June 2018.
 
+Announcements: Qgrid Webinar
+---------------------------- 
+Qgrid author Tim Shawver will be doing a live webinar on Qgrid this Thursday, July 19th at 12PM EDT. Register for free here: http://bit.ly/QgridIntro .  
+
+This webinar will be interesting both for people that are new to Qgrid, as well as longtime fans that are interested in learning more about the project.
+
 Demo
 ----
 Click the badge below to try out the latest beta of qgrid in Quantopian's hosted research environment. If you're already signed into Quantopian you'll be brought directly to the demo notebook. Otherwise you'll be prompted to register (it's free):
