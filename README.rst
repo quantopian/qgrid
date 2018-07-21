@@ -17,9 +17,9 @@ and is available for use in that environment as of June 2018.
 
 Announcements: Qgrid Webinar
 ---------------------------- 
-Qgrid author Tim Shawver will be doing a live webinar on Qgrid this Thursday, July 19th at 12PM EDT. Register for free here: http://bit.ly/QgridIntro .  
+Qgrid author Tim Shawver recently did a live webinar about Qgrid, and the recording of the webinar is `now available on YouTube <https://www.youtube.com/watch?v=AsJJpgwIX0Q>`_.
 
-This webinar will be interesting both for people that are new to Qgrid, as well as longtime fans that are interested in learning more about the project.
+This talk will be interesting both for people that are new to Qgrid, as well as longtime fans that are interested in learning more about the project.
 
 Demo
 ----
