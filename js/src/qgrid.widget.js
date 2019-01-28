@@ -545,6 +545,15 @@ class QgridView extends widgets.DOMWidgetView {
                  'value': args.item[column], 'type': 'edit_cell'};
       this.send(msg);
     });
+    
+    this.slick_grid.onActiveCellChanged.subscribe((e, args) => {
+      var column = this.columns[args.cell].name;
+      var data_item = this.slick_grid.getDataItem(args.row);
+      var msg = {'row_index': data_item.row_index, 'column': column,
+                 'unfiltered_index': data_item[this.index_col_name],
+                 'value': args.item[column], 'type': 'active_cell_changed'};
+      this.send(msg);
+    });
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
       if (!this.ignore_selection_changed) {
