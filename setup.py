@@ -154,7 +154,7 @@ setup_args = {
     },
 
     'author': 'Quantopian Inc.',
-    'author_email': 'tshawver@quantopian.com',
+    'author_email': 'opensource@quantopian.com',
     'url': 'https://github.com/quantopian/qgrid',
     'keywords': [
         'ipython',
