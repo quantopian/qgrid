@@ -306,7 +306,7 @@ def enable(dataframe=True, series=True):
     if series:
         ip_formatter.for_type(pd.Series, _display_as_qgrid)
     else:
-        ip_formatter.type_printers.pop(pd.Series)
+        ip_formatter.type_printers.pop(pd.Series, None)
 
 
 def disable():
