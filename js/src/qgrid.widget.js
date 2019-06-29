@@ -401,6 +401,33 @@ class QgridView extends widgets.DOMWidgetView {
     );
     this.grid_elem.data('slickgrid', this.slick_grid);
 
+    if (this.grid_options.context_menu){
+      if (!this.context_elem) {
+        this.context_elem = $(`<ul id='contextMenu' style='display:none;position:absolute'</ul>`).appendTo(this.$el);
+        this.grid_options.context_menu.forEach(o => {$(`<li>${o}</li>`).appendTo(this.context_elem)});
+      }
+    }
+    
+    this.slick_grid.onContextMenu.subscribe((e) => {
+      
+      //calculate x,y position for the context menu
+      e.preventDefault();
+      var bounds = this.$el[0].getBoundingClientRect();
+      var x = e.pageX - bounds.left;
+      var y = e.pageY - bounds.top;
+
+      var cell = this.slick_grid.getCellFromEvent(e);
+
+      this.context_elem
+          .data("cell", cell)
+          .css("top", y)
+          .css("left", x)
+          .show();
+      $("body").one("click", () => {
+        this.context_elem.hide();
+      });
+    });
+
     if (this.grid_options.forceFitColumns){
       this.grid_elem.addClass('force-fit-columns');
     }
