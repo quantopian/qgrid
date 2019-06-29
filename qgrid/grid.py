@@ -325,7 +325,8 @@ def show_grid(data_frame,
               grid_options=None,
               column_options=None,
               column_definitions=None,
-              row_edit_callback=None):
+              row_edit_callback=None,
+              context_menu = None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -377,7 +378,20 @@ def show_grid(data_frame,
         particular row's values, keyed by column name. The callback should
         return True if the provided row should be editable, and False
         otherwise.
-
+    context_menu : dict
+        A dict contains two callables to be used for handling the context menu.
+        Items in the context menu are dynamically generated based on the cell.
+         
+        ``
+        context_menu = {
+            'items_callback' : ... callable(cell)
+            'click_callback' : ... callable(cell, item)
+        }
+        ``
+        the ``items_callback`` takes a ``cell`` which is a dict of ``row`` and 
+        ``cell`` IDs, and returns a list of items (strings) to be shown in the 
+        context menu. The ``click_callback`` takes ``cell`` and an ``item`` 
+        from that was clicked from the context menu. 
 
     Notes
     -----
@@ -487,6 +501,10 @@ def show_grid(data_frame,
         options = defaults.grid_options.copy()
         options.update(grid_options)
         grid_options = options
+
+    if context_menu:
+        grid_options['context_menu'] = True
+
     if not isinstance(grid_options, dict):
         raise TypeError(
             "grid_options must be dict, not %s" % type(grid_options)
@@ -508,7 +526,8 @@ def show_grid(data_frame,
                        column_options=column_options,
                        column_definitions=column_definitions,
                        row_edit_callback=row_edit_callback,
-                       show_toolbar=show_toolbar)
+                       show_toolbar=show_toolbar,
+                       context_menu=context_menu)
 
 
 PAGE_SIZE = 100
@@ -607,6 +626,7 @@ class QgridWidget(widgets.DOMWidget):
     column_options = Dict({})
     column_definitions = Dict({})
     row_edit_callback = Instance(FunctionType, sync=False, allow_none=True)
+    context_menu = Dict({})
     show_toolbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
@@ -1548,6 +1568,15 @@ class QgridWidget(widgets.DOMWidget):
             self._notify_listeners({
                 'name': 'filter_changed',
                 'column': content['field']
+            })
+        elif content['type'] == 'show_context_menu':
+            x, y, cell = content['x'], content['y'], content['cell']
+            items = self.context_menu['items_callback'](cell)
+            self.send({
+                'type': 'show_context_menu',
+                'x': x,
+                'y': y,
+                'items': items
             })
 
     def _notify_listeners(self, event):
