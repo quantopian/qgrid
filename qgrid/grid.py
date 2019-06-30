@@ -1576,6 +1576,7 @@ class QgridWidget(widgets.DOMWidget):
                 'type': 'show_context_menu',
                 'x': x,
                 'y': y,
+                'cell':cell,
                 'items': items
             })
 
