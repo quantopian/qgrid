@@ -835,6 +835,17 @@ class QgridView extends widgets.DOMWidgetView {
         .css("top", y)
         .css("left", x)
         .show();
+
+    this.context_elem.find('li').one("click", e => {
+      var cell = this.context_elem.data("cell");
+      var item = $(e.target).text()
+      this.send({
+        'type': 'context_menu_item_clicked',
+        item,
+        cell
+      })
+    });
+
     $("body").one("click", () => {
       this.context_elem.hide();
     });

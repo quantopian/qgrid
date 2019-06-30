@@ -1579,6 +1579,9 @@ class QgridWidget(widgets.DOMWidget):
                 'cell':cell,
                 'items': items
             })
+        elif content['type'] == 'context_menu_item_clicked':
+            cell, item = content['cell'], content['item']
+            self.context_menu['click_callback'](cell, item)
 
     def _notify_listeners(self, event):
         # notify listeners at the module level
