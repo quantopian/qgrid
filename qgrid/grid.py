@@ -504,6 +504,8 @@ def show_grid(data_frame,
 
     if context_menu:
         grid_options['context_menu'] = True
+    else:
+        context_menu = {}
 
     if not isinstance(grid_options, dict):
         raise TypeError(
@@ -1572,13 +1574,14 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'show_context_menu':
             x, y, cell = content['x'], content['y'], content['cell']
             items = self.context_menu['items_callback'](cell)
-            self.send({
-                'type': 'show_context_menu',
-                'x': x,
-                'y': y,
-                'cell':cell,
-                'items': items
-            })
+            if items and isinstance(items, list):
+                self.send({
+                    'type': 'show_context_menu',
+                    'x': x,
+                    'y': y,
+                    'cell':cell,
+                    'items': items
+                })
         elif content['type'] == 'context_menu_item_clicked':
             cell, item = content['cell'], content['item']
             self.context_menu['click_callback'](cell, item)
