@@ -828,7 +828,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.context_elem = $(`<ul id='contextMenu' style='display:none;position:absolute'</ul>`).appendTo(this.$el);
     }
     this.context_elem.empty();
-    items.forEach(o => {$(`<li>${o}</li>`).appendTo(this.context_elem)});
+    $.each(items, (k,v) => {$(`<li key=${k}>${v}</li>`).appendTo(this.context_elem)});
 
     this.context_elem
         .data("cell", cell)
@@ -838,10 +838,10 @@ class QgridView extends widgets.DOMWidgetView {
 
     this.context_elem.find('li').one("click", e => {
       var cell = this.context_elem.data("cell");
-      var item = $(e.target).text()
+      var key = $(e.target).attr('key')
       this.send({
         'type': 'context_menu_item_clicked',
-        item,
+        key,
         cell
       })
     });

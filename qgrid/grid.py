@@ -385,13 +385,13 @@ def show_grid(data_frame,
         ``
         context_menu = {
             'items_callback' : ... callable(cell)
-            'click_callback' : ... callable(cell, item)
+            'click_callback' : ... callable(cell, key)
         }
         ``
         the ``items_callback`` takes a ``cell`` which is a dict of ``row`` and 
-        ``cell`` IDs, and returns a list of items (strings) to be shown in the 
-        context menu. The ``click_callback`` takes ``cell`` and an ``item`` 
-        from that was clicked from the context menu. 
+        ``cell`` IDs, and returns a dictionary of key-value strings to be shown in the 
+        context menu. The ``click_callback`` takes a ``cell`` and a ``key`` 
+        that was clicked from the context menu. 
 
     Notes
     -----
@@ -1574,7 +1574,7 @@ class QgridWidget(widgets.DOMWidget):
         elif content['type'] == 'show_context_menu':
             x, y, cell = content['x'], content['y'], content['cell']
             items = self.context_menu['items_callback'](cell)
-            if items and isinstance(items, list):
+            if items and isinstance(items, dict):
                 self.send({
                     'type': 'show_context_menu',
                     'x': x,
@@ -1583,8 +1583,8 @@ class QgridWidget(widgets.DOMWidget):
                     'items': items
                 })
         elif content['type'] == 'context_menu_item_clicked':
-            cell, item = content['cell'], content['item']
-            self.context_menu['click_callback'](cell, item)
+            cell, key = content['cell'], content['key']
+            self.context_menu['click_callback'](cell, key)
 
     def _notify_listeners(self, event):
         # notify listeners at the module level
