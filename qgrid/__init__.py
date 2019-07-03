@@ -1,5 +1,6 @@
 from ._version import version_info, __version__
 
+from .pandas_decorator
 from .grid import (
     enable,
     disable,
@@ -11,6 +12,7 @@ from .grid import (
     QgridWidget,
     QGridWidget
 )
+
 
 def _jupyter_nbextension_paths():
     return [{
