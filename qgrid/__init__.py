@@ -1,6 +1,6 @@
 from ._version import version_info, __version__
 
-from .pandas_decorator
+import .pandas_decorator
 from .grid import (
     enable,
     disable,
