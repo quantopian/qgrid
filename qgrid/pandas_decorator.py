@@ -1,7 +1,7 @@
 from pandas import DataFrame
 from .grid import show_grid
 
-def show_grid(df, **kwargs):
+def _show_grid(df, **kwargs):
    return show_grid(df, **kwargs)
    
-DataFrame.show_grid = show_grid
+DataFrame.show_grid = _show_grid
