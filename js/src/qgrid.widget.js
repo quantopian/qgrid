@@ -411,11 +411,17 @@ class QgridView extends widgets.DOMWidgetView {
         var y = e.pageY - bounds.top;
   
         var cell = this.slick_grid.getCellFromEvent(e);
+        if (cell.cell<=0)
+          return;
+
+        var column = this.columns[cell.cell].name;
+        var data_item = this.slick_grid.getDataItem(cell.row);
         this.send({
           type: 'show_context_menu',
           x,
           y,
-          cell
+          'row_index': data_item.row_index,
+          column
         })
       });
     }
@@ -809,7 +815,7 @@ class QgridView extends widgets.DOMWidgetView {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
     } else if (msg.type == 'show_context_menu'){
-      this.show_context_menu(msg.x, msg.y, msg.cell, msg.items)
+      this.show_context_menu(msg.x, msg.y, msg.index, msg.column, msg.items)
     }
   }
 
@@ -823,7 +829,7 @@ class QgridView extends widgets.DOMWidgetView {
     }
   }
 
-  show_context_menu (x,y,cell, items) {
+  show_context_menu (x,y, index, column, items) {
     if (!this.context_elem) {
       this.context_elem = $(`<ul id='contextMenu' style='display:none;position:absolute'</ul>`).appendTo(this.$el);
     }
@@ -831,18 +837,20 @@ class QgridView extends widgets.DOMWidgetView {
     $.each(items, (k,v) => {$(`<li key=${k}>${v}</li>`).appendTo(this.context_elem)});
 
     this.context_elem
-        .data("cell", cell)
+        .data({index, column})
         .css("top", y)
         .css("left", x)
         .show();
 
     this.context_elem.find('li').one("click", e => {
-      var cell = this.context_elem.data("cell");
+      var index = this.context_elem.data("index");
+      var column = this.context_elem.data("column");
       var key = $(e.target).attr('key')
       this.send({
         'type': 'context_menu_item_clicked',
         key,
-        cell
+        index,
+        column
       })
     });
 

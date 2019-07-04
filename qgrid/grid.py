@@ -384,14 +384,22 @@ def show_grid(data_frame,
          
         ``
         context_menu = {
-            'items_callback' : ... callable(cell)
-            'click_callback' : ... callable(cell, key)
+            'items_callback' : ... callable(index, column)
+            'click_callback' : ... callable(index, column, key)
         }
         ``
-        the ``items_callback`` takes a ``cell`` which is a dict of ``row`` and 
-        ``cell`` IDs, and returns a dictionary of key-value strings to be shown in the 
-        context menu. The ``click_callback`` takes a ``cell`` and a ``key`` 
-        that was clicked from the context menu. 
+        
+        The ``items_callback`` takes the follwoing parameters:
+            * **index** The index of the row that contains the clicked cell.
+            * **column** The name of the column that contains the clicked cell.
+        
+        And it returns a dictionary of key-value strings to be shown in the 
+        context menu. 
+
+        Then ``click_callback`` takes one more parameter in addition to the 
+        previous parameters: 
+            * **key** The key of the context menu item that was clicked.
+
 
     Notes
     -----
@@ -1572,19 +1580,21 @@ class QgridWidget(widgets.DOMWidget):
                 'column': content['field']
             })
         elif content['type'] == 'show_context_menu':
-            x, y, cell = content['x'], content['y'], content['cell']
-            items = self.context_menu['items_callback'](cell)
+            x, y, row_index, column = content['x'], content['y'], content['row_index'], content['column']
+            index = self._df.index[row_index]
+            items = self.context_menu['items_callback'](index, column)
             if items and isinstance(items, dict):
                 self.send({
                     'type': 'show_context_menu',
                     'x': x,
                     'y': y,
-                    'cell':cell,
+                    'index': index,
+                    'column': column,
                     'items': items
                 })
         elif content['type'] == 'context_menu_item_clicked':
-            cell, key = content['cell'], content['key']
-            self.context_menu['click_callback'](cell, key)
+            index, column, key = content['index'], content['column'], content['key']
+            self.context_menu['click_callback'](index, column, key)
 
     def _notify_listeners(self, event):
         # notify listeners at the module level
