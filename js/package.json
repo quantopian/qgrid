@@ -25,8 +25,8 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.0.0",
-    "@jupyter-widgets/controls": "^1.0.0",
+    "@jupyter-widgets/base": "^2.0.1",
+    "@jupyter-widgets/controls": "^1.5.1",
     "css-loader": "^0.28.7",
     "expose-loader": "^0.7.3",
     "file-loader": "^0.11.2",
