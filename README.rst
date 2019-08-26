@@ -14,6 +14,8 @@ filtering controls, as well as edit your DataFrames by double clicking cells.
 Qgrid was developed for use in `Quantopian's hosted research environment
 <https://www.quantopian.com/posts/qgrid-now-available-in-research-an-interactive-grid-for-sorting-and-filtering-dataframes?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_
 and is available for use in that environment as of June 2018.
+Quantopian also offers a `fully managed service for professionals <https://factset.quantopian.com>`_ 
+that includes qgrid, zipline, alphalens, pyfolio, FactSet data, and more.
 
 Announcements: Qgrid Webinar
 ---------------------------- 
