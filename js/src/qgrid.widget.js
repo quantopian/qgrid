@@ -7,13 +7,6 @@ var slider_filter = require('./qgrid.sliderfilter.js');
 var text_filter = require('./qgrid.textfilter.js');
 var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
-var dialog = null;
-try {
-  dialog = require('base/js/dialog');
-} catch (e) {
-  console.warn("Qgrid was unable to load base/js/dialog. " +
-               "Full screen button won't be available");
-}
 var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
 
 require('slickgrid-qgrid/slick.core.js');
@@ -116,30 +109,6 @@ class QgridView extends widgets.DOMWidgetView {
     this.buttons.tooltip('disable');
 
     this.full_screen_btn = null;
-    if (dialog) {
-      this.full_screen_modal = $('body').find('.qgrid-modal');
-      if (this.full_screen_modal.length == 0) {
-        this.full_screen_modal = $(`
-          <div class="modal qgrid-modal">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-body"></div>
-              </div>
-            </div>
-          </div>
-        `).appendTo($('body'));
-      }
-      this.full_screen_btn = $(`
-        <button
-          class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
-      `).appendTo(this.toolbar);
-      this.close_modal_btn = $(`
-        <button
-          class='btn btn-default fa fa-times close-modal-btn'
-          data-dismiss="modal"/>
-      `).appendTo(this.toolbar);
-
-    }
     this.bind_toolbar_events();
   }
 
@@ -176,22 +145,6 @@ class QgridView extends widgets.DOMWidgetView {
       if (IPython && IPython.keyboard_manager) {
         modal_options.keyboard_manager = IPython.keyboard_manager;
       }
-      var qgrid_modal = dialog.modal(modal_options);
-
-      qgrid_modal.removeClass('fade');
-      qgrid_modal.addClass('qgrid-modal');
-      qgrid_modal.on('shown.bs.modal', (e) => {
-        this.slick_grid.resizeCanvas();
-      });
-      qgrid_modal.on('hidden.bs.modal', (e) => {
-        this.$el.detach();
-        this.$el_wrapper.height('auto');
-        this.$el_wrapper.append(this.$el);
-        this.update_size();
-        this.slick_grid.bindAllEvents();
-        this.bind_toolbar_events();
-      });
-      qgrid_modal.modal('show');
     });
   }
 
