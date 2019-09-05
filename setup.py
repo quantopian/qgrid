@@ -142,6 +142,7 @@ setup_args = {
     'include_package_data': True,
     'data_files': [
         ('share/jupyter/nbextensions/qgrid', data_files),
+        ('etc/jupyter/nbconfig/notebook.d' , ['qgrid.json'])
     ],
     'install_requires': reqs,
     'packages': find_packages(),

@@ -63,7 +63,7 @@ Installation
 Installing with pip::
 
   pip install qgrid
-  jupyter nbextension enable --py --sys-prefix qgrid
+  jupyter nbextension enable --py --sys-prefix qgrid  # can be skipped for notebook >=5.3
 
   # only required if you have not enabled the ipywidgets nbextension yet
   jupyter nbextension enable --py --sys-prefix widgetsnbextension
