@@ -246,7 +246,7 @@ class QgridView extends widgets.DOMWidgetView {
       ),
       string: {
         filter: text_filter.TextFilter,
-        editor: Slick.Editors.Text,
+        editor: Slick.Editors.LongText,
         formatter: this.format_string
       },
       datetime: {
