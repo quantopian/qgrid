@@ -214,6 +214,10 @@ to do this.
 
     jupyter nbextension install --py --symlink --sys-prefix qgrid && jupyter nbextension enable --py --sys-prefix qgrid
 
+#. If desired, install the labextension::
+
+    jupyter labextension install js/
+
 #. Run the notebook as you normally would with the following command::
 
     jupyter notebook
