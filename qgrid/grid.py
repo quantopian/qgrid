@@ -876,7 +876,7 @@ class QgridWidget(widgets.DOMWidget):
                        hasattr(col_series, 'cat') or \
                        isinstance(col_series, pd.PeriodIndex)
 
-            if type(df.index) == pd.core.index.MultiIndex:
+            if type(df.index) == pd.MultiIndex:
                 self._multi_index = True
                 for idx, cur_level in enumerate(df.index.levels):
                     if cur_level.name:
@@ -913,7 +913,7 @@ class QgridWidget(widgets.DOMWidget):
                 ).map(stringify)
             self._set_col_series_on_df(col_name, df, series_to_set)
 
-        if type(df.index) == pd.core.index.MultiIndex and \
+        if type(df.index) == pd.MultiIndex and \
                 not self._disable_grouping:
             previous_value = None
             row_styles = {}
