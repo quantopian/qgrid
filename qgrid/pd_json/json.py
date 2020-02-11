@@ -458,7 +458,7 @@ class Parser(object):
                     try:
                         dtype = np.dtype(dtype)
                         return data.astype(dtype), True
-                    except:
+                    except Exception:
                         return data, False
 
         if convert_dates:
@@ -474,7 +474,7 @@ class Parser(object):
             try:
                 data = data.astype('float64')
                 result = True
-            except:
+            except Exception:
                 pass
 
         if data.dtype.kind == 'f':
@@ -485,7 +485,7 @@ class Parser(object):
                 try:
                     data = data.astype('float64')
                     result = True
-                except:
+                except Exception:
                     pass
 
         # do't coerce 0-len data
@@ -497,7 +497,7 @@ class Parser(object):
                 if (new_data == data).all():
                     data = new_data
                     result = True
-            except:
+            except Exception:
                 pass
 
         # coerce ints to 64
@@ -507,7 +507,7 @@ class Parser(object):
             try:
                 data = data.astype('int64')
                 result = True
-            except:
+            except Exception:
                 pass
 
         return data, result
@@ -526,7 +526,7 @@ class Parser(object):
         if new_data.dtype == 'object':
             try:
                 new_data = data.astype('int64')
-            except:
+            except Exception:
                 pass
 
         # ignore numbers that are out of range
@@ -543,7 +543,7 @@ class Parser(object):
                                        unit=date_unit)
             except ValueError:
                 continue
-            except:
+            except Exception:
                 break
             return new_data, True
         return data, False
@@ -649,11 +649,8 @@ class FrameParser(Parser):
             self.obj = DataFrame(
                 loads(json, precise_float=self.precise_float), dtype=None)
 
-    def _process_converter(self, f, filt=None):
+    def _process_converter(self, f, filt=lambda col, c: True):
         """ take a conversion function and possibly recreate the frame """
-
-        if filt is None:
-            filt = lambda col, c: True
 
         needs_new_obj = False
         new_obj = dict()

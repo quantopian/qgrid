@@ -856,7 +856,7 @@ class QgridWidget(widgets.DOMWidget):
         to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
         new_df_range = (from_index, to_index)
 
-        if triggered_by is 'viewport_changed' and \
+        if triggered_by == 'viewport_changed' and \
                 self._df_range == new_df_range:
             return
 

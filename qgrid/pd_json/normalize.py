@@ -171,7 +171,7 @@ def json_normalize(data, record_path=None, meta=None,
 
         return result
 
-    if isinstance(data, list) and len(data) is 0:
+    if isinstance(data, list) and len(data) == 0:
         return DataFrame()
 
     # A bit of a hackjob
