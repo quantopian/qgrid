@@ -43,7 +43,7 @@ jobs:
         key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.pandas }}-${{ matrix.numpy }}-pip-${{ hashFiles('**/setup.py') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-      - name: Install dependencies
+    - name: Install dependencies
       env:
         PYTHONWARNINGS: ignore:DEPRECATION::pip._internal.cli.base_command
       run: |
