@@ -134,6 +134,14 @@ def package_files(directory):
 
 data_files = package_files('qgrid/static')
 
+
+def extras_require():
+    return {
+        "test": [
+            "pytest>=2.8.5",
+        ],
+    }
+
 setup_args = {
     'name': 'qgrid',
     'version': version_ns['__version__'],
@@ -144,6 +152,7 @@ setup_args = {
         ('share/jupyter/nbextensions/qgrid', data_files),
     ],
     'install_requires': reqs,
+    'extras_require': extras_require(),
     'packages': find_packages(),
     'zip_safe': False,
     'cmdclass': {
