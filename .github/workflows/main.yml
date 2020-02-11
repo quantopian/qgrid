@@ -37,7 +37,13 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.pandas }}-${{ matrix.numpy }}-pip-${{ hashFiles('**/setup.py') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+      - name: Install dependencies
       env:
         PYTHONWARNINGS: ignore:DEPRECATION::pip._internal.cli.base_command
       run: |
