@@ -139,6 +139,7 @@ def extras_require():
     return {
         "test": [
             "pytest>=2.8.5",
+            "flake8>=3.6.0"
         ],
     }
 
