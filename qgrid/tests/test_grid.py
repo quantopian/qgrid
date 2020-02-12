@@ -36,12 +36,13 @@ def create_interval_index_df():
     td = np.cumsum(np.random.randint(1, 15 * 60, 1000))
     start = pd.Timestamp("2017-04-17")
     df = pd.DataFrame(
-        [(start + pd.Timedelta(seconds=d)) for d in td], columns=["time"], dtype='M8[ns]'
+        [(start + pd.Timedelta(seconds=d)) for d in td],
+        columns=["time"],
+        dtype="M8[ns]",
     )
 
     freq = "15Min"
     start = df["time"].min().floor(freq)
-    end = df["time"].max().ceil(freq)
     df["time_bin"] = np.cumsum(np.random.randint(1, 15 * 60, 1000))
     return df
 
@@ -157,9 +158,9 @@ def test_add_row_button():
     # expected values
     added_index = event_history[0]["index"]
     expected_values = pd.Series(
-        data=[4, 1, 1, 3, pd.Timestamp("2013-01-02 00:00:00"), 'bar', 'fox'],
-        index=['qgrid_unfiltered_index', 'A', 'C', 'D', 'Date', 'E', 'F']
-     )
+        data=[4, 1, 1, 3, pd.Timestamp("2013-01-02 00:00:00"), "bar", "fox"],
+        index=["qgrid_unfiltered_index", "A", "C", "D", "Date", "E", "F"],
+    )
     assert (widget._df.loc[added_index] == expected_values).all()
 
 
