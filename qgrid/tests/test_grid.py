@@ -41,8 +41,6 @@ def create_interval_index_df():
         dtype="M8[ns]",
     )
 
-    freq = "15Min"
-    start = df["time"].min().floor(freq)
     df["time_bin"] = np.cumsum(np.random.randint(1, 15 * 60, 1000))
     return df
 
@@ -157,11 +155,17 @@ def test_add_row_button():
     # make sure the added row in the internal dataframe contains the
     # expected values
     added_index = event_history[0]["index"]
-    expected_values = pd.Series(
-        data=[4, 1, 1, 3, pd.Timestamp("2013-01-02 00:00:00"), "bar", "fox"],
-        index=["qgrid_unfiltered_index", "A", "C", "D", "Date", "E", "F"],
-    )
-    assert (widget._df.loc[added_index] == expected_values).all()
+    expected_values = pd.Series({
+        "qgrid_unfiltered_index": 4,
+        "A": 1,
+        "C": 1,
+        "D": 3,
+        "Date": pd.Timestamp("2013-01-02 00:00:00"),
+        "E": "bar",
+        "F": "fox"
+    })
+    sort_idx = widget._df.loc[added_index].index
+    assert (widget._df.loc[added_index] == expected_values[sort_idx]).all()
 
 
 def test_remove_row_button():
