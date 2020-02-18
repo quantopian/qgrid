@@ -1431,12 +1431,15 @@ class QgridWidget(widgets.DOMWidget):
             try:
                 location = (self._df.index[content['row_index']],
                             content['column'])
+                old_value = self._df.loc[location]
 
                 val_to_set = content['value']
                 if col_info['type'] == 'datetime':
                     val_to_set = pd.to_datetime(val_to_set)
+                    # pandas > 18.0 compat
+                    if old_value.tz != val_to_set.tz:
+                        val_to_set = val_to_set.tz_convert(tz=old_value.tz)
 
-                old_value = self._df.loc[location]
                 self._df.loc[location] = val_to_set
 
                 query = self._unfiltered_df[self._index_col_name] == \
