@@ -216,7 +216,7 @@ to do this.
 
 #. If desired, install the labextension::
 
-    jupyter labextension install js/
+    jupyter labextension link js/
 
 #. Run the notebook as you normally would with the following command::
 
