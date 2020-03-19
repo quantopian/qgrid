@@ -1,6 +1,6 @@
 {
   "name": "qgrid2",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook",
   "author": "Quantopian Inc.",
   "main": "src/index.js",
@@ -16,27 +16,28 @@
   ],
   "scripts": {
     "clean": "rimraf dist/",
-    "prepublish": "webpack",
+    "prepare": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "jshint": "^2.9.5",
-    "rimraf": "^2.6.1",
-    "webpack": "^3.5.5"
+    "css-loader": "^3.4.2",
+    "expose-loader": "^0.7.5",
+    "file-loader": "^6.0.0",
+    "jshint": "^2.11.0",
+    "json-loader": "^0.5.7",
+    "rimraf": "^3.0.2",
+    "style-loader": "^1.1.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1 || ^2",
-    "@jupyter-widgets/controls": "^1.0.0 || ^1.5.1",
-    "css-loader": "^0.28.7",
-    "expose-loader": "^0.7.3",
-    "file-loader": "^0.11.2",
+    "@jupyter-widgets/base": "^1.1 || ^2 || ^3",
+    "@jupyter-widgets/controls": "^1 || ^2",
     "jquery": "^3.2.1",
-    "jquery-ui-dist": "1.12.1",
-    "json-loader": "^0.5.4",
-    "moment": "^2.18.1",
+    "jquery-ui-dist": "^1.12.1",
+    "moment": "^2.24.0",
     "slickgrid-qgrid": "0.0.5",
-    "style-loader": "^0.18.2",
-    "underscore": "^1.8.3"
+    "underscore": "^1.9.2"
   },
   "jshintConfig": {
     "esversion": 6
