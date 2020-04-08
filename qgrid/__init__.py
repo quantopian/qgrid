@@ -1,5 +1,6 @@
 from ._version import version_info, __version__  # noqa F401
 
+from . import pandas_decorator
 from .grid import (
     enable,
     disable,
