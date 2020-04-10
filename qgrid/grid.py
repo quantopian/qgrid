@@ -205,6 +205,7 @@ def on(names, handler):
         [
             'instance_created',
             'cell_edited',
+            'active_cell_changed',
             'selection_changed',
             'viewport_changed',
             'row_added',
@@ -661,6 +662,7 @@ class QgridWidget(widgets.DOMWidget):
 
             [
                 'cell_edited',
+                'active_cell_changed',
                 'selection_changed',
                 'viewport_changed',
                 'row_added',
@@ -683,6 +685,11 @@ class QgridWidget(widgets.DOMWidget):
             * **column** The name of the column that contains the edited cell.
             * **old** The previous value of the cell.
             * **new** The new value of the cell.
+            
+        * **active_cell_changed** The user changed the active cell in the grid.
+            * **index** The index of the row that contains the active cell.
+            * **column** The name of the column that contains the active cell.
+            * **new** The value of the active cell.
 
         * **filter_changed** The user changed the filter setting for a column.
 
@@ -1426,9 +1433,10 @@ class QgridWidget(widgets.DOMWidget):
         if 'type' not in content:
             return
 
-        if content['type'] == 'edit_cell':
+        if content['type'] in ('edit_cell', 'active_cell_changed'):
             col_info = self._columns[content['column']]
             try:
+                event_name = 'cell_edited' if content['type'] == 'edit_cell' else 'active_cell_changed'
                 location = (self._df.index[content['row_index']],
                             content['column'])
                 old_value = self._df.loc[location]
@@ -1445,19 +1453,22 @@ class QgridWidget(widgets.DOMWidget):
                 query = self._unfiltered_df[self._index_col_name] == \
                     content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
-                self._notify_listeners({
-                    'name': 'cell_edited',
+                result = {
+                    'name': event_name,
                     'index': location[0],
                     'column': location[1],
-                    'old': old_value,
                     'new': val_to_set,
                     'source': 'gui'
-                })
+                }
+                if content['type'] == 'edit_cell':
+                    old_value = self._df.loc[location]
+                    result['old'] = old_value
+                self._notify_listeners(result)
 
             except (ValueError, TypeError):
-                msg = "Error occurred while attempting to edit the " \
+                msg = "Error occurred while attempting to {received_event} the " \
                       "DataFrame. Check the notebook server logs for more " \
-                      "information."
+                      "information.".format(received_event=received_event)
                 self.log.exception(msg)
                 self.send({
                     'type': 'show_error',
