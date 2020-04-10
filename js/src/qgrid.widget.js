@@ -401,6 +401,31 @@ class QgridView extends widgets.DOMWidgetView {
     );
     this.grid_elem.data('slickgrid', this.slick_grid);
 
+    if (this.grid_options.context_menu){
+      this.slick_grid.onContextMenu.subscribe((e) => {
+      
+        //calculate x,y position for the context menu
+        e.preventDefault();
+        var bounds = this.$el[0].getBoundingClientRect();
+        var x = e.pageX - bounds.left;
+        var y = e.pageY - bounds.top;
+  
+        var cell = this.slick_grid.getCellFromEvent(e);
+        if (cell.cell<=0)
+          return;
+
+        var column = this.columns[cell.cell].name;
+        var data_item = this.slick_grid.getDataItem(cell.row);
+        this.send({
+          type: 'show_context_menu',
+          x,
+          y,
+          'row_index': data_item.row_index,
+          column
+        })
+      });
+    }
+
     if (this.grid_options.forceFitColumns){
       this.grid_elem.addClass('force-fit-columns');
     }
@@ -789,6 +814,8 @@ class QgridView extends widgets.DOMWidgetView {
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
+    } else if (msg.type == 'show_context_menu'){
+      this.show_context_menu(msg.x, msg.y, msg.index, msg.column, msg.items)
     }
   }
 
@@ -800,6 +827,36 @@ class QgridView extends widgets.DOMWidgetView {
       );
       this.in_progress_btn = null;
     }
+  }
+
+  show_context_menu (x,y, index, column, items) {
+    if (!this.context_elem) {
+      this.context_elem = $(`<ul id='contextMenu' style='display:none;position:absolute'</ul>`).appendTo(this.$el);
+    }
+    this.context_elem.empty();
+    $.each(items, (k,v) => {$(`<li key=${k}>${v}</li>`).appendTo(this.context_elem)});
+
+    this.context_elem
+        .data({index, column})
+        .css("top", y)
+        .css("left", x)
+        .show();
+
+    this.context_elem.find('li').one("click", e => {
+      var index = this.context_elem.data("index");
+      var column = this.context_elem.data("column");
+      var key = $(e.target).attr('key')
+      this.send({
+        'type': 'context_menu_item_clicked',
+        key,
+        index,
+        column
+      })
+    });
+
+    $("body").one("click", () => {
+      this.context_elem.hide();
+    });
   }
 
   /**
