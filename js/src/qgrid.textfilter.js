@@ -9,7 +9,7 @@ class TextFilter extends filter_base.FilterBase {
       <div class='text-filter grid-filter qgrid-dropdown-menu'>
         <h3 class='qgrid-popover-title'>
           <div class='dropdown-title'>Filter by ${this.field}</div>
-          <i class='fa fa-times icon-remove close-button'/>
+          <i class='fa fa-times icon-remove close-button'></i>
         </h3>
         <div class='dropdown-body'>
           <div class='input-area'>
