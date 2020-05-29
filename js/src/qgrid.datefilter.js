@@ -11,9 +11,9 @@ class DateFilter extends filter_base.FilterBase {
           <i class='fa fa-times icon-remove close-button'/>
         </h3>
         <div class='dropdown-body'>
-          <input class='datepicker stay-open-on-click ignore start-date'/>
+          <input class='datepicker ignore start-date'/>
           <span class='to'>to</span>
-          <input class='datepicker stay-open-on-click ignore end-date'/>
+          <input class='datepicker ignore end-date'/>
         </div>
         <div class='dropdown-footer'>
           <a class='reset-link' href='#'>Reset</a>
