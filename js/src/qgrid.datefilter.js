@@ -77,7 +77,6 @@ class DateFilter extends filter_base.FilterBase {
         widget.css('margin-left', $(input).outerWidth() - widget.outerWidth());
         widget.addClass("stay-open-on-click filter-child-elem");
       },
-      /*
       onSelect: (dateText, instance) => {
         // pull the values from the datepickers
         var start_date_string = this.start_date_control.val();
@@ -109,7 +108,6 @@ class DateFilter extends filter_base.FilterBase {
           this.start_date_control.datepicker("option", "maxDate", new Date(end_date_string));
         }
       }
-      */
     };
 
     this.filter_elem.find(".datepicker").datepicker(date_options);
