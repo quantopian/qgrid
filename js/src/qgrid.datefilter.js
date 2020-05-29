@@ -110,7 +110,7 @@ class DateFilter extends filter_base.FilterBase {
       }
     };
 
-    this.filter_elem.find(".datepicker").datepicker(date_options);
+    $(this.filter_elem.find(".datepicker")).datepicker(date_options);
 
     if (this.filter_start_date != null){
       this.start_date_control.datepicker("setDate", this.get_utc_date(this.filter_start_date));
