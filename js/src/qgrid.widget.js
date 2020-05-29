@@ -14,7 +14,7 @@ try {
   console.warn("Qgrid was unable to load base/js/dialog. " +
                "Full screen button won't be available");
 }
-var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
+var jquery_ui = require('jquery-ui-dist/jquery-ui.js');
 
 require('slickgrid-qgrid/slick.core.js');
 require('slickgrid-qgrid/lib/jquery.event.drag-2.3.0.js');
