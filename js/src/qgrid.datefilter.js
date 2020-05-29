@@ -63,9 +63,9 @@ class DateFilter extends filter_base.FilterBase {
     this.end_date_control = this.filter_elem.find(".end-date");
 
     var date_options = {
-      "dayNamesMin": ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      "prevText": "",
-      "nextText": "",
+      dayNamesMin: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      prevText: "",
+      nextText: "",
       minDate: this.min_date,
       maxDate: this.max_date,
       beforeShow: (input, inst) => {
