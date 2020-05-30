@@ -666,11 +666,11 @@
   background-image: none;
 }
 
-#ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-w:before {
+#ui-datepicker-div.ui-datepicker-prev .ui-icon-circle-triangle-w:before {
     content: "\f053";
 }
 
-#ui-datepicker-div.ui-datepicker .ui-icon-circle-triangle-e:before {
+#ui-datepicker-div.ui-datepicker-next .ui-icon-circle-triangle-e:before {
     content: "\f054";
 }
 
