@@ -233,6 +233,7 @@ def test_row_edit_callback():
 
     assert expected_dict == view._editable_rows
 
+    
 '''
 TODO: fix that for Python 3.7 and 3.8
 def test_period_object_column():
@@ -252,6 +253,7 @@ def test_period_object_column():
         {"type": "show_filter_dropdown", "field": "b", "search_val": None}
     )
 '''
+
 
 def test_get_selected_df():
     sample_df = create_df()
