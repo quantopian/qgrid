@@ -8,7 +8,6 @@ class DateFilter extends filter_base.FilterBase {
       <div class='date-range-filter grid-filter qgrid-dropdown-menu'>
         <h3 class='qgrid-popover-title'>
           <div class='dropdown-title'>Filter by ${this.field}</div>
-          <i class='fa fa-times icon-remove close-button'/>
         </h3>
         <div class='dropdown-body'>
           <input class='datepicker ignore start-date'/>
@@ -63,9 +62,9 @@ class DateFilter extends filter_base.FilterBase {
     this.end_date_control = this.filter_elem.find(".end-date");
 
     var date_options = {
-      "dayNamesMin": ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      "prevText": "",
-      "nextText": "",
+      dayNamesMin: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      prevText: "",
+      nextText: "",
       minDate: this.min_date,
       maxDate: this.max_date,
       beforeShow: (input, inst) => {

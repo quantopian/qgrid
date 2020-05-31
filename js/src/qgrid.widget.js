@@ -14,7 +14,7 @@ try {
   console.warn("Qgrid was unable to load base/js/dialog. " +
                "Full screen button won't be available");
 }
-var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
+var jquery_ui = require('jquery-ui-dist/jquery-ui.js');
 
 require('slickgrid-qgrid/slick.core.js');
 require('slickgrid-qgrid/lib/jquery.event.drag-2.3.0.js');
@@ -757,11 +757,15 @@ class QgridView extends widgets.DOMWidgetView {
         } else if (msg.triggered_by === 'add_row') {
           this.slick_grid.scrollRowIntoView(msg.scroll_to_row);
           this.slick_grid.setSelectedRows([msg.scroll_to_row]);
-        } else if (msg.triggered_by === 'change_viewport' &&
-            this.last_vp.bottom >= this.df_length) {
-          this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
+        } else if (msg.triggered_by === 'change_viewport') {
+            if (this.last_vp == null) {
+              this.last_vp = this.slick_grid.getViewport();
+            }
+            if(this.last_vp.bottom >= this.df_length) {
+               this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
+            }
         }
-
+  
         var selected_rows = this.slick_grid.getSelectedRows().filter((row) => {
           return row < Math.min(this.df_length, this.df_range[1]);
         });
@@ -782,6 +786,7 @@ class QgridView extends widgets.DOMWidgetView {
       this.slick_grid.setSelectedRows(msg.rows);
       if (msg.rows && msg.rows.length > 0) {
         this.slick_grid.scrollRowIntoView(msg.rows[0]);
+        this.slick_grid.gotoCell(msg.rows[0],0);
       }
       this.ignore_selection_changed = false;
     } else if (msg.type == 'change_show_toolbar') {
