@@ -757,12 +757,15 @@ class QgridView extends widgets.DOMWidgetView {
         } else if (msg.triggered_by === 'add_row') {
           this.slick_grid.scrollRowIntoView(msg.scroll_to_row);
           this.slick_grid.setSelectedRows([msg.scroll_to_row]);
-        } else if (msg.triggered_by === 'change_viewport' &&
-            this.last_vp != null &&
-            this.last_vp.bottom >= this.df_length) {
-          this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
+        } else if (msg.triggered_by === 'change_viewport') {
+            if (this.last_vp != null) {
+              this.last_vp = this.slick_grid.getViewport();
+            }
+            if(this.last_vp.bottom >= this.df_length) {
+               this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
+            }
         }
-
+  
         var selected_rows = this.slick_grid.getSelectedRows().filter((row) => {
           return row < Math.min(this.df_length, this.df_range[1]);
         });
