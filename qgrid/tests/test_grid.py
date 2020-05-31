@@ -233,7 +233,7 @@ def test_row_edit_callback():
 
     assert expected_dict == view._editable_rows
 
-    
+
 '''
 TODO: fix that for Python 3.7 and 3.8
 def test_period_object_column():
