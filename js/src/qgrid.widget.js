@@ -34,7 +34,7 @@ class QgridModel extends widgets.DOMWidgetModel {
     return _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
       _model_name : 'QgridModel',
       _view_name : 'QgridView',
-      _model_module : 'qgrid',
+      _model_module : 'qgrid2',
       _view_module : 'qgrid',
       _model_module_version : '^1.1.3',
       _view_module_version : '^1.1.3',
