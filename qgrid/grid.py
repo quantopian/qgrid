@@ -521,7 +521,7 @@ def stringify(x):
         return str(x)
 
 
-@widgets.register()
+@widgets.register
 class QgridWidget(widgets.DOMWidget):
     """
     The widget class which is instantiated by the ``show_grid`` method. This
