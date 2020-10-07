@@ -482,7 +482,7 @@ def show_grid(data_frame,
         options.update(column_options)
         column_options = options
     if grid_options is None:
-        grid_options = defaults.grid_options
+        grid_options = defaults.grid_options.copy()
     else:
         options = defaults.grid_options.copy()
         options.update(grid_options)
