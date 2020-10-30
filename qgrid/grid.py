@@ -957,10 +957,10 @@ class QgridWidget(widgets.DOMWidget):
         else:
             self._row_styles = {}
 
-        df_json = pd_json.to_json(None, df,
-                                  orient='table',
-                                  date_format='iso',
-                                  double_precision=self.precision)
+        df_json = df.to_json(None,
+                             orient='table',
+                             date_format='iso',
+                             double_precision=self.precision)
 
         if update_columns:
             self._interval_columns = []
