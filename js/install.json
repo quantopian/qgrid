@@ -1,5 +1,0 @@
-{
-  "packageManager": "python",
-  "packageName": "qgrid2",
-  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package qgrid2"
-}

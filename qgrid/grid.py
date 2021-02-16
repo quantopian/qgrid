@@ -522,7 +522,7 @@ def stringify(x):
 
 
 @widgets.register()
-class QgridWidget(widgets.DOMWidget):
+class QgridWidget(widgets.Widget):
     """
     The widget class which is instantiated by the ``show_grid`` method. This
     class can be constructed directly but that's not recommended because
@@ -564,10 +564,10 @@ class QgridWidget(widgets.DOMWidget):
 
     _view_name = Unicode('QgridView').tag(sync=True)
     _model_name = Unicode('QgridModel').tag(sync=True)
-    _view_module = Unicode('qgrid').tag(sync=True)
-    _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('^1.1.3').tag(sync=True)
-    _model_module_version = Unicode('^1.1.3').tag(sync=True)
+    _view_module = Unicode('qgrid2').tag(sync=True)
+    _model_module = Unicode('qgrid2').tag(sync=True)
+    _view_module_version = Unicode('2.0.0').tag(sync=True)
+    _model_module_version = Unicode('2.0.0').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
@@ -1308,7 +1308,6 @@ class QgridWidget(widgets.DOMWidget):
         sort_column_name = self._sort_helper_columns.get(col_name)
         if sort_column_name:
             return df[sort_column_name]
-
         if col_name in self._primary_key:
             if len(self._primary_key) > 1:
                 key_index = self._primary_key.index(col_name)

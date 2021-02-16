@@ -1,19 +1,16 @@
-var qgrid = require('./index');
-
+var plugin = require('./index');
 var base = require('@jupyter-widgets/base');
 
-/**
- * The widget manager provider.
- */
 module.exports = {
-  id: 'qgrid',
+  id: 'qgrid2:plugin',
   requires: [base.IJupyterWidgetRegistry],
   activate: function(app, widgets) {
       widgets.registerWidget({
-          name: 'qgrid',
-          version: qgrid.version,
-          exports: qgrid
+          name: 'qgrid2',
+          version: plugin.version,
+          exports: plugin
       });
-    },
+  },
   autoStart: true
 };
+
