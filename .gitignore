@@ -32,3 +32,7 @@ qgrid/static/
 
 # OS X
 .DS_Store
+
+# Compiled javascript
+qgrid/nbextension/
+qgrid/labextension/

@@ -1,52 +1,74 @@
 {
   "name": "qgrid2",
-  "version": "1.1.3",
-  "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook",
+  "version": "2.0.0",
+  "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook/Lab",
   "author": "Quantopian Inc.",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Quantopian/qgrid.git"
+    "url": "https://github.com/quantopian/qgrid"
   },
   "keywords": [
     "jupyter",
     "widgets",
     "ipython",
-    "ipywidgets"
+    "ipywidgets",
+    "jupyterlab-extension"
+  ],
+  "files": [
+    "lib/**/*.js",
+    "dist/*.js",
+    "style/index.js"
   ],
   "scripts": {
-    "clean": "rimraf dist/",
-    "prepare": "webpack",
+    "clean": "rimraf dist/ && rimraf ../qgrid/labextension/ && rimraf ../qgrid/nbextension",
+    "prepublish": "yarn run clean && yarn run build:prod",
+    "build": "webpack --mode=development && yarn run build:labextension:dev",
+    "build:prod": "webpack --mode=production && yarn run build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "watch": "webpack --watch --mode=development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+    "@jupyterlab/builder": "^3.0.0",
+    "webpack": "^4.42.0",
     "css-loader": "^3.4.2",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
     "expose-loader": "^0.7.5",
     "file-loader": "^6.0.0",
     "jshint": "^2.11.0",
     "json-loader": "^0.5.7",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.1",
     "rimraf": "^3.0.2",
     "style-loader": "^1.1.3",
-    "webpack": "^4.42.0",
+    "typescript": "~4.1.3",
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1 || ^2 || ^3",
-    "@jupyter-widgets/controls": "^1 || ^2",
+    "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
+    "lodash": "^4.17.4",
     "jquery": "^3.2.1",
     "jquery-ui-dist": "^1.12.1",
     "moment": "^2.24.0",
     "slickgrid-qgrid": "0.0.5",
     "underscore": "^1.9.2"
   },
+  "jupyterlab": {
+    "extension": "lib/labplugin",
+    "outputDir": "../qgrid/labextension",
+    "sharedPackages": {
+      "@jupyter-widgets/base": {
+        "bundled": false,
+        "singleton": true
+      }
+    }
+  },
   "jshintConfig": {
     "esversion": 6
   },
-  "files": [
-    "dist/",
-    "src/"
-  ],
-  "jupyterlab": {
-    "extension": "src/jupyterlab-plugin"
-  }
+  "styleModule": "style/index.js"
 }
