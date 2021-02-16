@@ -44,6 +44,15 @@ cmdclass['jsdeps'] = combine_commands(
     install_npm(js_dir, npm=['yarn'], build_cmd='build:prod'), ensure_targets(jstargets),
 )
 
+
+def extras_require():
+    return {
+        "test": [
+            "pytest>=2.8.5",
+            "flake8>=3.6.0"
+        ],
+    }
+
 setup_args = dict(
     name=name,
     version=version,
@@ -54,6 +63,7 @@ setup_args = dict(
         'ipywidgets>=7.6.0',
         'pandas>=0.22'
     ],
+    extras_requre=extras_require(),
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,
