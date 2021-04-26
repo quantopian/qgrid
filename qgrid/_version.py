@@ -1,4 +1,8 @@
-version_info = (1, 3, 1, "final")
+# Modifications copyright (C) 2021 8080 Labs GmbH
+
+# - set version_info = (0, 0, 1, "final")
+
+version_info = (0, 0, 1, "final")
 
 _specifier_ = {"alpha": "a", "beta": "b", "candidate": "rc", "final": ""}
 

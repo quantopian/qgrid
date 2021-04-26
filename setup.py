@@ -1,3 +1,7 @@
+# Modifications copyright (C) 2021 8080 Labs GmbH
+
+# - changed setup_args: package name, email, package url
+
 from __future__ import print_function
 from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
@@ -144,7 +148,7 @@ def extras_require():
     }
 
 setup_args = {
-    'name': 'qgrid',
+    'name': 'ipyslickgrid',
     'version': version_ns['__version__'],
     'description': 'An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook',
     'long_description': LONG_DESCRIPTION,
@@ -163,9 +167,9 @@ setup_args = {
         'jsdeps': NPM,
     },
 
-    'author': 'Quantopian Inc.',
-    'author_email': 'opensource@quantopian.com',
-    'url': 'https://github.com/quantopian/qgrid',
+    'author': '8080 Labs GmbH',
+    'author_email': 'info@8080labs.com',
+    'url': 'https://github.com/8080labs/ipyslickgrid',
     'license': 'Apache-2.0',
     'keywords': [
         'ipython',
@@ -175,17 +179,10 @@ setup_args = {
     'classifiers': [
         'Development Status :: 4 - Beta',
         'Framework :: IPython',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'Topic :: Office/Business :: Financial',
-        'Topic :: Scientific/Engineering :: Information Analysis',
-        'Topic :: Multimedia :: Graphics',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 }
 

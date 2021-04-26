@@ -1,3 +1,10 @@
+/*
+ * Modifications copyright (C) 2021 8080 Labs GmbH
+ *
+ * - commented out _model_module_version : '^1.1.3' and _view_module_version : '^1.1.3',
+ *   and added comments above
+ */
+
 var widgets = require('@jupyter-widgets/base');
 var _ = require('underscore');
 var moment = require('moment');
@@ -36,8 +43,10 @@ class QgridModel extends widgets.DOMWidgetModel {
       _view_name : 'QgridView',
       _model_module : 'qgrid',
       _view_module : 'qgrid',
-      _model_module_version : '^1.1.3',
-      _view_module_version : '^1.1.3',
+      // Widget version infos in JS are not needed.
+      // Widget version in python only needs to reference to JS package version
+      // _model_module_version : '^1.1.3',
+      // _view_module_version : '^1.1.3',
       _df_json: '',
       _columns: {}
     });
@@ -360,7 +369,7 @@ class QgridView extends widgets.DOMWidgetView {
       // don't allow editing index columns
       if (cur_column.is_index) {
         slick_column.editor = editors.IndexEditor;
-        
+
         if (cur_column.first_index){
           slick_column.cssClass += ' first-idx-col';
         }
@@ -423,7 +432,7 @@ class QgridView extends widgets.DOMWidgetView {
     this.slick_grid.setSelectionModel(new Slick.RowSelectionModel());
     this.slick_grid.setCellCssStyles("grouping", this.row_styles);
     this.slick_grid.render();
-    
+
     this.update_size();
 
     var render_header_cell = (e, args) => {
