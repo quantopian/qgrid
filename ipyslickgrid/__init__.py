@@ -18,8 +18,8 @@ def _jupyter_nbextension_paths():
         {
             "section": "notebook",
             "src": "static",
-            "dest": "qgrid",
-            "require": "qgrid/extension",
+            "dest": "ipyslickgrid",
+            "require": "ipyslickgrid/extension",
         }
     ]
 
