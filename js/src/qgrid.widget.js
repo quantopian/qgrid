@@ -15,12 +15,6 @@ var text_filter = require('./qgrid.textfilter.js');
 var boolean_filter = require('./qgrid.booleanfilter.js');
 var editors = require('./qgrid.editors.js');
 var dialog = null;
-try {
-  dialog = require('base/js/dialog');
-} catch (e) {
-  console.warn("Qgrid was unable to load base/js/dialog. " +
-               "Full screen button won't be available");
-}
 var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
 
 require('slickgrid-qgrid/slick.core.js');

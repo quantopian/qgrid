@@ -31,8 +31,9 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "@jupyter-widgets/base": "^1.1 || ^2 || ^3",
-    "@jupyter-widgets/controls": "^1 || ^2",
+    "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
+    "@jupyter-widgets/controls": "^1 || ^2 || ^3",
+    "clean": "^4.0.2",
     "jquery": "^3.2.1",
     "jquery-ui-dist": "^1.12.1",
     "moment": "^2.24.0",
