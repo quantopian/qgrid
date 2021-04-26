@@ -28,7 +28,7 @@ js/package-lock.json
 jslab/package-lock.json
 
 # Compiled javascript
-qgrid/static/
+ipyslickgrid/static/
 
 # OS X
 .DS_Store
