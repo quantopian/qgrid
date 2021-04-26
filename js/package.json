@@ -1,6 +1,6 @@
 {
   "name": "ipyslickgrid",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook",
   "author": "8080 Labs GmbH",
   "main": "src/index.js",

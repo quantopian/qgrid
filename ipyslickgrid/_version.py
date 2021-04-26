@@ -2,9 +2,9 @@
 
 # - set version_info = (0, 0, 1, "final")
 
-version_info = (0, 0, 2, "alpha")
+version_info = (0, 0, 2, "final")
 
-_specifier_ = {"alpha": "a", "beta": "b", "candidate": "rc", "final": ""}
+_specifier_ = {"alpha": "a1", "beta": "b", "candidate": "rc", "final": ""}
 
 __version__ = "%s.%s.%s%s" % (
     version_info[0],
