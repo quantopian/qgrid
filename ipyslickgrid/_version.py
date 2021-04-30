@@ -2,7 +2,7 @@
 
 # - set version_info = (0, 0, 1, "final")
 
-version_info = (0, 0, 2, "final")
+version_info = (0, 0, 3, "final")
 
 _specifier_ = {"alpha": "a1", "beta": "b", "candidate": "rc", "final": ""}
 
