@@ -7,7 +7,7 @@ if (window.require) {
     window.require.config({
         map: {
             "*" : {
-                "qgrid": "nbextensions/qgrid/index"
+                "ipyslickgrid": "nbextensions/ipyslickgrid/index"
             }
         }
     });

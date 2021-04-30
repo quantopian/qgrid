@@ -35,8 +35,8 @@ class QgridModel extends widgets.DOMWidgetModel {
     return _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
       _model_name : 'QgridModel',
       _view_name : 'QgridView',
-      _model_module : 'qgrid',
-      _view_module : 'qgrid',
+      _model_module : 'ipyslickgrid',
+      _view_module : 'ipyslickgrid',
       // Widget version infos in JS are not needed.
       // Widget version in python only needs to reference to JS package version
       // _model_module_version : '^1.1.3',

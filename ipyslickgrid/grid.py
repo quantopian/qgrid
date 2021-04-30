@@ -1,7 +1,7 @@
 # Modifications copyright (C) 2021 8080 Labs GmbH
 
-# - set _view_module_version = Unicode('0.0.2').tag(sync=True)
-# - set _model_module_version = Unicode('0.0.2').tag(sync=True)
+# - set _view_module_version = Unicode('0.0.3').tag(sync=True)
+# - set _model_module_version = Unicode('0.0.3').tag(sync=True)
 
 import ipywidgets as widgets
 import pandas as pd
@@ -569,10 +569,10 @@ class QgridWidget(widgets.DOMWidget):
 
     _view_name = Unicode('QgridView').tag(sync=True)
     _model_name = Unicode('QgridModel').tag(sync=True)
-    _view_module = Unicode('qgrid').tag(sync=True)
-    _model_module = Unicode('qgrid').tag(sync=True)
-    _view_module_version = Unicode('0.0.2').tag(sync=True)
-    _model_module_version = Unicode('0.0.2').tag(sync=True)
+    _view_module = Unicode('ipyslickgrid').tag(sync=True)
+    _model_module = Unicode('ipyslickgrid').tag(sync=True)
+    _view_module_version = Unicode('0.0.3').tag(sync=True)
+    _model_module_version = Unicode('0.0.3').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
