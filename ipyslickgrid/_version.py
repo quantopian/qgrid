@@ -1,14 +1,9 @@
 # Modifications copyright (C) 2021 8080 Labs GmbH
 
-# - set version_info = (0, 0, 1, "final")
+# - set version_info as string and add comments
 
-version_info = (0, 0, 3, "final")
-
-_specifier_ = {"alpha": "a1", "beta": "b", "candidate": "rc", "final": ""}
-
-__version__ = "%s.%s.%s%s" % (
-    version_info[0],
-    version_info[1],
-    version_info[2],
-    _specifier_[version_info[3]],
-)
+# alpha example: 0.0.3a0
+# beta example: 0.0.3b
+# release candidate: 0.0.3rc
+# final release: 0.0.3
+__version__ = "0.0.3"
