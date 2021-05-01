@@ -3,6 +3,7 @@
  *
  * - commented out _model_module_version : '^1.1.3' and _view_module_version : '^1.1.3',
  *   and added comments above
+ * - replaced qgrid with ipyslickgrid in line 38 and 39
  */
 
 var widgets = require('@jupyter-widgets/base');

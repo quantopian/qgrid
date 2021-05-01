@@ -1,7 +1,8 @@
 # Modifications copyright (C) 2021 8080 Labs GmbH
 
-# - set _view_module_version = Unicode('0.0.3').tag(sync=True)
-# - set _model_module_version = Unicode('0.0.3').tag(sync=True)
+# - set _view_module_version and _model_module_version to match our resease versioning
+#   scheme
+# - renamed _view_module and _model_module from 'qgrid' to 'ipyslickgrid'
 
 import ipywidgets as widgets
 import pandas as pd

@@ -1,6 +1,7 @@
 # Modifications copyright (C) 2021 8080 Labs GmbH
 
-# - set version_info as string and add comments
+# - remove version_info to __version__ mapping
+# - set __version__ as string and add comments
 
 # alpha example: 0.0.3a0
 # beta example: 0.0.3b

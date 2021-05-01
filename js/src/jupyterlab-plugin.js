@@ -1,3 +1,9 @@
+/*
+ * Modifications copyright (C) 2021 8080 Labs GmbH
+ *
+ * - replaced qgrid with ipyslickgrid in lines 14, 18, 19, 20
+ */
+
 var ipyslickgrid = require('./index');
 
 var base = require('@jupyter-widgets/base');
