@@ -2,6 +2,9 @@
 
 This is a fork of [qgrid](https://github.com/quantopian/qgrid) and it has been created for the sole purpose of supporting Jupyterlab 3. However, over time, it may be used for more than that.
 
+# DISCLAIMER
+
+qgrid is licensed under the Apache License, Version 2.0. We did our best to track all modifiaction we did to the original source code to comply with the Apache License standard. If you find we could improve our modification tracking, please do let us know how. We're happy to get your feedback.
 ## Running from source & testing your changes
 
 1. Clone the repository from GitHub and cd into the top-level directory:
