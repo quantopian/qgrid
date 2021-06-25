@@ -1707,8 +1707,8 @@ class QgridWidget(widgets.DOMWidget):
             The new value for the cell.
         """
         old_value = self._df.loc[index, column]
-        self._df.loc[index, column] = value
-        self._unfiltered_df.loc[index, column] = value
+        self._df.at[index, column] = value
+        self._unfiltered_df.at[index, column] = value
         self._update_table(triggered_by='edit_cell',
                            fire_data_change_event=True)
 
