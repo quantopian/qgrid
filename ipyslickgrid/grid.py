@@ -22,7 +22,7 @@ from traitlets import (
     Tuple,
     Any,
     All,
-    parse_notifier_name
+    parse_notifier_name,
 )
 from itertools import chain
 from uuid import uuid4
@@ -33,44 +33,44 @@ from six import string_types
 # have our own copy of the panda's 0.20.0 implementation that we use for old
 # versions of pandas.
 from distutils.version import LooseVersion
-if LooseVersion(pd.__version__) > LooseVersion('0.20.0'):
+
+if LooseVersion(pd.__version__) > LooseVersion("0.20.0"):
     import pandas.io.json as pd_json
 else:
     from . import pd_json
 
 
 class _DefaultSettings(object):
-
     def __init__(self):
         self._grid_options = {
-            'fullWidthRows': True,
-            'syncColumnCellResize': True,
-            'forceFitColumns': True,
-            'defaultColumnWidth': 150,
-            'rowHeight': 28,
-            'enableColumnReorder': False,
-            'enableTextSelectionOnCells': True,
-            'editable': True,
-            'autoEdit': False,
-            'explicitInitialization': True,
-            'maxVisibleRows': 15,
-            'minVisibleRows': 8,
-            'sortable': True,
-            'filterable': True,
-            'highlightSelectedCell': False,
-            'highlightSelectedRow': True,
-            'boldIndex': True
+            "fullWidthRows": True,
+            "syncColumnCellResize": True,
+            "forceFitColumns": True,
+            "defaultColumnWidth": 150,
+            "rowHeight": 28,
+            "enableColumnReorder": False,
+            "enableTextSelectionOnCells": True,
+            "editable": True,
+            "autoEdit": False,
+            "explicitInitialization": True,
+            "maxVisibleRows": 15,
+            "minVisibleRows": 8,
+            "sortable": True,
+            "filterable": True,
+            "highlightSelectedCell": False,
+            "highlightSelectedRow": True,
+            "boldIndex": True,
         }
         self._column_options = {
-            'editable': True,
+            "editable": True,
             # the following options are supported by SlickGrid
-            'defaultSortAsc': True,
-            'maxWidth': None,
-            'minWidth': 30,
-            'resizable': True,
-            'sortable': True,
-            'toolTip': "",
-            'width': None
+            "defaultSortAsc": True,
+            "maxWidth": None,
+            "minWidth": 30,
+            "resizable": True,
+            "sortable": True,
+            "toolTip": "",
+            "width": None,
         }
         self._show_toolbar = False
         self._precision = None  # Defer to pandas.get_option
@@ -78,8 +78,9 @@ class _DefaultSettings(object):
     def set_grid_option(self, optname, optvalue):
         self._grid_options[optname] = optvalue
 
-    def set_defaults(self, show_toolbar=None, precision=None,
-                     grid_options=None, column_options=None):
+    def set_defaults(
+        self, show_toolbar=None, precision=None, grid_options=None, column_options=None
+    ):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
         if precision is not None:
@@ -99,7 +100,7 @@ class _DefaultSettings(object):
 
     @property
     def precision(self):
-        return self._precision or pd.get_option('display.precision') - 1
+        return self._precision or pd.get_option("display.precision") - 1
 
     @property
     def column_options(self):
@@ -107,7 +108,6 @@ class _DefaultSettings(object):
 
 
 class _EventHandlers(object):
-
     def __init__(self):
         self._listeners = {}
 
@@ -128,7 +128,7 @@ class _EventHandlers(object):
                 pass
 
     def notify_listeners(self, event, qgrid_widget):
-        event_listeners = self._listeners.get(event['name'], [])
+        event_listeners = self._listeners.get(event["name"], [])
         all_listeners = self._listeners.get(All, [])
         for c in chain(event_listeners, all_listeners):
             c(event, qgrid_widget)
@@ -138,10 +138,9 @@ defaults = _DefaultSettings()
 handlers = _EventHandlers()
 
 
-def set_defaults(show_toolbar=None,
-                 precision=None,
-                 grid_options=None,
-                 column_options=None):
+def set_defaults(
+    show_toolbar=None, precision=None, grid_options=None, column_options=None
+):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
@@ -163,10 +162,12 @@ def set_defaults(show_toolbar=None,
     QgridWidget :
         The widget whose default behavior is changed by ``set_defaults``.
     """
-    defaults.set_defaults(show_toolbar=show_toolbar,
-                          precision=precision,
-                          grid_options=grid_options,
-                          column_options=column_options)
+    defaults.set_defaults(
+        show_toolbar=show_toolbar,
+        precision=precision,
+        grid_options=grid_options,
+        column_options=column_options,
+    )
 
 
 def on(names, handler):
@@ -299,7 +300,7 @@ def enable(dataframe=True, series=True):
     try:
         from IPython.core.getipython import get_ipython
     except ImportError:
-        raise ImportError('This feature requires IPython 1.0+')
+        raise ImportError("This feature requires IPython 1.0+")
 
     ip = get_ipython()
     ip_formatter = ip.display_formatter.ipython_display_formatter
@@ -325,13 +326,15 @@ def disable():
     enable(dataframe=False, series=False)
 
 
-def show_grid(data_frame,
-              show_toolbar=None,
-              precision=None,
-              grid_options=None,
-              column_options=None,
-              column_definitions=None,
-              row_edit_callback=None):
+def show_grid(
+    data_frame,
+    show_toolbar=None,
+    precision=None,
+    grid_options=None,
+    column_options=None,
+    column_definitions=None,
+    row_edit_callback=None,
+):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -494,9 +497,7 @@ def show_grid(data_frame,
         options.update(grid_options)
         grid_options = options
     if not isinstance(grid_options, dict):
-        raise TypeError(
-            "grid_options must be dict, not %s" % type(grid_options)
-        )
+        raise TypeError("grid_options must be dict, not %s" % type(grid_options))
 
     # if a Series is passed in, convert it to a DataFrame
     if isinstance(data_frame, pd.Series):
@@ -506,15 +507,18 @@ def show_grid(data_frame,
             "data_frame must be DataFrame or Series, not %s" % type(data_frame)
         )
 
-    column_definitions = (column_definitions or {})
+    column_definitions = column_definitions or {}
 
     # create a visualization for the dataframe
-    return QgridWidget(df=data_frame, precision=precision,
-                       grid_options=grid_options,
-                       column_options=column_options,
-                       column_definitions=column_definitions,
-                       row_edit_callback=row_edit_callback,
-                       show_toolbar=show_toolbar)
+    return QgridWidget(
+        df=data_frame,
+        precision=precision,
+        grid_options=grid_options,
+        column_options=column_options,
+        column_definitions=column_definitions,
+        row_edit_callback=row_edit_callback,
+        show_toolbar=show_toolbar,
+    )
 
 
 PAGE_SIZE = 100
@@ -568,15 +572,15 @@ class QgridWidget(widgets.DOMWidget):
 
     """
 
-    _view_name = Unicode('QgridView').tag(sync=True)
-    _model_name = Unicode('QgridModel').tag(sync=True)
-    _view_module = Unicode('ipyslickgrid').tag(sync=True)
-    _model_module = Unicode('ipyslickgrid').tag(sync=True)
-    _view_module_version = Unicode('0.0.3').tag(sync=True)
-    _model_module_version = Unicode('0.0.3').tag(sync=True)
+    _view_name = Unicode("QgridView").tag(sync=True)
+    _model_name = Unicode("QgridModel").tag(sync=True)
+    _view_module = Unicode("ipyslickgrid").tag(sync=True)
+    _model_module = Unicode("ipyslickgrid").tag(sync=True)
+    _view_module_version = Unicode("0.0.3").tag(sync=True)
+    _model_module_version = Unicode("0.0.3").tag(sync=True)
 
     _df = Instance(pd.DataFrame)
-    _df_json = Unicode('', sync=True)
+    _df_json = Unicode("", sync=True)
     _primary_key = List()
     _primary_key_display = Dict({})
     _row_styles = Dict({}, sync=True)
@@ -592,15 +596,12 @@ class QgridWidget(widgets.DOMWidget):
     _initialized = Bool(False)
     _ignore_df_changed = Bool(False)
     _unfiltered_df = Instance(pd.DataFrame)
-    _index_col_name = Unicode('qgrid_unfiltered_index', sync=True)
-    _sort_col_suffix = Unicode('_qgrid_sort_column')
+    _index_col_name = Unicode("qgrid_unfiltered_index", sync=True)
+    _sort_col_suffix = Unicode("_qgrid_sort_column")
     _multi_index = Bool(False, sync=True)
     _edited = Bool(False)
     _selected_rows = List([])
-    _viewport_range = Tuple(Integer(),
-                            Integer(),
-                            default_value=(0, 100),
-                            sync=True)
+    _viewport_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
     _row_count = Integer(0, sync=True)
     _sort_field = Any(None, sync=True)
@@ -625,9 +626,7 @@ class QgridWidget(widgets.DOMWidget):
         self._initialized = True
         self._handlers = _EventHandlers()
 
-        handlers.notify_listeners({
-            'name': 'instance_created'
-        }, self)
+        handlers.notify_listeners({"name": "instance_created"}, self)
 
         if self.df is not None:
             self._update_df()
@@ -828,7 +827,7 @@ class QgridWidget(widgets.DOMWidget):
 
     def _rebuild_widget(self):
         self._update_df()
-        self.send({'type': 'draw_table'})
+        self.send({"type": "draw_table"})
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
@@ -849,21 +848,22 @@ class QgridWidget(widgets.DOMWidget):
     def _show_toolbar_changed(self):
         if not self._initialized:
             return
-        self.send({'type': 'change_show_toolbar'})
+        self.send({"type": "change_show_toolbar"})
 
-    def _update_table(self,
-                      update_columns=False,
-                      triggered_by=None,
-                      scroll_to_row=None,
-                      fire_data_change_event=True):
+    def _update_table(
+        self,
+        update_columns=False,
+        triggered_by=None,
+        scroll_to_row=None,
+        fire_data_change_event=True,
+    ):
         df = self._df.copy()
 
         from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
         to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
         new_df_range = (from_index, to_index)
 
-        if triggered_by == 'viewport_changed' and \
-                self._df_range == new_df_range:
+        if triggered_by == "viewport_changed" and self._df_range == new_df_range:
             return
 
         self._df_range = new_df_range
@@ -873,14 +873,16 @@ class QgridWidget(widgets.DOMWidget):
         self._row_count = len(self._df.index)
 
         if update_columns:
-            self._string_columns = list(df.select_dtypes(
-                include=[np.dtype('O'), 'category']
-            ).columns.values)
+            self._string_columns = list(
+                df.select_dtypes(include=[np.dtype("O"), "category"]).columns.values
+            )
 
             def should_be_stringified(col_series):
-                return col_series.dtype == np.dtype('O') or \
-                       hasattr(col_series, 'cat') or \
-                       isinstance(col_series, pd.PeriodIndex)
+                return (
+                    col_series.dtype == np.dtype("O")
+                    or hasattr(col_series, "cat")
+                    or isinstance(col_series, pd.PeriodIndex)
+                )
 
             if type(df.index) == pd.MultiIndex:
                 self._multi_index = True
@@ -889,7 +891,7 @@ class QgridWidget(widgets.DOMWidget):
                         col_name = cur_level.name
                         self._primary_key_display[col_name] = col_name
                     else:
-                        col_name = 'level_%s' % idx
+                        col_name = "level_%s" % idx
                         self._primary_key_display[col_name] = ""
                     self._primary_key.append(col_name)
                     if should_be_stringified(cur_level):
@@ -900,7 +902,7 @@ class QgridWidget(widgets.DOMWidget):
                     col_name = df.index.name
                     self._primary_key_display[col_name] = col_name
                 else:
-                    col_name = 'index'
+                    col_name = "index"
                     self._primary_key_display[col_name] = ""
                 self._primary_key = [col_name]
 
@@ -919,8 +921,7 @@ class QgridWidget(widgets.DOMWidget):
                 ).map(stringify)
             self._set_col_series_on_df(col_name, df, series_to_set)
 
-        if type(df.index) == pd.MultiIndex and \
-                not self._disable_grouping:
+        if type(df.index) == pd.MultiIndex and not self._disable_grouping:
             previous_value = None
             row_styles = {}
             row_loc = from_index
@@ -931,30 +932,28 @@ class QgridWidget(widgets.DOMWidget):
                 for idx, index_val in enumerate(index):
                     col_name = self._primary_key[idx]
                     if previous_value is None:
-                        row_style[col_name] = 'group-top'
+                        row_style[col_name] = "group-top"
                         continue
                     elif index_val == previous_value[idx]:
                         if prev_idx < 0:
-                            row_style[col_name] = 'group-top'
+                            row_style[col_name] = "group-top"
                             continue
-                        if row_styles[prev_idx][col_name] == 'group-top':
-                            row_style[col_name] = 'group-middle'
-                        elif row_styles[prev_idx][col_name] == 'group-bottom':
-                            row_style[col_name] = 'group-top'
+                        if row_styles[prev_idx][col_name] == "group-top":
+                            row_style[col_name] = "group-middle"
+                        elif row_styles[prev_idx][col_name] == "group-bottom":
+                            row_style[col_name] = "group-top"
                         else:
-                            row_style[col_name] = 'group-middle'
+                            row_style[col_name] = "group-middle"
                     else:
                         if last_row:
-                            row_style[col_name] = 'single'
+                            row_style[col_name] = "single"
                         else:
-                            row_style[col_name] = 'group-top'
+                            row_style[col_name] = "group-top"
                         if prev_idx >= 0:
-                            if row_styles[prev_idx][col_name] == \
-                                    'group-middle':
-                                row_styles[prev_idx][col_name] = 'group-bottom'
-                            elif row_styles[prev_idx][col_name] == \
-                                    'group-top':
-                                row_styles[prev_idx][col_name] = 'group-single'
+                            if row_styles[prev_idx][col_name] == "group-middle":
+                                row_styles[prev_idx][col_name] = "group-bottom"
+                            elif row_styles[prev_idx][col_name] == "group-top":
+                                row_styles[prev_idx][col_name] = "group-single"
                 previous_value = index
                 row_styles[row_loc] = row_style
                 row_loc += 1
@@ -963,10 +962,9 @@ class QgridWidget(widgets.DOMWidget):
         else:
             self._row_styles = {}
 
-        df_json = pd_json.to_json(None, df,
-                                  orient='table',
-                                  date_format='iso',
-                                  double_precision=self.precision)
+        df_json = pd_json.to_json(
+            None, df, orient="table", date_format="iso", double_precision=self.precision
+        )
 
         if update_columns:
             self._interval_columns = []
@@ -976,36 +974,37 @@ class QgridWidget(widgets.DOMWidget):
             # parse the schema that we just exported in order to get the
             # column metadata that was generated by 'to_json'
             parsed_json = json.loads(df_json)
-            df_schema = parsed_json['schema']
+            df_schema = parsed_json["schema"]
 
             columns = {}
-            for i, cur_column in enumerate(df_schema['fields']):
-                col_name = cur_column['name']
-                if 'constraints' in cur_column and \
-                        isinstance(cur_column['constraints']['enum'][0], dict):
-                    cur_column['type'] = 'interval'
+            for i, cur_column in enumerate(df_schema["fields"]):
+                col_name = cur_column["name"]
+                if "constraints" in cur_column and isinstance(
+                    cur_column["constraints"]["enum"][0], dict
+                ):
+                    cur_column["type"] = "interval"
                     self._interval_columns.append(col_name)
 
-                if 'freq' in cur_column:
+                if "freq" in cur_column:
                     self._period_columns.append(col_name)
 
                 if col_name in self._primary_key:
-                    cur_column['is_index'] = True
-                    cur_column['index_display_text'] = \
-                        self._primary_key_display[col_name]
+                    cur_column["is_index"] = True
+                    cur_column["index_display_text"] = self._primary_key_display[
+                        col_name
+                    ]
                     if len(self._primary_key) > 0:
-                        cur_column['level'] = self._primary_key.index(col_name)
+                        cur_column["level"] = self._primary_key.index(col_name)
                     level = self._primary_key.index(col_name)
                     if level == 0:
-                        cur_column['first_index'] = True
-                    if self._multi_index and \
-                       level == (len(self._primary_key) - 1):
-                        cur_column['last_index'] = True
+                        cur_column["first_index"] = True
+                    if self._multi_index and level == (len(self._primary_key) - 1):
+                        cur_column["last_index"] = True
 
-                cur_column['position'] = i
-                cur_column['field'] = col_name
-                cur_column['id'] = col_name
-                cur_column['cssClass'] = cur_column['type']
+                cur_column["position"] = i
+                cur_column["field"] = col_name
+                cur_column["id"] = col_name
+                cur_column["cssClass"] = cur_column["type"]
 
                 columns[col_name] = cur_column
 
@@ -1020,12 +1019,9 @@ class QgridWidget(widgets.DOMWidget):
         # json that has interval columns replaced with text columns
         if len(self._interval_columns) > 0:
             for col_name in self._interval_columns:
-                col_series = self._get_col_series_from_df(col_name,
-                                                          df,
-                                                          level_vals=True)
+                col_series = self._get_col_series_from_df(col_name, df, level_vals=True)
                 col_series_as_strings = col_series.map(lambda x: str(x))
-                self._set_col_series_on_df(col_name, df,
-                                           col_series_as_strings)
+                self._set_col_series_on_df(col_name, df, col_series_as_strings)
 
         # special handling for period index columns: call to_timestamp to
         # convert the series to a datetime series before displaying
@@ -1043,33 +1039,39 @@ class QgridWidget(widgets.DOMWidget):
         # and then call 'to_json' again to get a new version of the table
         # json that has interval columns replaced with text columns
         if len(self._interval_columns) > 0 or len(self._period_columns) > 0:
-            df_json = pd_json.to_json(None, df,
-                                      orient='table',
-                                      date_format='iso',
-                                      double_precision=self.precision)
+            df_json = pd_json.to_json(
+                None,
+                df,
+                orient="table",
+                date_format="iso",
+                double_precision=self.precision,
+            )
 
         self._df_json = df_json
 
         if self.row_edit_callback is not None:
             editable_rows = {}
             for index, row in df.iterrows():
-                editable_rows[int(row[self._index_col_name])] = \
-                    self.row_edit_callback(row)
+                editable_rows[int(row[self._index_col_name])] = self.row_edit_callback(
+                    row
+                )
             self._editable_rows = editable_rows
 
         if fire_data_change_event:
-            self._notify_listeners({
-                'name': 'json_updated',
-                'triggered_by': triggered_by,
-                'range': self._df_range
-            })
+            self._notify_listeners(
+                {
+                    "name": "json_updated",
+                    "triggered_by": triggered_by,
+                    "range": self._df_range,
+                }
+            )
             data_to_send = {
-                'type': 'update_data_view',
-                'columns': self._columns,
-                'triggered_by': triggered_by
+                "type": "update_data_view",
+                "columns": self._columns,
+                "triggered_by": triggered_by,
             }
             if scroll_to_row:
-                data_to_send['scroll_to_row'] = scroll_to_row
+                data_to_send["scroll_to_row"] = scroll_to_row
             self.send(data_to_send)
 
     def _update_sort(self):
@@ -1079,36 +1081,28 @@ class QgridWidget(widgets.DOMWidget):
             self._disable_grouping = False
             if self._sort_field in self._primary_key:
                 if len(self._primary_key) == 1:
-                    self._df.sort_index(
-                        ascending=self._sort_ascending,
-                        inplace=True
-                    )
+                    self._df.sort_index(ascending=self._sort_ascending, inplace=True)
                 else:
                     level_index = self._primary_key.index(self._sort_field)
                     self._df.sort_index(
-                        level=level_index,
-                        ascending=self._sort_ascending,
-                        inplace=True
+                        level=level_index, ascending=self._sort_ascending, inplace=True
                     )
                     if level_index > 0:
                         self._disable_grouping = True
             else:
                 self._df.sort_values(
-                    self._sort_field,
-                    ascending=self._sort_ascending,
-                    inplace=True
+                    self._sort_field, ascending=self._sort_ascending, inplace=True
                 )
                 self._disable_grouping = True
         except TypeError:
-            self.log.info('TypeError occurred, assuming mixed data type '
-                          'column')
+            self.log.info("TypeError occurred, assuming mixed data type " "column")
             # if there's a TypeError, assume it means that we have a mixed
             # type column, and attempt to create a stringified version of
             # the column to use for sorting/filtering
             self._df.sort_values(
                 self._initialize_sort_column(self._sort_field),
                 ascending=self._sort_ascending,
-                inplace=True
+                inplace=True,
             )
 
     # Add a new column which is a stringified version of the column whose name
@@ -1120,28 +1114,28 @@ class QgridWidget(widgets.DOMWidget):
         if sort_column_name:
             return sort_column_name
 
-        sort_col_series = \
-            self._get_col_series_from_df(col_name, self._df)
-        sort_col_series_unfiltered = \
-            self._get_col_series_from_df(col_name, self._unfiltered_df)
+        sort_col_series = self._get_col_series_from_df(col_name, self._df)
+        sort_col_series_unfiltered = self._get_col_series_from_df(
+            col_name, self._unfiltered_df
+        )
         sort_column_name = str(col_name) + self._sort_col_suffix
 
         if to_timestamp:
             self._df[sort_column_name] = sort_col_series.to_timestamp()
-            self._unfiltered_df[sort_column_name] = \
-                sort_col_series_unfiltered.to_timestamp()
+            self._unfiltered_df[
+                sort_column_name
+            ] = sort_col_series_unfiltered.to_timestamp()
         else:
             self._df[sort_column_name] = sort_col_series.map(str)
-            self._unfiltered_df[sort_column_name] = \
-                sort_col_series_unfiltered.map(str)
+            self._unfiltered_df[sort_column_name] = sort_col_series_unfiltered.map(str)
 
         self._sort_helper_columns[col_name] = sort_column_name
         return sort_column_name
 
     def _handle_show_filter_dropdown(self, content):
-        col_name = content['field']
+        col_name = content["field"]
         col_info = self._columns[col_name]
-        if 'filter_info' in col_info and 'selected' in col_info['filter_info']:
+        if "filter_info" in col_info and "selected" in col_info["filter_info"]:
             df_for_unique = self._unfiltered_df
         else:
             df_for_unique = self._df
@@ -1150,57 +1144,64 @@ class QgridWidget(widgets.DOMWidget):
         # same values, but converted to timestamps instead of period objects.
         # we'll use that sort column for all subsequent sorts/filters.
         if col_name in self._period_columns:
-            self._initialize_sort_column(col_name,
-                                         to_timestamp=True)
+            self._initialize_sort_column(col_name, to_timestamp=True)
 
         col_series = self._get_col_series_from_df(col_name, df_for_unique)
-        if 'is_index' in col_info:
+        if "is_index" in col_info:
             col_series = pd.Series(col_series)
 
-        if col_info['type'] in ['integer', 'number']:
-            if 'filter_info' not in col_info or \
-                    (col_info['filter_info']['min'] is None and
-                     col_info['filter_info']['max'] is None):
-                col_info['slider_max'] = max(col_series)
-                col_info['slider_min'] = min(col_series)
+        if col_info["type"] in ["integer", "number"]:
+            if "filter_info" not in col_info or (
+                col_info["filter_info"]["min"] is None
+                and col_info["filter_info"]["max"] is None
+            ):
+                col_info["slider_max"] = max(col_series)
+                col_info["slider_min"] = min(col_series)
                 self._columns[col_name] = col_info
-            self.send({
-                'type': 'column_min_max_updated',
-                'field': col_name,
-                'col_info': col_info
-            })
+            self.send(
+                {
+                    "type": "column_min_max_updated",
+                    "field": col_name,
+                    "col_info": col_info,
+                }
+            )
             return
-        elif col_info['type'] == 'datetime':
-            if 'filter_info' not in col_info or \
-                    (col_info['filter_info']['min'] is None and
-                     col_info['filter_info']['max'] is None):
-                col_info['filter_max'] = max(col_series)
-                col_info['filter_min'] = min(col_series)
+        elif col_info["type"] == "datetime":
+            if "filter_info" not in col_info or (
+                col_info["filter_info"]["min"] is None
+                and col_info["filter_info"]["max"] is None
+            ):
+                col_info["filter_max"] = max(col_series)
+                col_info["filter_min"] = min(col_series)
                 self._columns[col_name] = col_info
-            self.send({
-                'type': 'column_min_max_updated',
-                'field': col_name,
-                'col_info': col_info
-            })
+            self.send(
+                {
+                    "type": "column_min_max_updated",
+                    "field": col_name,
+                    "col_info": col_info,
+                }
+            )
             return
-        elif col_info['type'] == 'boolean':
-            self.log.info('handling boolean type')
-            if 'filter_info' not in col_info:
+        elif col_info["type"] == "boolean":
+            self.log.info("handling boolean type")
+            if "filter_info" not in col_info:
                 values = []
                 for possible_val in [True, False]:
                     if possible_val in col_series:
                         values.append(possible_val)
-                col_info['values'] = values
+                col_info["values"] = values
                 self._columns[col_name] = col_info
-            self.send({
-                'type': 'column_min_max_updated',
-                'field': col_name,
-                'col_info': col_info
-            })
-            self.log.info('handled boolean type')
+            self.send(
+                {
+                    "type": "column_min_max_updated",
+                    "field": col_name,
+                    "col_info": col_info,
+                }
+            )
+            self.log.info("handled boolean type")
             return
         else:
-            if col_info['type'] == 'any':
+            if col_info["type"] == "any":
                 unique_list = col_series.cat.categories
             else:
                 if col_name in self._sorted_column_cache:
@@ -1211,51 +1212,53 @@ class QgridWidget(widgets.DOMWidget):
                         try:
                             unique.sort()
                         except TypeError:
-                            sort_col_name = \
-                                self._initialize_sort_column(col_name)
+                            sort_col_name = self._initialize_sort_column(col_name)
                             col_series = df_for_unique[sort_col_name]
                             unique = col_series.unique()
                             unique.sort()
                     unique_list = unique.tolist()
                     self._sorted_column_cache[col_name] = unique_list
 
-            if content['search_val'] is not None:
+            if content["search_val"] is not None:
                 unique_list = [
-                    k for k in unique_list if
-                    content['search_val'].lower() in str(k).lower()
+                    k
+                    for k in unique_list
+                    if content["search_val"].lower() in str(k).lower()
                 ]
 
             # if the filter that we're opening is already active (as indicated
             # by the presence of a 'selected' attribute on the column's
             # filter_info attribute), show the selected rows at the top and
             # specify that they should be checked
-            if 'filter_info' in col_info and \
-               'selected' in col_info['filter_info']:
-                col_filter_info = col_info['filter_info']
+            if "filter_info" in col_info and "selected" in col_info["filter_info"]:
+                col_filter_info = col_info["filter_info"]
                 col_filter_table = self._filter_tables[col_name]
 
                 def get_value_from_filter_table(k):
                     return col_filter_table[k]
-                selected_indices = col_filter_info['selected'] or []
-                if selected_indices == 'all':
-                    excluded_indices = col_filter_info['excluded'] or []
-                    excluded_values = list(map(get_value_from_filter_table,
-                                               excluded_indices))
+
+                selected_indices = col_filter_info["selected"] or []
+                if selected_indices == "all":
+                    excluded_indices = col_filter_info["excluded"] or []
+                    excluded_values = list(
+                        map(get_value_from_filter_table, excluded_indices)
+                    )
                     non_excluded_count = 0
                     for i in range(len(unique_list), 0, -1):
-                        unique_val = unique_list[i-1]
+                        unique_val = unique_list[i - 1]
                         if unique_val not in excluded_values:
                             non_excluded_count += 1
                             excluded_values.insert(0, unique_val)
-                    col_info['values'] = excluded_values
-                    col_info['selected_length'] = non_excluded_count
+                    col_info["values"] = excluded_values
+                    col_info["selected_length"] = non_excluded_count
                 elif len(selected_indices) == 0:
-                    col_info['selected_length'] = 0
-                    col_info['values'] = unique_list
+                    col_info["selected_length"] = 0
+                    col_info["values"] = unique_list
                 else:
-                    selected_vals = list(map(get_value_from_filter_table,
-                                             selected_indices))
-                    col_info['selected_length'] = len(selected_vals)
+                    selected_vals = list(
+                        map(get_value_from_filter_table, selected_indices)
+                    )
+                    col_info["selected_length"] = len(selected_vals)
 
                     in_selected = set(selected_vals)
                     in_unique = set(unique_list)
@@ -1264,50 +1267,46 @@ class QgridWidget(widgets.DOMWidget):
                     in_unique_but_not_selected.sort()
                     selected_vals.extend(in_unique_but_not_selected)
 
-                    col_info['values'] = selected_vals
+                    col_info["values"] = selected_vals
             else:
-                col_info['selected_length'] = 0
-                col_info['values'] = unique_list
+                col_info["selected_length"] = 0
+                col_info["values"] = unique_list
 
-            length = len(col_info['values'])
+            length = len(col_info["values"])
 
-            self._filter_tables[col_name] = list(col_info['values'])
+            self._filter_tables[col_name] = list(col_info["values"])
 
-            if col_info['type'] == 'any':
-                col_info['value_range'] = (0, length)
+            if col_info["type"] == "any":
+                col_info["value_range"] = (0, length)
             else:
                 max_items = PAGE_SIZE * 2
                 range_max = length
                 if length > max_items:
-                    col_info['values'] = col_info['values'][:max_items]
+                    col_info["values"] = col_info["values"][:max_items]
                     range_max = max_items
-                col_info['value_range'] = (0, range_max)
+                col_info["value_range"] = (0, range_max)
 
-            col_info['viewport_range'] = col_info['value_range']
-            col_info['length'] = length
+            col_info["viewport_range"] = col_info["value_range"]
+            col_info["length"] = length
 
             self._columns[col_name] = col_info
 
-            if content['search_val'] is not None:
-                message_type = 'update_data_view_filter'
+            if content["search_val"] is not None:
+                message_type = "update_data_view_filter"
             else:
-                message_type = 'column_min_max_updated'
+                message_type = "column_min_max_updated"
             try:
-                self.send({
-                    'type': message_type,
-                    'field': col_name,
-                    'col_info': col_info
-                })
+                self.send(
+                    {"type": message_type, "field": col_name, "col_info": col_info}
+                )
             except ValueError:
                 # if there's a ValueError, assume it's because we're
                 # attempting to serialize something that can't be converted
                 # to json, so convert all the values to strings.
-                col_info['values'] = map(str, col_info['values'])
-                self.send({
-                    'type': message_type,
-                    'field': col_name,
-                    'col_info': col_info
-                })
+                col_info["values"] = map(str, col_info["values"])
+                self.send(
+                    {"type": message_type, "field": col_name, "col_info": col_info}
+                )
 
     # get any column from a dataframe, including index columns
     def _get_col_series_from_df(self, col_name, df, level_vals=False):
@@ -1342,36 +1341,34 @@ class QgridWidget(widgets.DOMWidget):
             df[col_name] = col_series
 
     def _append_condition_for_column(self, col_name, filter_info, conditions):
-        col_series = self._get_col_series_from_df(col_name,
-                                                  self._unfiltered_df)
-        if filter_info['type'] == 'slider':
-            if filter_info['min'] is not None:
-                conditions.append(col_series >= filter_info['min'])
-            if filter_info['max'] is not None:
-                conditions.append(col_series <= filter_info['max'])
-        elif filter_info['type'] == 'date':
-            if filter_info['min'] is not None:
+        col_series = self._get_col_series_from_df(col_name, self._unfiltered_df)
+        if filter_info["type"] == "slider":
+            if filter_info["min"] is not None:
+                conditions.append(col_series >= filter_info["min"])
+            if filter_info["max"] is not None:
+                conditions.append(col_series <= filter_info["max"])
+        elif filter_info["type"] == "date":
+            if filter_info["min"] is not None:
                 conditions.append(
-                    col_series >= pd.to_datetime(filter_info['min'], unit='ms')
+                    col_series >= pd.to_datetime(filter_info["min"], unit="ms")
                 )
-            if filter_info['max'] is not None:
+            if filter_info["max"] is not None:
                 conditions.append(
-                    col_series <= pd.to_datetime(filter_info['max'], unit='ms')
+                    col_series <= pd.to_datetime(filter_info["max"], unit="ms")
                 )
-        elif filter_info['type'] == 'boolean':
-            if filter_info['selected'] is not None:
-                conditions.append(
-                    col_series == filter_info['selected']
-                )
-        elif filter_info['type'] == 'text':
+        elif filter_info["type"] == "boolean":
+            if filter_info["selected"] is not None:
+                conditions.append(col_series == filter_info["selected"])
+        elif filter_info["type"] == "text":
             if col_name not in self._filter_tables:
                 return
             col_filter_table = self._filter_tables[col_name]
-            selected_indices = filter_info['selected']
-            excluded_indices = filter_info['excluded']
+            selected_indices = filter_info["selected"]
+            excluded_indices = filter_info["excluded"]
 
             def get_value_from_filter_table(i):
                 return col_filter_table[i]
+
             if selected_indices == "all":
                 if excluded_indices is not None and len(excluded_indices) > 0:
                     excluded_values = list(
@@ -1385,18 +1382,16 @@ class QgridWidget(widgets.DOMWidget):
                 conditions.append(col_series.isin(selected_values))
 
     def _handle_change_filter(self, content):
-        col_name = content['field']
+        col_name = content["field"]
         columns = self._columns.copy()
         col_info = columns[col_name]
-        col_info['filter_info'] = content['filter_info']
+        col_info["filter_info"] = content["filter_info"]
         columns[col_name] = col_info
 
         conditions = []
         for key, value in columns.items():
-            if 'filter_info' in value:
-                self._append_condition_for_column(
-                    key, value['filter_info'], conditions
-                )
+            if "filter_info" in value:
+                self._append_condition_for_column(key, value["filter_info"], conditions)
 
         self._columns = columns
 
@@ -1417,7 +1412,7 @@ class QgridWidget(widgets.DOMWidget):
 
         self._sorted_column_cache = {}
         self._update_sort()
-        self._update_table(triggered_by='change_filter')
+        self._update_table(triggered_by="change_filter")
         self._ignore_df_changed = False
 
     def _handle_qgrid_msg(self, widget, content, buffers=None):
@@ -1429,18 +1424,17 @@ class QgridWidget(widgets.DOMWidget):
 
     def _handle_qgrid_msg_helper(self, content):
         """Handle incoming messages from the QGridView"""
-        if 'type' not in content:
+        if "type" not in content:
             return
 
-        if content['type'] == 'edit_cell':
-            col_info = self._columns[content['column']]
+        if content["type"] == "edit_cell":
+            col_info = self._columns[content["column"]]
             try:
-                location = (self._df.index[content['row_index']],
-                            content['column'])
+                location = (self._df.index[content["row_index"]], content["column"])
                 old_value = self._df.loc[location]
 
-                val_to_set = content['value']
-                if col_info['type'] == 'datetime':
+                val_to_set = content["value"]
+                if col_info["type"] == "datetime":
                     val_to_set = pd.to_datetime(val_to_set)
                     # pandas > 18.0 compat
                     if old_value.tz != val_to_set.tz:
@@ -1448,116 +1442,121 @@ class QgridWidget(widgets.DOMWidget):
 
                 self._df.loc[location] = val_to_set
 
-                query = self._unfiltered_df[self._index_col_name] == \
-                    content['unfiltered_index']
-                self._unfiltered_df.loc[query, content['column']] = val_to_set
-                self._notify_listeners({
-                    'name': 'cell_edited',
-                    'index': location[0],
-                    'column': location[1],
-                    'old': old_value,
-                    'new': val_to_set,
-                    'source': 'gui'
-                })
+                query = (
+                    self._unfiltered_df[self._index_col_name]
+                    == content["unfiltered_index"]
+                )
+                self._unfiltered_df.loc[query, content["column"]] = val_to_set
+                self._notify_listeners(
+                    {
+                        "name": "cell_edited",
+                        "index": location[0],
+                        "column": location[1],
+                        "old": old_value,
+                        "new": val_to_set,
+                        "source": "gui",
+                    }
+                )
 
             except (ValueError, TypeError):
-                msg = "Error occurred while attempting to edit the " \
-                      "DataFrame. Check the notebook server logs for more " \
-                      "information."
+                msg = (
+                    "Error occurred while attempting to edit the "
+                    "DataFrame. Check the notebook server logs for more "
+                    "information."
+                )
                 self.log.exception(msg)
-                self.send({
-                    'type': 'show_error',
-                    'error_msg': msg,
-                    'triggered_by': 'add_row'
-                })
+                self.send(
+                    {"type": "show_error", "error_msg": msg, "triggered_by": "add_row"}
+                )
                 return
-        elif content['type'] == 'change_selection':
-            self._change_selection(content['rows'], 'gui')
-        elif content['type'] == 'change_viewport':
+        elif content["type"] == "change_selection":
+            self._change_selection(content["rows"], "gui")
+        elif content["type"] == "change_viewport":
             old_viewport_range = self._viewport_range
-            self._viewport_range = (content['top'], content['bottom'])
+            self._viewport_range = (content["top"], content["bottom"])
 
             # if the viewport didn't change, do nothing
-            if old_viewport_range == self._viewport_range:
-                return
+            # It can happen that grid sends change_viewport even if old_viewport_range == self._viewport_range.
+            # Since it always expects a reply, I comment out this code.
+            # if old_viewport_range == self._viewport_range:
+            #     return
 
-            self._update_table(triggered_by='change_viewport')
-            self._notify_listeners({
-                'name': 'viewport_changed',
-                'old': old_viewport_range,
-                'new': self._viewport_range
-            })
+            self._update_table(triggered_by="change_viewport")
+            self._notify_listeners(
+                {
+                    "name": "viewport_changed",
+                    "old": old_viewport_range,
+                    "new": self._viewport_range,
+                }
+            )
 
-        elif content['type'] == 'add_row':
+        elif content["type"] == "add_row":
             row_index = self._duplicate_last_row()
-            self._notify_listeners({
-                'name': 'row_added',
-                'index': row_index,
-                'source': 'gui'
-            })
-        elif content['type'] == 'remove_row':
+            self._notify_listeners(
+                {"name": "row_added", "index": row_index, "source": "gui"}
+            )
+        elif content["type"] == "remove_row":
             removed_indices = self._remove_rows()
-            self._notify_listeners({
-                'name': 'row_removed',
-                'indices': removed_indices,
-                'source': 'gui'
-            })
-        elif content['type'] == 'change_filter_viewport':
-            col_name = content['field']
+            self._notify_listeners(
+                {"name": "row_removed", "indices": removed_indices, "source": "gui"}
+            )
+        elif content["type"] == "change_filter_viewport":
+            col_name = content["field"]
             col_info = self._columns[col_name]
             col_filter_table = self._filter_tables[col_name]
 
-            from_index = max(content['top'] - PAGE_SIZE, 0)
-            to_index = max(content['top'] + PAGE_SIZE, 0)
+            from_index = max(content["top"] - PAGE_SIZE, 0)
+            to_index = max(content["top"] + PAGE_SIZE, 0)
 
-            old_viewport_range = col_info['viewport_range']
-            col_info['values'] = col_filter_table[from_index:to_index]
-            col_info['value_range'] = (from_index, to_index)
-            col_info['viewport_range'] = (content['top'], content['bottom'])
+            old_viewport_range = col_info["viewport_range"]
+            col_info["values"] = col_filter_table[from_index:to_index]
+            col_info["value_range"] = (from_index, to_index)
+            col_info["viewport_range"] = (content["top"], content["bottom"])
 
             self._columns[col_name] = col_info
-            self.send({
-                'type': 'update_data_view_filter',
-                'field': col_name,
-                'col_info': col_info
-            })
-            self._notify_listeners({
-                'name': 'text_filter_viewport_changed',
-                'column': col_name,
-                'old': old_viewport_range,
-                'new': col_info['viewport_range']
-            })
-        elif content['type'] == 'change_sort':
+            self.send(
+                {
+                    "type": "update_data_view_filter",
+                    "field": col_name,
+                    "col_info": col_info,
+                }
+            )
+            self._notify_listeners(
+                {
+                    "name": "text_filter_viewport_changed",
+                    "column": col_name,
+                    "old": old_viewport_range,
+                    "new": col_info["viewport_range"],
+                }
+            )
+        elif content["type"] == "change_sort":
             old_column = self._sort_field
             old_ascending = self._sort_ascending
-            self._sort_field = content['sort_field']
-            self._sort_ascending = content['sort_ascending']
+            self._sort_field = content["sort_field"]
+            self._sort_ascending = content["sort_ascending"]
             self._sorted_column_cache = {}
             self._update_sort()
-            self._update_table(triggered_by='change_sort')
-            self._notify_listeners({
-                'name': 'sort_changed',
-                'old': {
-                    'column': old_column,
-                    'ascending': old_ascending
-                },
-                'new': {
-                    'column': self._sort_field,
-                    'ascending': self._sort_ascending
+            self._update_table(triggered_by="change_sort")
+            self._notify_listeners(
+                {
+                    "name": "sort_changed",
+                    "old": {"column": old_column, "ascending": old_ascending},
+                    "new": {
+                        "column": self._sort_field,
+                        "ascending": self._sort_ascending,
+                    },
                 }
-            })
-        elif content['type'] == 'show_filter_dropdown':
+            )
+        elif content["type"] == "show_filter_dropdown":
             self._handle_show_filter_dropdown(content)
-            self._notify_listeners({
-                'name': 'filter_dropdown_shown',
-                'column': content['field']
-            })
-        elif content['type'] == 'change_filter':
+            self._notify_listeners(
+                {"name": "filter_dropdown_shown", "column": content["field"]}
+            )
+        elif content["type"] == "change_filter":
             self._handle_change_filter(content)
-            self._notify_listeners({
-                'name': 'filter_changed',
-                'column': content['field']
-            })
+            self._notify_listeners(
+                {"name": "filter_changed", "column": content["field"]}
+            )
 
     def _notify_listeners(self, event):
         # notify listeners at the module level
@@ -1624,11 +1623,9 @@ class QgridWidget(widgets.DOMWidget):
         else:
             added_index = self._add_row(row)
 
-        self._notify_listeners({
-            'name': 'row_added',
-            'index': added_index,
-            'source': 'api'
-        })
+        self._notify_listeners(
+            {"name": "row_added", "index": added_index, "source": "api"}
+        )
 
     def _duplicate_last_row(self):
         """
@@ -1640,11 +1637,9 @@ class QgridWidget(widgets.DOMWidget):
 
         if not df.index.is_integer():
             msg = "Cannot add a row to a table with a non-integer index"
-            self.send({
-                'type': 'show_error',
-                'error_msg': msg,
-                'triggered_by': 'add_row'
-            })
+            self.send(
+                {"type": "show_error", "error_msg": msg, "triggered_by": "add_row"}
+            )
             return
 
         last_index = max(df.index)
@@ -1653,8 +1648,9 @@ class QgridWidget(widgets.DOMWidget):
         last[self._index_col_name] = last.name
         df.loc[last.name] = last.values
         self._unfiltered_df.loc[last.name] = last.values
-        self._update_table(triggered_by='add_row',
-                           scroll_to_row=df.index.get_loc(last.name))
+        self._update_table(
+            triggered_by="add_row", scroll_to_row=df.index.get_loc(last.name)
+        )
         return last.name
 
     def _add_row(self, row):
@@ -1672,16 +1668,17 @@ class QgridWidget(widgets.DOMWidget):
 
         # check that the given column names match what
         # already exists in the dataframe
-        required_cols = set(df.columns.values).union({df.index.name}) - \
-            {self._index_col_name}
+        required_cols = set(df.columns.values).union({df.index.name}) - {
+            self._index_col_name
+        }
         if set(col_names) != required_cols:
-            msg = "Cannot add row -- column names don't match in "\
-                  "the existing dataframe"
-            self.send({
-                'type': 'show_error',
-                'error_msg': msg,
-                'triggered_by': 'add_row'
-            })
+            msg = (
+                "Cannot add row -- column names don't match in "
+                "the existing dataframe"
+            )
+            self.send(
+                {"type": "show_error", "error_msg": msg, "triggered_by": "add_row"}
+            )
             return
 
         for i, s in enumerate(col_data):
@@ -1691,9 +1688,11 @@ class QgridWidget(widgets.DOMWidget):
             df.loc[index_col_val, col_names[i]] = s
             self._unfiltered_df.loc[index_col_val, col_names[i]] = s
 
-        self._update_table(triggered_by='add_row',
-                           scroll_to_row=df.index.get_loc(index_col_val),
-                           fire_data_change_event=True)
+        self._update_table(
+            triggered_by="add_row",
+            scroll_to_row=df.index.get_loc(index_col_val),
+            fire_data_change_event=True,
+        )
 
         return index_col_val
 
@@ -1715,17 +1714,18 @@ class QgridWidget(widgets.DOMWidget):
         old_value = self._df.loc[index, column]
         self._df.loc[index, column] = value
         self._unfiltered_df.loc[index, column] = value
-        self._update_table(triggered_by='edit_cell',
-                           fire_data_change_event=True)
+        self._update_table(triggered_by="edit_cell", fire_data_change_event=True)
 
-        self._notify_listeners({
-            'name': 'cell_edited',
-            'index': index,
-            'column': column,
-            'old': old_value,
-            'new': value,
-            'source': 'api'
-        })
+        self._notify_listeners(
+            {
+                "name": "cell_edited",
+                "index": index,
+                "column": column,
+                "old": old_value,
+                "new": value,
+                "source": "api",
+            }
+        )
 
     def remove_rows(self, rows=None):
         """
@@ -1750,11 +1750,9 @@ class QgridWidget(widgets.DOMWidget):
             Alias for this method.
         """
         row_indices = self._remove_rows(rows=rows)
-        self._notify_listeners({
-            'name': 'row_removed',
-            'indices': row_indices,
-            'source': 'api'
-        })
+        self._notify_listeners(
+            {"name": "row_removed", "indices": row_indices, "source": "api"}
+        )
         return row_indices
 
     def remove_row(self, rows=None):
@@ -1768,13 +1766,14 @@ class QgridWidget(widgets.DOMWidget):
         if rows is not None:
             selected_names = rows
         else:
-            selected_names = \
-                list(map(lambda x: self._df.iloc[x].name, self._selected_rows))
+            selected_names = list(
+                map(lambda x: self._df.iloc[x].name, self._selected_rows)
+            )
 
         self._df.drop(selected_names, inplace=True)
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
-        self._update_table(triggered_by='remove_row')
+        self._update_table(triggered_by="remove_row")
         return selected_names
 
     def change_selection(self, rows=[]):
@@ -1791,10 +1790,9 @@ class QgridWidget(widgets.DOMWidget):
             The default value of ``[]`` results in the no rows being
             selected (i.e. it clears the selection).
         """
-        new_selection = \
-            list(map(lambda x: self._df.index.get_loc(x), rows))
+        new_selection = list(map(lambda x: self._df.index.get_loc(x), rows))
 
-        self._change_selection(new_selection, 'api', send_msg_to_js=True)
+        self._change_selection(new_selection, "api", send_msg_to_js=True)
 
     def _change_selection(self, rows, source, send_msg_to_js=False):
         old_selection = self._selected_rows
@@ -1806,25 +1804,24 @@ class QgridWidget(widgets.DOMWidget):
             return
 
         if send_msg_to_js:
-            data_to_send = {
-                'type': 'change_selection',
-                'rows': rows
-            }
+            data_to_send = {"type": "change_selection", "rows": rows}
             self.send(data_to_send)
 
-        self._notify_listeners({
-            'name': 'selection_changed',
-            'old': old_selection,
-            'new': self._selected_rows,
-            'source': source
-        })
+        self._notify_listeners(
+            {
+                "name": "selection_changed",
+                "old": old_selection,
+                "new": self._selected_rows,
+                "source": source,
+            }
+        )
 
     def toggle_editable(self):
         """
         Change whether the grid is editable or not, without rebuilding
         the entire grid widget.
         """
-        self.change_grid_option('editable', not self.grid_options['editable'])
+        self.change_grid_option("editable", not self.grid_options["editable"])
 
     def change_grid_option(self, option_name, option_value):
         """
@@ -1840,11 +1837,13 @@ class QgridWidget(widgets.DOMWidget):
             The new value for the grid option.
         """
         self.grid_options[option_name] = option_value
-        self.send({
-            'type': 'change_grid_option',
-            'option_name': option_name,
-            'option_value': option_value
-        })
+        self.send(
+            {
+                "type": "change_grid_option",
+                "option_name": option_name,
+                "option_value": option_value,
+            }
+        )
 
 
 # Alias for legacy support, since we changed the capitalization
