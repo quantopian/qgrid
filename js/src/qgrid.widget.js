@@ -64,6 +64,7 @@ class QgridView extends widgets.DOMWidgetView {
     }
     this.initialize_toolbar();
     this.initialize_slick_grid();
+    this.initialize_statusbar();
   }
 
   initialize_toolbar() {
@@ -131,12 +132,12 @@ class QgridView extends widgets.DOMWidgetView {
       }
       this.full_screen_btn = $(`
         <button
-          class='btn btn-default fa fa-arrows-alt full-screen-btn'/>
+          class='btn btn-default fa fa-arrows-alt full-screen-btn'></button>
       `).appendTo(this.toolbar);
       this.close_modal_btn = $(`
         <button
           class='btn btn-default fa fa-times close-modal-btn'
-          data-dismiss="modal"/>
+          data-dismiss="modal"></button>
       `).appendTo(this.toolbar);
 
     }
@@ -193,6 +194,22 @@ class QgridView extends widgets.DOMWidgetView {
       });
       qgrid_modal.modal('show');
     });
+  }
+
+  initialize_statusbar() {
+    if (!this.model.get('show_statusbar')) {
+        this.$el.removeClass('show-statusbar');
+        return;
+    } else {
+        this.$el.addClass('show-statusbar');
+    }
+
+    if (this.statusbar) {
+        return;
+    }
+
+    this.statusbar = $("<div class='q-grid-statusbar'>").appendTo(this.$el);
+    this.update_statusbar();
   }
 
   /**
@@ -305,7 +322,7 @@ class QgridView extends widgets.DOMWidgetView {
         filter: boolean_filter.BooleanFilter,
         editor: Slick.Editors.Checkbox,
         formatter: (row, cell, value, columngDef, dataContext) => {
-          return value ? `<span class="fa fa-check"/>` : "";
+          return value ? `<span class="fa fa-check"></span>` : "";
         }
       }
     };
@@ -484,7 +501,7 @@ class QgridView extends widgets.DOMWidgetView {
       var clicked_column_sort_indicator = col_header.find('.slick-sort-indicator');
       if (clicked_column_sort_indicator.length == 0){
         clicked_column_sort_indicator =
-            $("<span class='slick-sort-indicator'/>").appendTo(col_header);
+            $("<span class='slick-sort-indicator'></span>").appendTo(col_header);
       }
 
       this.sort_indicator = clicked_column_sort_indicator;
@@ -604,6 +621,7 @@ class QgridView extends widgets.DOMWidgetView {
   create_data_view(df) {
     let df_range = this.df_range = this.model.get("_df_range");
     let df_length = this.df_length = this.model.get("_row_count");
+    this.update_statusbar();
     return {
       getLength: () => {
         return df_length;
@@ -786,6 +804,8 @@ class QgridView extends widgets.DOMWidgetView {
       this.ignore_selection_changed = false;
     } else if (msg.type == 'change_show_toolbar') {
       this.initialize_toolbar();
+    } else if (msg.type == 'change_show_statusbar') {
+      this.initialize_statusbar();
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
@@ -827,6 +847,12 @@ class QgridView extends widgets.DOMWidgetView {
     this.grid_elem.height(grid_height);
     this.slick_grid.render();
     this.slick_grid.resizeCanvas();
+  }
+
+  update_statusbar() {
+    if (this.statusbar) {
+        this.statusbar.text(this.df_length + ' rows');
+    }
   }
 }
 

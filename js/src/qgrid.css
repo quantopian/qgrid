@@ -163,6 +163,15 @@
   display: block;
 }
 
+.q-grid-statusbar {
+  display: none;
+  font-size: 80%;
+}
+
+.show-statusbar .q-grid-statusbar {
+  display: block;
+}
+
 .output_scroll .show-toolbar .q-grid {
   height: 284px !important;
 }

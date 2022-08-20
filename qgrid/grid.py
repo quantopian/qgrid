@@ -67,15 +67,19 @@ class _DefaultSettings(object):
             'width': None
         }
         self._show_toolbar = False
+        self._show_statusbar = False
         self._precision = None  # Defer to pandas.get_option
 
     def set_grid_option(self, optname, optvalue):
         self._grid_options[optname] = optvalue
 
     def set_defaults(self, show_toolbar=None, precision=None,
-                     grid_options=None, column_options=None):
+                     grid_options=None, column_options=None,
+                     show_statusbar=None):
         if show_toolbar is not None:
             self._show_toolbar = show_toolbar
+        if show_statusbar is not None:
+            self._show_statusbar = show_statusbar
         if precision is not None:
             self._precision = precision
         if grid_options is not None:
@@ -86,6 +90,10 @@ class _DefaultSettings(object):
     @property
     def show_toolbar(self):
         return self._show_toolbar
+
+    @property
+    def show_statusbar(self):
+        return self._show_statusbar
 
     @property
     def grid_options(self):
@@ -135,7 +143,8 @@ handlers = _EventHandlers()
 def set_defaults(show_toolbar=None,
                  precision=None,
                  grid_options=None,
-                 column_options=None):
+                 column_options=None,
+                 show_statusbar=None):
     """
     Set the default qgrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
@@ -160,7 +169,8 @@ def set_defaults(show_toolbar=None,
     defaults.set_defaults(show_toolbar=show_toolbar,
                           precision=precision,
                           grid_options=grid_options,
-                          column_options=column_options)
+                          column_options=column_options,
+                          show_statusbar=show_statusbar)
 
 
 def on(names, handler):
@@ -325,7 +335,8 @@ def show_grid(data_frame,
               grid_options=None,
               column_options=None,
               column_definitions=None,
-              row_edit_callback=None):
+              row_edit_callback=None,
+              show_statusbar=None):
     """
     Renders a DataFrame or Series as an interactive qgrid, represented by
     an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
@@ -377,6 +388,8 @@ def show_grid(data_frame,
         particular row's values, keyed by column name. The callback should
         return True if the provided row should be editable, and False
         otherwise.
+    show_statusbar : bool
+        Whether to show a statusbar with current row counts.
 
 
     Notes
@@ -471,6 +484,8 @@ def show_grid(data_frame,
 
     if show_toolbar is None:
         show_toolbar = defaults.show_toolbar
+    if show_statusbar is None:
+        show_statusbar = defaults.show_statusbar
     if precision is None:
         precision = defaults.precision
     if not isinstance(precision, Integral):
@@ -508,7 +523,8 @@ def show_grid(data_frame,
                        column_options=column_options,
                        column_definitions=column_definitions,
                        row_edit_callback=row_edit_callback,
-                       show_toolbar=show_toolbar)
+                       show_toolbar=show_toolbar,
+                       show_statusbar=show_statusbar)
 
 
 PAGE_SIZE = 100
@@ -554,6 +570,8 @@ class QgridWidget(widgets.DOMWidget):
         Get/set the precision options being used by the current instance.
     show_toolbar : bool
         Get/set the show_toolbar option being used by the current instance.
+    show_statusbar : bool
+        Get/set the show_statusbar option being used by the current instance.
     column_options : bool
         Get/set the column options being used by the current instance.
     column_definitions : bool
@@ -608,6 +626,7 @@ class QgridWidget(widgets.DOMWidget):
     column_definitions = Dict({})
     row_edit_callback = Instance(FunctionType, sync=False, allow_none=True)
     show_toolbar = Bool(False, sync=True)
+    show_statusbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
     def __init__(self, *args, **kwargs):
@@ -634,6 +653,9 @@ class QgridWidget(widgets.DOMWidget):
 
     def _show_toolbar_default(self):
         return defaults.show_toolbar
+
+    def _show_statusbar_default(self):
+        return defaults.show_statusbar
 
     def on(self, names, handler):
         """
@@ -844,6 +866,11 @@ class QgridWidget(widgets.DOMWidget):
         if not self._initialized:
             return
         self.send({'type': 'change_show_toolbar'})
+
+    def _show_statusbar_changed(self):
+        if not self._initialized:
+            return
+        self.send({'type': 'change_show_statusbar'})
 
     def _update_table(self,
                       update_columns=False,
