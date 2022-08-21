@@ -31,7 +31,7 @@ class FilterBase {
     this.slick_grid = slick_grid;
     this.filter_btn = $(`
       <div class='filter-button'>
-        <div class='fa fa-filter filter-icon'/>
+        <div class='fa fa-filter filter-icon'></div>
       </div>
     `);
     this.filter_icon = this.filter_btn.find('.filter-icon');
