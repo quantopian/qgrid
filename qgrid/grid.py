@@ -1318,7 +1318,7 @@ class QgridWidget(widgets.DOMWidget):
             if len(self._primary_key) > 1:
                 key_index = self._primary_key.index(col_name)
                 prev_name = df.index.levels[key_index].name
-                df.index.set_levels(col_series, level=key_index, inplace=True)
+                df.index = df.index.set_levels(col_series, level=key_index)
                 df.index.rename(prev_name, level=key_index, inplace=True)
             else:
                 prev_name = df.index.name
