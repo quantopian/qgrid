@@ -2,6 +2,7 @@ import ipywidgets as widgets
 import pandas as pd
 import numpy as np
 import json
+from pandas.api.types import is_integer_dtype
 
 from types import FunctionType
 from IPython.display import display
@@ -1624,7 +1625,7 @@ class QgridWidget(widgets.DOMWidget):
         """
         df = self._df
 
-        if not df.index.is_integer():
+        if not is_integer_dtype(df.index):
             msg = "Cannot add a row to a table with a non-integer index"
             self.send({
                 'type': 'show_error',
