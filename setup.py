@@ -144,7 +144,7 @@ def extras_require():
     }
 
 setup_args = {
-    'name': 'qgrid',
+    'name': 'qgridtrusted',
     'version': version_ns['__version__'],
     'description': 'An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook',
     'long_description': LONG_DESCRIPTION,
