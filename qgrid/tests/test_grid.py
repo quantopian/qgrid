@@ -125,7 +125,7 @@ def check_edit_success(
             "source": "gui",
         }
     ]
-    assert widget._df[col_name][row_index] == new_val_obj
+    assert widget._df[col_name].iloc[row_index] == new_val_obj
 
     # call _update_table so the widget updates _df_json
     widget._update_table(fire_data_change_event=False)
