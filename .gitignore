@@ -1,5 +1,6 @@
 # Python
 *.pyc
+/.venv
 # IntelliJ IDEA (IDE-related files)
 *.iml
 .idea/*
