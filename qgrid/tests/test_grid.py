@@ -235,7 +235,7 @@ def test_row_edit_callback():
 
 
 def test_period_object_column():
-    range_index = pd.period_range(start="2000", periods=10, freq="B")
+    range_index = pd.date_range(start="2000", periods=10, freq="B")
     df = pd.DataFrame({"a": 5, "b": range_index}, index=range_index)
     view = QgridWidget(df=df)
     view._handle_qgrid_msg_helper(
