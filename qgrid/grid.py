@@ -17,6 +17,7 @@ from traitlets import (
     Tuple,
     Any,
     All,
+    observe,
     parse_notifier_name
 )
 from itertools import chain
@@ -818,23 +819,27 @@ class QgridWidget(widgets.DOMWidget):
         self._update_df()
         self.send({'type': 'draw_table'})
 
-    def _df_changed(self):
+    @observe("df")
+    def _df_changed(self, change):
         """Build the Data Table for the DataFrame."""
         if self._ignore_df_changed or not self._initialized:
             return
         self._rebuild_widget()
 
-    def _precision_changed(self):
+    @observe("precision")
+    def _precision_changed(self, change):
         if not self._initialized:
             return
         self._rebuild_widget()
 
-    def _grid_options_changed(self):
+    @observe("grid_options")
+    def _grid_options_changed(self, change):
         if not self._initialized:
             return
         self._rebuild_widget()
 
-    def _show_toolbar_changed(self):
+    @observe("show_toolbar")
+    def _show_toolbar_changed(self, change):
         if not self._initialized:
             return
         self.send({'type': 'change_show_toolbar'})
