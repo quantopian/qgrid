@@ -47,3 +47,4 @@ jobs:
           flake8
       - name: Run the tests
         run: pytest -Werror
+# vim: set filetype=yaml :
