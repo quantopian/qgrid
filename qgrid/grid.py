@@ -1637,8 +1637,8 @@ class QgridWidget(widgets.DOMWidget):
         last = df.loc[last_index].copy()
         last.name += 1
         last[self._index_col_name] = last.name
-        df.loc[last.name] = last.values
-        self._unfiltered_df.loc[last.name] = last.values
+        df.loc[last.name, :] = last
+        self._unfiltered_df.loc[last.name, :] = last
         self._update_table(triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(last.name))
         return last.name
